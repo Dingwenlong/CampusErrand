@@ -3,6 +3,7 @@ package com.campus.errand.controller;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.campus.errand.common.PageResult;
 import com.campus.errand.common.Result;
+import com.campus.errand.dto.TaskCancelDTO;
 import com.campus.errand.dto.TaskPublishDTO;
 import com.campus.errand.service.TaskService;
 import com.campus.errand.util.UserContext;
@@ -11,16 +12,20 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "任务管理", description = "跑腿任务相关接口")
 @RestController
 @RequestMapping("/task")
-@RequiredArgsConstructor
 public class TaskController {
 
     private final TaskService taskService;
+
+    @Autowired
+    public TaskController(TaskService taskService) {
+        this.taskService = taskService;
+    }
 
     @Operation(summary = "发布任务")
     @PostMapping("/publish")
@@ -74,5 +79,48 @@ public class TaskController {
             return Result.error("状态更新失败");
         }
         return Result.success(true);
+    }
+
+    @Operation(summary = "取消任务")
+    @PostMapping("/{id}/cancel")
+    public Result<Boolean> cancel(
+            @PathVariable Long id,
+            @Valid @RequestBody TaskCancelDTO cancelDTO) {
+        Long userId = UserContext.getUserId();
+        boolean success = taskService.cancelTask(id, userId, cancelDTO);
+        if (!success) {
+            return Result.error("取消任务失败");
+        }
+        return Result.success(true);
+    }
+
+    @Operation(summary = "确认送达（跑腿员）")
+    @PostMapping("/{id}/deliver")
+    public Result<Boolean> deliver(@PathVariable Long id) {
+        Long runnerId = UserContext.getUserId();
+        try {
+            boolean success = taskService.deliverTask(id, runnerId);
+            if (!success) {
+                return Result.error("确认送达失败");
+            }
+            return Result.success(true);
+        } catch (RuntimeException e) {
+            return Result.error(e.getMessage());
+        }
+    }
+
+    @Operation(summary = "确认收货（发单者）")
+    @PostMapping("/{id}/receive")
+    public Result<Boolean> receive(@PathVariable Long id) {
+        Long userId = UserContext.getUserId();
+        try {
+            boolean success = taskService.receiveTask(id, userId);
+            if (!success) {
+                return Result.error("确认收货失败");
+            }
+            return Result.success(true);
+        } catch (RuntimeException e) {
+            return Result.error(e.getMessage());
+        }
     }
 }

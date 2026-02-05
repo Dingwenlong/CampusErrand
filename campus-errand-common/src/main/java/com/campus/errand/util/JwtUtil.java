@@ -5,20 +5,24 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-@Slf4j
+@Component
 public class JwtUtil {
+
+    private static final Logger log = LoggerFactory.getLogger(JwtUtil.class);
 
     private static final String SECRET = "campus_errand_secret_key_2024";
     private static final long EXPIRATION = 86400000 * 7; // 7天
     private static final String ISSUER = "campus-errand-system";
 
-    public static String generateToken(Long userId, String openid) {
+    public String generateToken(Long userId, String openid) {
         Date issuedAt = new Date();
         Date expiresAt = new Date(issuedAt.getTime() + EXPIRATION);
 
@@ -36,14 +40,14 @@ public class JwtUtil {
                 .sign(Algorithm.HMAC256(SECRET));
     }
 
-    public static DecodedJWT verifyToken(String token) throws JWTVerificationException {
+    public DecodedJWT verifyToken(String token) throws JWTVerificationException {
         JWTVerifier verifier = JWT.require(Algorithm.HMAC256(SECRET))
                 .withIssuer(ISSUER)
                 .build();
         return verifier.verify(token);
     }
 
-    public static Long getUserId(String token) {
+    public Long getUserId(String token) {
         try {
             DecodedJWT jwt = verifyToken(token);
             return jwt.getClaim("userId").asLong();
@@ -53,7 +57,7 @@ public class JwtUtil {
         }
     }
 
-    public static String getOpenid(String token) {
+    public String getOpenid(String token) {
         try {
             DecodedJWT jwt = verifyToken(token);
             return jwt.getClaim("openid").asString();
@@ -63,12 +67,16 @@ public class JwtUtil {
         }
     }
 
-    public static boolean isTokenExpired(String token) {
+    public boolean isTokenExpired(String token) {
         try {
             DecodedJWT jwt = verifyToken(token);
             return jwt.getExpiresAt().before(new Date());
         } catch (JWTVerificationException e) {
             return true;
         }
+    }
+
+    public Long getUserIdFromToken(String token) {
+        return getUserId(token);
     }
 }

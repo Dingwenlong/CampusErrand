@@ -3,118 +3,127 @@
     <!-- 用户信息卡片 -->
     <view class="user-card">
       <view class="user-info">
-        <image class="user-avatar" src="/static/avatar/default.png" mode="aspectFill"></image>
+        <image class="avatar" :src="userInfo.avatar || '/static/default-avatar.png'" mode="aspectFill"></image>
         <view class="user-detail">
-          <text class="user-name">点击登录</text>
-          <text class="user-school">未认证</text>
-        </view>
-        <text class="iconfont icon-settings" @click="goProfile"></text>
-      </view>
-      <view class="user-stats">
-        <view class="stat-item">
-          <text class="stat-num">0</text>
-          <text class="stat-label">信用分</text>
-        </view>
-        <view class="stat-item">
-          <text class="stat-num">0</text>
-          <text class="stat-label">完成订单</text>
-        </view>
-        <view class="stat-item">
-          <text class="stat-num">0</text>
-          <text class="stat-label">发布任务</text>
+          <text class="nickname">{{ userInfo.nickname || '未登录' }}</text>
+          <view class="credit-score">
+            <text class="score-label">信用分</text>
+            <text class="score-value">{{ userInfo.creditScore || 100 }}</text>
+          </view>
         </view>
       </view>
-    </view>
-
-    <!-- 我的钱包 -->
-    <view class="wallet-card" @click="goWallet">
-      <view class="wallet-header">
-        <text class="wallet-title">我的钱包</text>
-        <text class="wallet-more">查看详情 ></text>
-      </view>
-      <view class="wallet-balance">
-        <text class="balance-label">余额</text>
-        <text class="balance-num">¥0.00</text>
-      </view>
-      <view class="wallet-actions">
-        <view class="action-item">
-          <text class="iconfont icon-recharge"></text>
-          <text>充值</text>
+      <view class="wallet-summary" @click="goWallet">
+        <view class="wallet-item">
+          <text class="wallet-label">余额</text>
+          <text class="wallet-value">¥{{ wallet.balance }}</text>
         </view>
-        <view class="action-item">
-          <text class="iconfont icon-withdraw"></text>
-          <text>提现</text>
+        <view class="wallet-item">
+          <text class="wallet-label">冻结</text>
+          <text class="wallet-value">¥{{ wallet.frozenAmount }}</text>
         </view>
       </view>
     </view>
 
     <!-- 功能菜单 -->
-    <view class="menu-list">
-      <view class="menu-group">
-        <view class="menu-item" @click="navigateTo('/pages/order/list')">
-          <text class="iconfont icon-order menu-icon"></text>
-          <text class="menu-text">我的订单</text>
-          <text class="iconfont icon-arrow-right"></text>
-        </view>
-        <view class="menu-item" @click="navigateTo('/pages/task/publish')">
+    <view class="menu-section">
+      <view class="menu-title">我的服务</view>
+      <view class="menu-grid">
+        <view class="menu-item" @click="goPublishedTasks">
           <text class="iconfont icon-publish menu-icon"></text>
-          <text class="menu-text">发布任务</text>
-          <text class="iconfont icon-arrow-right"></text>
+          <text class="menu-text">我发布的</text>
         </view>
-        <view class="menu-item" @click="navigateTo('/pages/message/list')">
-          <text class="iconfont icon-message menu-icon"></text>
-          <text class="menu-text">消息通知</text>
-          <text class="badge" v-if="unreadCount > 0">{{ unreadCount }}</text>
-          <text class="iconfont icon-arrow-right" v-else></text>
+        <view class="menu-item" @click="goAcceptedTasks">
+          <text class="iconfont icon-accept menu-icon"></text>
+          <text class="menu-text">我接单的</text>
         </view>
-      </view>
-
-      <view class="menu-group">
-        <view class="menu-item">
-          <text class="iconfont icon-verify menu-icon"></text>
-          <text class="menu-text">实名认证</text>
-          <text class="menu-extra">未认证</text>
-          <text class="iconfont icon-arrow-right"></text>
+        <view class="menu-item" @click="goWallet">
+          <text class="iconfont icon-wallet menu-icon"></text>
+          <text class="menu-text">我的钱包</text>
         </view>
-        <view class="menu-item">
-          <text class="iconfont icon-address menu-icon"></text>
-          <text class="menu-text">地址管理</text>
-          <text class="iconfont icon-arrow-right"></text>
-        </view>
-        <view class="menu-item">
-          <text class="iconfont icon-service menu-icon"></text>
-          <text class="menu-text">联系客服</text>
-          <text class="iconfont icon-arrow-right"></text>
+        <view class="menu-item" @click="goEvaluations">
+          <text class="iconfont icon-evaluation menu-icon"></text>
+          <text class="menu-text">我的评价</text>
         </view>
       </view>
+    </view>
 
-      <view class="menu-group">
-        <view class="menu-item">
-          <text class="iconfont icon-about menu-icon"></text>
-          <text class="menu-text">关于我们</text>
-          <text class="iconfont icon-arrow-right"></text>
-        </view>
-        <view class="menu-item">
-          <text class="iconfont icon-settings menu-icon"></text>
-          <text class="menu-text">设置</text>
-          <text class="iconfont icon-arrow-right"></text>
-        </view>
+    <!-- 设置菜单 -->
+    <view class="menu-list">
+      <view class="menu-item" @click="goProfile">
+        <text class="iconfont icon-profile menu-icon"></text>
+        <text class="menu-text">个人资料</text>
+        <text class="iconfont icon-arrow-right"></text>
+      </view>
+      <view class="menu-item" @click="goPayPassword">
+        <text class="iconfont icon-password menu-icon"></text>
+        <text class="menu-text">支付密码</text>
+        <text class="menu-extra">{{ wallet.hasPayPassword ? '已设置' : '未设置' }}</text>
+        <text class="iconfont icon-arrow-right"></text>
+      </view>
+      <view class="menu-item" @click="goSettings">
+        <text class="iconfont icon-setting menu-icon"></text>
+        <text class="menu-text">设置</text>
+        <text class="iconfont icon-arrow-right"></text>
       </view>
     </view>
   </view>
 </template>
 
 <script>
+import userApi from '@/api/user.js'
+import walletApi from '@/api/wallet.js'
+
 export default {
   data() {
     return {
-      unreadCount: 3
+      userInfo: {
+        nickname: '',
+        avatar: '',
+        creditScore: 100
+      },
+      wallet: {
+        balance: '0.00',
+        frozenAmount: '0.00',
+        hasPayPassword: false
+      }
     }
   },
+  onShow() {
+    this.loadUserInfo()
+    this.loadWalletInfo()
+  },
   methods: {
-    navigateTo(path) {
+    async loadUserInfo() {
+      try {
+        const res = await userApi.getUserInfo()
+        if (res.code === 200) {
+          this.userInfo = res.data
+        }
+      } catch (e) {
+        console.error('加载用户信息失败', e)
+      }
+    },
+    async loadWalletInfo() {
+      try {
+        const res = await walletApi.getBalance()
+        if (res.code === 200) {
+          const data = res.data
+          this.wallet.balance = parseFloat(data.balance).toFixed(2)
+          this.wallet.frozenAmount = parseFloat(data.frozenAmount).toFixed(2)
+          this.wallet.hasPayPassword = data.hasPayPassword === 1
+        }
+      } catch (e) {
+        console.error('加载钱包信息失败', e)
+      }
+    },
+    goPublishedTasks() {
       uni.navigateTo({
-        url: path
+        url: '/pages/order/list?type=published'
+      })
+    },
+    goAcceptedTasks() {
+      uni.navigateTo({
+        url: '/pages/order/list?type=accepted'
       })
     },
     goWallet() {
@@ -122,9 +131,32 @@ export default {
         url: '/pages/user/wallet'
       })
     },
+    goEvaluations() {
+      uni.navigateTo({
+        url: '/pages/evaluation/list'
+      })
+    },
     goProfile() {
       uni.navigateTo({
         url: '/pages/user/profile'
+      })
+    },
+    goPayPassword() {
+      if (this.wallet.hasPayPassword) {
+        uni.showToast({
+          title: '支付密码已设置',
+          icon: 'none'
+        })
+        return
+      }
+      uni.navigateTo({
+        url: '/pages/user/pay-password'
+      })
+    },
+    goSettings() {
+      uni.showToast({
+        title: '设置功能开发中',
+        icon: 'none'
       })
     }
   }
@@ -148,123 +180,102 @@ export default {
   .user-info {
     display: flex;
     align-items: center;
-    margin-bottom: 40rpx;
+    margin-bottom: 30rpx;
 
-    .user-avatar {
+    .avatar {
       width: 120rpx;
       height: 120rpx;
       border-radius: 50%;
       border: 4rpx solid rgba(255, 255, 255, 0.3);
-      margin-right: 24rpx;
+      margin-right: 20rpx;
     }
 
     .user-detail {
-      flex: 1;
+      display: flex;
+      flex-direction: column;
 
-      .user-name {
-        display: block;
+      .nickname {
         font-size: 36rpx;
         font-weight: bold;
-        margin-bottom: 8rpx;
+        margin-bottom: 10rpx;
       }
 
-      .user-school {
-        display: block;
-        font-size: 26rpx;
-        opacity: 0.9;
-      }
-    }
+      .credit-score {
+        display: flex;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 6rpx 16rpx;
+        border-radius: 20rpx;
 
-    .icon-settings {
-      font-size: 40rpx;
-      opacity: 0.9;
+        .score-label {
+          font-size: 24rpx;
+          margin-right: 8rpx;
+        }
+
+        .score-value {
+          font-size: 28rpx;
+          font-weight: bold;
+        }
+      }
     }
   }
 
-  .user-stats {
+  .wallet-summary {
     display: flex;
-    justify-content: space-around;
+    border-top: 1rpx solid rgba(255, 255, 255, 0.2);
+    padding-top: 20rpx;
 
-    .stat-item {
+    .wallet-item {
+      flex: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
 
-      .stat-num {
-        font-size: 40rpx;
-        font-weight: bold;
+      .wallet-label {
+        font-size: 24rpx;
+        opacity: 0.8;
         margin-bottom: 8rpx;
       }
 
-      .stat-label {
-        font-size: 24rpx;
-        opacity: 0.9;
+      .wallet-value {
+        font-size: 32rpx;
+        font-weight: bold;
       }
     }
   }
 }
 
-.wallet-card {
+.menu-section {
   background: #fff;
   border-radius: 16rpx;
   padding: 30rpx;
   margin-bottom: 20rpx;
 
-  .wallet-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20rpx;
-
-    .wallet-title {
-      font-size: 30rpx;
-      font-weight: bold;
-      color: #333;
-    }
-
-    .wallet-more {
-      font-size: 24rpx;
-      color: #999;
-    }
-  }
-
-  .wallet-balance {
-    display: flex;
-    flex-direction: column;
+  .menu-title {
+    font-size: 30rpx;
+    font-weight: bold;
+    color: #333;
     margin-bottom: 30rpx;
-
-    .balance-label {
-      font-size: 24rpx;
-      color: #999;
-      margin-bottom: 8rpx;
-    }
-
-    .balance-num {
-      font-size: 48rpx;
-      font-weight: bold;
-      color: #333;
-    }
   }
 
-  .wallet-actions {
+  .menu-grid {
     display: flex;
-    border-top: 1rpx solid #f0f0f0;
-    padding-top: 20rpx;
+    flex-wrap: wrap;
 
-    .action-item {
-      flex: 1;
+    .menu-item {
+      width: 25%;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 20rpx 0;
+      margin-bottom: 30rpx;
 
-      .iconfont {
+      .menu-icon {
         font-size: 48rpx;
         color: #667eea;
-        margin-bottom: 8rpx;
+        margin-bottom: 12rpx;
       }
 
-      text:last-child {
+      .menu-text {
         font-size: 26rpx;
         color: #666;
       }
@@ -273,53 +284,41 @@ export default {
 }
 
 .menu-list {
-  .menu-group {
-    background: #fff;
-    border-radius: 16rpx;
-    margin-bottom: 20rpx;
-    overflow: hidden;
+  background: #fff;
+  border-radius: 16rpx;
+  overflow: hidden;
 
-    .menu-item {
-      display: flex;
-      align-items: center;
-      padding: 30rpx;
-      border-bottom: 1rpx solid #f5f5f5;
+  .menu-item {
+    display: flex;
+    align-items: center;
+    padding: 30rpx;
+    border-bottom: 1rpx solid #f5f5f5;
 
-      &:last-child {
-        border-bottom: none;
-      }
+    &:last-child {
+      border-bottom: none;
+    }
 
-      .menu-icon {
-        font-size: 40rpx;
-        color: #667eea;
-        margin-right: 20rpx;
-      }
+    .menu-icon {
+      font-size: 40rpx;
+      color: #667eea;
+      margin-right: 20rpx;
+    }
 
-      .menu-text {
-        flex: 1;
-        font-size: 30rpx;
-        color: #333;
-      }
+    .menu-text {
+      flex: 1;
+      font-size: 30rpx;
+      color: #333;
+    }
 
-      .menu-extra {
-        font-size: 26rpx;
-        color: #999;
-        margin-right: 16rpx;
-      }
+    .menu-extra {
+      font-size: 26rpx;
+      color: #999;
+      margin-right: 16rpx;
+    }
 
-      .badge {
-        background: #ff4d4f;
-        color: #fff;
-        font-size: 22rpx;
-        padding: 4rpx 12rpx;
-        border-radius: 20rpx;
-        margin-right: 16rpx;
-      }
-
-      .icon-arrow-right {
-        font-size: 28rpx;
-        color: #ccc;
-      }
+    .icon-arrow-right {
+      font-size: 28rpx;
+      color: #ccc;
     }
   }
 }

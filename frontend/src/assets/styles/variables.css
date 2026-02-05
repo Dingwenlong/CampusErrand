@@ -1,0 +1,108 @@
+:root {
+  /* ========================================================================
+     Global Theme Variables (Adapted from Original Project)
+     ======================================================================== */
+
+  /* Brand Colors */
+  --color-primary: #409eff;
+  --color-primary-hover: #69b1ff;
+  --color-primary-active: #096dd9;
+  --color-success: #67c23a;
+  --color-warning: #e6a23c;
+  --color-danger: #f56c6c;
+  --color-info: #909399;
+
+  /* Layout Sizes */
+  --g-main-sidebar-width: 220px;
+  --g-main-sidebar-collapsed-width: 64px;
+  --g-header-height: 60px;
+  --g-toolbar-height: 50px;
+  --g-tabbar-height: 40px;
+
+  /* Layout Colors - Sidebar (Light Theme Default) */
+  --g-main-sidebar-bg: #ffffff;
+  --g-main-sidebar-menu-color: #333333;
+  --g-main-sidebar-menu-hover-bg: #f5f7fa;
+  --g-main-sidebar-menu-hover-color: var(--color-primary);
+  --g-main-sidebar-menu-active-bg: #e6f7ff;
+  --g-main-sidebar-menu-active-color: var(--color-primary);
+  --g-sidebar-logo-bg: #ffffff;
+  --g-sidebar-logo-color: #333333;
+  --g-sidebar-border-color: #e4e7ed;
+
+  /* Layout Colors - Header */
+  --g-header-bg: rgba(255, 255, 255, 0.85);
+  --g-header-color: #606266;
+  --g-header-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+
+  /* Layout Colors - Main Content */
+  --g-main-bg: #f5f7f9;
+  --g-container-bg: #ffffff;
+  --g-border-color: #e4e7ed;
+
+  /* Transitions */
+  --transition-time: 0.3s;
+  --transition-ease: cubic-bezier(0.25, 0.8, 0.5, 1);
+
+  /* Shadows */
+  --box-shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+  --box-shadow-base: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --box-shadow-hover: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Dark Mode Override (Placeholder for future) */
+[data-theme='dark'] {
+  --g-main-sidebar-bg: #001529;
+  --g-main-sidebar-menu-color: #bfcbd9;
+  --g-main-sidebar-menu-hover-bg: #263445;
+  --g-main-sidebar-menu-active-bg: var(--color-primary);
+  --g-main-sidebar-menu-active-color: #ffffff;
+}
+
+/* Global Resets & Utilities */
+body {
+  background-color: var(--g-main-bg);
+  color: #303133;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  overflow: hidden; /* App handles scrolling */
+}
+
+/* Custom Scrollbar (Overlay Style) */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(144, 147, 153, 0.3);
+  border-radius: 3px;
+  transition: background 0.3s;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(144, 147, 153, 0.5);
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Transitions */
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: all 0.3s var(--transition-ease);
+}
+.fade-slide-enter-from {
+  opacity: 0;
+  transform: translateX(-20px);
+}
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}

@@ -49,6 +49,18 @@
       }
     },
     {
+      "path": "pages/user/transactions",
+      "style": {
+        "navigationBarTitleText": "交易明细"
+      }
+    },
+    {
+      "path": "pages/user/pay-password",
+      "style": {
+        "navigationBarTitleText": "支付密码"
+      }
+    },
+    {
       "path": "pages/user/profile",
       "style": {
         "navigationBarTitleText": "个人资料"

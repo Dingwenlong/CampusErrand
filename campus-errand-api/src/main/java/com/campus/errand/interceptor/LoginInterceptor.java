@@ -8,27 +8,39 @@ import com.campus.errand.util.UserContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-@Slf4j
+@Component
 public class LoginInterceptor implements HandlerInterceptor {
+
+    private static final Logger log = LoggerFactory.getLogger(LoginInterceptor.class);
+
+    private final JwtUtil jwtUtil;
+
+    @Autowired
+    public LoginInterceptor(JwtUtil jwtUtil) {
+        this.jwtUtil = jwtUtil;
+    }
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String token = request.getHeader("Authorization");
-        
+
         if (token == null || !token.startsWith("Bearer ")) {
             writeErrorResponse(response, ResultCode.UNAUTHORIZED);
             return false;
         }
 
         token = token.substring(7);
-        
+
         try {
-            Long userId = JwtUtil.getUserId(token);
-            String openid = JwtUtil.getOpenid(token);
-            
+            Long userId = jwtUtil.getUserId(token);
+            String openid = jwtUtil.getOpenid(token);
+
             if (userId == null) {
                 writeErrorResponse(response, ResultCode.TOKEN_INVALID);
                 return false;
@@ -36,7 +48,7 @@ public class LoginInterceptor implements HandlerInterceptor {
 
             UserContext.setUserId(userId);
             UserContext.setOpenid(openid);
-            
+
             return true;
         } catch (JWTVerificationException e) {
             log.error("Token验证失败: {}", e.getMessage());

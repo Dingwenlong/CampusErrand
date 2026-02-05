@@ -8,7 +8,7 @@ import com.campus.errand.service.UserWalletService;
 import com.campus.errand.util.UserContext;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,11 +20,16 @@ import java.util.Map;
 @Tag(name = "用户管理", description = "用户相关接口")
 @RestController
 @RequestMapping("/user")
-@RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
     private final UserWalletService userWalletService;
+
+    @Autowired
+    public UserController(UserService userService, UserWalletService userWalletService) {
+        this.userService = userService;
+        this.userWalletService = userWalletService;
+    }
 
     @Operation(summary = "获取当前用户信息")
     @GetMapping("/info")
@@ -32,11 +37,11 @@ public class UserController {
         Long userId = UserContext.getUserId();
         User user = userService.getById(userId);
         UserWallet wallet = userWalletService.getByUserId(userId);
-        
+
         Map<String, Object> result = new HashMap<>();
         result.put("user", user);
         result.put("wallet", wallet);
-        
+
         return Result.success(result);
     }
 
