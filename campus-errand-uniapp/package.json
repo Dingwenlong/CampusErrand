@@ -1,0 +1,17 @@
+{
+  "name": "campus-errand-uniapp",
+  "version": "1.0.0",
+  "description": "校园跑腿小程序",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "uniapp",
+    "campus",
+    "errand"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {}
+}
