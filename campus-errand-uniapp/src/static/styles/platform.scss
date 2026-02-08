@@ -1,0 +1,378 @@
+/* ============================================
+   平台适配样式 - Platform Adaptation Styles
+   ============================================ */
+
+/* --------------------------------------------
+   1. iOS 平台适配
+   -------------------------------------------- */
+
+.ios {
+  /* iOS 状态栏高度 */
+  --status-bar-height: 44rpx;
+}
+
+.ios .nav-bar {
+  padding-top: var(--status-bar-height);
+}
+
+.ios .nav-bar.nav-large .nav-title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+}
+
+/* iOS 底部安全区域 */
+.ios .bottom-bar,
+.ios .tab-bar {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* iOS 按钮样式 - 更圆润 */
+.ios .btn {
+  border-radius: var(--radius-lg);
+}
+
+.ios .btn.btn-sm {
+  border-radius: var(--radius-md);
+}
+
+/* iOS 卡片样式 - 更大圆角 */
+.ios .card {
+  border-radius: var(--radius-xl);
+}
+
+/* iOS 列表样式 */
+.ios .list {
+  border-radius: var(--radius-xl);
+}
+
+.ios .list .list-item:first-child {
+  border-top-left-radius: var(--radius-xl);
+  border-top-right-radius: var(--radius-xl);
+}
+
+.ios .list .list-item:last-child {
+  border-bottom-left-radius: var(--radius-xl);
+  border-bottom-right-radius: var(--radius-xl);
+}
+
+/* iOS 输入框样式 */
+.ios .form-input,
+.ios .form-textarea {
+  border-radius: var(--radius-lg);
+}
+
+/* iOS 滚动回弹效果 */
+.ios scroll-view {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* --------------------------------------------
+   2. Android 平台适配
+   -------------------------------------------- */
+
+.android {
+  /* Android 状态栏高度 */
+  --status-bar-height: 40rpx;
+}
+
+.android .nav-bar {
+  padding-top: var(--status-bar-height);
+}
+
+/* Android 底部导航栏 */
+.android .bottom-bar,
+.android .tab-bar {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Android 按钮样式 - 直角风格 */
+.android .btn {
+  border-radius: var(--radius-md);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.android .btn.btn-sm {
+  border-radius: var(--radius-sm);
+}
+
+/* Android 卡片样式 - 较小圆角 */
+.android .card {
+  border-radius: var(--radius-md);
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+}
+
+/* Android 列表样式 */
+.android .list {
+  border-radius: var(--radius-md);
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+}
+
+/* Android 输入框样式 */
+.android .form-input,
+.android .form-textarea {
+  border-radius: var(--radius-sm);
+  border-bottom: 2rpx solid var(--color-border);
+}
+
+.android .form-input:focus,
+.android .form-textarea:focus {
+  border-bottom-color: var(--color-primary);
+  box-shadow: none;
+}
+
+/* Android 涟漪效果 */
+.android .ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.android .ripple::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s, height 0.3s;
+}
+
+.android .ripple:active::after {
+  width: 200%;
+  height: 200%;
+}
+
+/* --------------------------------------------
+   3. 微信小程序适配
+   -------------------------------------------- */
+
+.mp-weixin .custom-nav {
+  padding-top: var(--status-bar-height);
+}
+
+.mp-weixin .custom-nav .nav-content {
+  height: 88rpx;
+}
+
+/* 微信小程序按钮样式调整 */
+.mp-weixin button {
+  margin: 0;
+  padding: 0;
+  line-height: inherit;
+}
+
+.mp-weixin button::after {
+  border: none;
+}
+
+/* 微信小程序输入框 */
+.mp-weixin input,
+.mp-weixin textarea {
+  min-height: auto;
+}
+
+/* --------------------------------------------
+   4. H5 平台适配
+   -------------------------------------------- */
+
+/* H5 滚动条样式 */
+.h5 ::-webkit-scrollbar {
+  width: 8rpx;
+  height: 8rpx;
+}
+
+.h5 ::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+
+.h5 ::-webkit-scrollbar-thumb {
+  background: var(--color-border-dark);
+  border-radius: var(--radius-full);
+}
+
+.h5 ::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-tertiary);
+}
+
+/* H5 按钮 hover 效果 */
+.h5 .btn:hover {
+  opacity: 0.9;
+}
+
+.h5 .btn:active {
+  opacity: 1;
+}
+
+/* H5 链接样式 */
+.h5 a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.h5 a:hover {
+  text-decoration: underline;
+}
+
+/* --------------------------------------------
+   5. 安全区域适配
+   -------------------------------------------- */
+
+.safe-area-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.safe-area-left {
+  padding-left: env(safe-area-inset-left);
+}
+
+.safe-area-right {
+  padding-right: env(safe-area-inset-right);
+}
+
+.safe-area-all {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+.fixed-bottom {
+  padding-bottom: calc(var(--space-6) + env(safe-area-inset-bottom));
+}
+
+/* --------------------------------------------
+   6. 暗黑模式适配
+   -------------------------------------------- */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* 文字颜色 */
+    --color-text-primary: #f9fafb;
+    --color-text-secondary: #d1d5db;
+    --color-text-tertiary: #9ca3af;
+    --color-text-placeholder: #6b7280;
+    --color-text-disabled: #6b7280;
+    
+    /* 背景颜色 */
+    --color-bg: #111827;
+    --color-bg-secondary: #1f2937;
+    --color-bg-tertiary: #374151;
+    --color-surface: #1f2937;
+    --color-surface-elevated: #374151;
+    
+    /* 边框颜色 */
+    --color-border: #374151;
+    --color-border-light: #1f2937;
+    --color-border-dark: #4b5563;
+    
+    /* 分割线颜色 */
+    --color-divider: #374151;
+    
+    /* 遮罩颜色 */
+    --color-mask: rgba(0, 0, 0, 0.7);
+    --color-mask-light: rgba(0, 0, 0, 0.5);
+    
+    /* 阴影调整 */
+    --shadow-sm: 0 2rpx 8rpx rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4rpx 16rpx rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8rpx 32rpx rgba(0, 0, 0, 0.5);
+  }
+  
+  /* 暗黑模式下的图片亮度调整 */
+  image,
+  img {
+    opacity: 0.9;
+  }
+  
+  /* 暗黑模式下的卡片样式 */
+  .card {
+    background-color: var(--color-surface);
+    border: 1rpx solid var(--color-border);
+  }
+  
+  /* 暗黑模式下的输入框 */
+  .form-input,
+  .form-textarea {
+    background-color: var(--color-bg-secondary);
+    border-color: var(--color-border);
+    color: var(--color-text-primary);
+  }
+  
+  .form-input::placeholder,
+  .form-textarea::placeholder {
+    color: var(--color-text-placeholder);
+  }
+}
+
+/* 强制暗黑模式类 */
+.dark-mode {
+  --color-text-primary: #f9fafb;
+  --color-text-secondary: #d1d5db;
+  --color-text-tertiary: #9ca3af;
+  --color-bg: #111827;
+  --color-bg-secondary: #1f2937;
+  --color-surface: #1f2937;
+  --color-border: #374151;
+  --color-divider: #374151;
+}
+
+/* --------------------------------------------
+   7. 响应式适配
+   -------------------------------------------- */
+
+/* 小屏手机适配 */
+@media (max-width: 375px) {
+  :root {
+    --font-size-base: 28rpx;
+    --font-size-lg: 32rpx;
+    --font-size-xl: 36rpx;
+  }
+  
+  .container {
+    padding: var(--space-4);
+  }
+  
+  .card {
+    padding: var(--space-4);
+  }
+}
+
+/* 大屏手机适配 */
+@media (min-width: 414px) {
+  :root {
+    --font-size-base: 34rpx;
+    --font-size-lg: 38rpx;
+    --font-size-xl: 42rpx;
+  }
+  
+  .container {
+    padding: var(--space-8);
+  }
+  
+  .card {
+    padding: var(--space-8);
+  }
+}
+
+/* 平板适配 */
+@media (min-width: 768px) {
+  .container {
+    max-width: 750rpx;
+    margin: 0 auto;
+  }
+}
+
+/* 横屏适配 */
+@media (orientation: landscape) {
+  .container {
+    max-width: 750rpx;
+    margin: 0 auto;
+  }
+}

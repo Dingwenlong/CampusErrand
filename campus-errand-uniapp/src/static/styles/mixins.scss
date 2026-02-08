@@ -1,0 +1,469 @@
+// ============================================
+// SCSS Mixins - 可复用的样式片段
+// ============================================
+
+// --------------------------------------------
+// 1. 布局相关 Mixins
+// --------------------------------------------
+
+// Flexbox 居中
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// Flexbox 垂直居中
+@mixin flex-vcenter {
+  display: flex;
+  align-items: center;
+}
+
+// Flexbox 水平居中
+@mixin flex-hcenter {
+  display: flex;
+  justify-content: center;
+}
+
+// Flexbox 两端对齐
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+// Flexbox 列布局
+@mixin flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+// 绝对定位居中
+@mixin absolute-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+// 绝对定位垂直居中
+@mixin absolute-vcenter {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+// 绝对定位水平居中
+@mixin absolute-hcenter {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+// --------------------------------------------
+// 2. 文本相关 Mixins
+// --------------------------------------------
+
+// 单行文本省略
+@mixin text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// 多行文本省略
+@mixin text-ellipsis-multi($lines: 2) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+}
+
+// 隐藏文本（用于图标替换）
+@mixin text-hide {
+  font-size: 0;
+  color: transparent;
+  text-shadow: none;
+  background-color: transparent;
+  border: 0;
+}
+
+// --------------------------------------------
+// 3. 视觉相关 Mixins
+// --------------------------------------------
+
+// 卡片基础样式
+@mixin card-base {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--duration-normal) var(--ease-out);
+}
+
+// 卡片悬浮效果
+@mixin card-hover {
+  &:active {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2rpx);
+  }
+}
+
+// 卡片按压效果
+@mixin card-press {
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+// 按钮基础样式
+@mixin btn-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+  
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+// 主按钮样式
+@mixin btn-primary {
+  @include btn-base;
+  background-color: var(--color-primary);
+  color: var(--color-text-inverse);
+  box-shadow: var(--shadow-primary);
+  
+  &:active {
+    background-color: var(--color-primary-dark);
+  }
+}
+
+// 次按钮样式
+@mixin btn-secondary {
+  @include btn-base;
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  
+  &:active {
+    background-color: var(--color-bg-tertiary);
+  }
+}
+
+// 幽灵按钮样式
+@mixin btn-ghost {
+  @include btn-base;
+  background-color: transparent;
+  color: var(--color-primary);
+  border: 2rpx solid var(--color-primary);
+  
+  &:active {
+    background-color: rgba(var(--color-primary-rgb), 0.1);
+  }
+}
+
+// 表单输入框基础样式
+@mixin input-base {
+  width: 100%;
+  background-color: var(--color-bg-secondary);
+  border: 2rpx solid transparent;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+  transition: all var(--duration-fast) var(--ease-out);
+  
+  &:focus {
+    background-color: var(--color-surface);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 4rpx rgba(var(--color-primary-rgb), 0.1);
+  }
+  
+  &::placeholder {
+    color: var(--color-text-placeholder);
+  }
+}
+
+// --------------------------------------------
+// 4. 动画相关 Mixins
+// --------------------------------------------
+
+// 淡入动画
+@mixin animate-fade-in($duration: var(--duration-normal), $delay: 0ms) {
+  animation: fadeIn $duration var(--ease-out) $delay forwards;
+  opacity: 0;
+}
+
+// 淡入上滑动画
+@mixin animate-fade-in-up($duration: var(--duration-normal), $delay: 0ms) {
+  animation: fadeInUp $duration var(--ease-out) $delay forwards;
+  opacity: 0;
+  transform: translateY(30rpx);
+}
+
+// 淡入下滑动画
+@mixin animate-fade-in-down($duration: var(--duration-normal), $delay: 0ms) {
+  animation: fadeInDown $duration var(--ease-out) $delay forwards;
+  opacity: 0;
+  transform: translateY(-30rpx);
+}
+
+// 缩放进入动画
+@mixin animate-scale-in($duration: var(--duration-normal), $delay: 0ms) {
+  animation: scaleIn $duration var(--ease-out) $delay forwards;
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+// 列表项 stagger 动画
+@mixin stagger-animation($base-delay: 50ms, $item-count: 10) {
+  @for $i from 1 through $item-count {
+    &:nth-child(#{$i}) {
+      animation-delay: $base-delay * $i;
+    }
+  }
+}
+
+// 性能优化 - 启用GPU加速
+@mixin gpu-accelerate {
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+// --------------------------------------------
+// 5. 响应式相关 Mixins
+// --------------------------------------------
+
+// 小屏手机
+@mixin screen-xs {
+  @media (max-width: 375px) {
+    @content;
+  }
+}
+
+// 大屏手机
+@mixin screen-lg {
+  @media (min-width: 414px) {
+    @content;
+  }
+}
+
+// 平板
+@mixin screen-xl {
+  @media (min-width: 768px) {
+    @content;
+  }
+}
+
+// 安全区域适配
+@mixin safe-area-bottom {
+  padding-bottom: calc(var(--space-6) + env(safe-area-inset-bottom));
+}
+
+@mixin safe-area-top {
+  padding-top: calc(var(--status-bar-height) + env(safe-area-inset-top));
+}
+
+// --------------------------------------------
+// 6. 平台适配 Mixins
+// --------------------------------------------
+
+// iOS 特定样式
+@mixin ios-only {
+  .ios & {
+    @content;
+  }
+}
+
+// Android 特定样式
+@mixin android-only {
+  .android & {
+    @content;
+  }
+}
+
+// 小程序特定样式
+@mixin mp-only {
+  .mp-weixin & {
+    @content;
+  }
+}
+
+// H5 特定样式
+@mixin h5-only {
+  .h5 & {
+    @content;
+  }
+}
+
+// --------------------------------------------
+// 7. 工具 Mixins
+// --------------------------------------------
+
+// 清除浮动
+@mixin clearfix {
+  &::after {
+    content: '';
+    display: table;
+    clear: both;
+  }
+}
+
+// 隐藏滚动条
+@mixin hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+// 1px 边框（高清屏适配）
+@mixin hairline($direction: bottom, $color: var(--color-border)) {
+  position: relative;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    background-color: $color;
+    
+    @if $direction == top {
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1rpx;
+      transform: scaleY(0.5);
+      transform-origin: top;
+    } @else if $direction == bottom {
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 1rpx;
+      transform: scaleY(0.5);
+      transform-origin: bottom;
+    } @else if $direction == left {
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 1rpx;
+      transform: scaleX(0.5);
+      transform-origin: left;
+    } @else if $direction == right {
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 1rpx;
+      transform: scaleX(0.5);
+      transform-origin: right;
+    }
+  }
+}
+
+// 全边框
+@mixin hairline-all($color: var(--color-border), $radius: 0) {
+  position: relative;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 1rpx solid $color;
+    border-radius: $radius;
+    transform: scale(0.5);
+    transform-origin: top left;
+    width: 200%;
+    height: 200%;
+    pointer-events: none;
+  }
+}
+
+// 禁用状态
+@mixin disabled {
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+// 加载状态
+@mixin loading {
+  position: relative;
+  pointer-events: none;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40rpx;
+    height: 40rpx;
+    margin-top: -20rpx;
+    margin-left: -20rpx;
+    border: 4rpx solid var(--color-border);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+}
+
+// --------------------------------------------
+// 8. 主题相关 Mixins
+// --------------------------------------------
+
+// 任务类型颜色
+@mixin task-type-color($type) {
+  @if $type == 1 {
+    background: rgba(24, 144, 255, 0.1);
+    color: var(--color-task-express);
+  } @else if $type == 2 {
+    background: rgba(82, 196, 26, 0.1);
+    color: var(--color-task-shopping);
+  } @else if $type == 3 {
+    background: rgba(250, 173, 20, 0.1);
+    color: var(--color-task-delivery);
+  } @else if $type == 4 {
+    background: rgba(114, 46, 209, 0.1);
+    color: var(--color-task-other);
+  }
+}
+
+// 状态颜色
+@mixin status-color($status) {
+  @if $status == success {
+    background: rgba(82, 196, 26, 0.1);
+    color: var(--color-success);
+  } @else if $status == warning {
+    background: rgba(250, 173, 20, 0.1);
+    color: var(--color-warning);
+  } @else if $status == error {
+    background: rgba(255, 77, 79, 0.1);
+    color: var(--color-error);
+  } @else if $status == info {
+    background: rgba(24, 144, 255, 0.1);
+    color: var(--color-info);
+  }
+}
+
+// 渐变背景
+@mixin gradient-primary {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+}
+
+@mixin gradient-success {
+  background: linear-gradient(135deg, var(--color-success) 0%, var(--color-success-light) 100%);
+}
+
+@mixin gradient-warning {
+  background: linear-gradient(135deg, var(--color-warning) 0%, var(--color-warning-light) 100%);
+}
+
+@mixin gradient-error {
+  background: linear-gradient(135deg, var(--color-error) 0%, var(--color-error-light) 100%);
+}

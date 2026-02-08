@@ -1,0 +1,1274 @@
+<template>
+  <view class="login-container">
+    <!-- 背景装饰 -->
+    <view class="bg-decoration">
+      <view class="gradient-orb orb-1"></view>
+      <view class="gradient-orb orb-2"></view>
+      <view class="gradient-orb orb-3"></view>
+      <view class="grid-pattern"></view>
+    </view>
+
+    <!-- 主内容区 -->
+    <view class="content-wrapper">
+      <!-- 品牌展示区域 -->
+      <view class="brand-section">
+        <view class="logo-container">
+          <view class="logo-glow"></view>
+          <view class="logo-wrapper">
+            <text class="logo-icon">🏃</text>
+          </view>
+        </view>
+        <view class="brand-text">
+          <text class="brand-name">校园跑腿</text>
+          <text class="brand-slogan">让校园生活更便捷</text>
+        </view>
+      </view>
+
+      <!-- 登录卡片 -->
+      <view class="login-card">
+        <view class="card-header">
+          <text class="welcome-text">欢迎回来</text>
+          <text class="sub-text">请登录以继续使用</text>
+        </view>
+
+        <!-- 协议同意区域 -->
+        <view class="agreement-section">
+          <view 
+            class="checkbox-wrapper" 
+            :class="{ checked: agreed }" 
+            @click="toggleAgreement"
+          >
+            <view class="checkbox">
+              <view v-if="agreed" class="check-mark">
+                <text class="check-icon">✓</text>
+              </view>
+            </view>
+            <view class="agreement-text">
+              <text class="text-normal">我已阅读并同意</text>
+              <text class="text-link" @click.stop="showUserAgreement">《用户协议》</text>
+              <text class="text-normal">和</text>
+              <text class="text-link" @click.stop="showPrivacyPolicy">《隐私政策》</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 登录按钮 -->
+        <button
+          class="login-btn"
+          :class="{ disabled: !agreed || loading, active: agreed && !loading }"
+          :disabled="!agreed || loading"
+          @click="handleLogin"
+        >
+          <view class="btn-content">
+            <view v-if="loading" class="loading-wrapper">
+              <view class="loading-spinner"></view>
+            </view>
+            <template v-else>
+              <view class="wechat-icon">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"/>
+                </svg>
+              </view>
+              <text class="btn-text">微信一键登录</text>
+            </template>
+          </view>
+          <view class="btn-shine"></view>
+        </button>
+
+        <!-- 游客入口 -->
+        <view class="guest-section">
+          <view class="divider">
+            <view class="divider-line"></view>
+            <text class="divider-text">或者</text>
+            <view class="divider-line"></view>
+          </view>
+          <button class="guest-btn" @click="enterAsGuest">
+            <text class="guest-text">暂不登录，先看看</text>
+            <view class="arrow-icon">→</view>
+          </button>
+        </view>
+      </view>
+    </view>
+
+    <!-- 底部版权 -->
+    <view class="footer-section">
+      <view class="footer-content">
+        <view class="safe-badge">
+          <text class="badge-icon">🔒</text>
+          <text class="badge-text">安全登录保障</text>
+        </view>
+        <text class="copyright">登录即代表您同意相关服务条款</text>
+      </view>
+    </view>
+
+    <!-- 用户协议弹窗 -->
+    <view v-if="showAgreementModal" class="modal-overlay">
+      <view class="modal-container">
+        <view class="modal-header">
+          <view class="header-icon">📋</view>
+          <text class="modal-title">用户协议</text>
+          <view class="close-btn" @click="closeAgreement">
+            <text class="close-icon">✕</text>
+          </view>
+        </view>
+        <scroll-view class="modal-body" scroll-y>
+          <view class="agreement-content">
+            <view class="content-intro">
+              <text class="intro-title">欢迎使用校园跑腿</text>
+              <text class="intro-desc">请您仔细阅读以下条款，确保您充分理解并同意后再开始使用我们的服务。</text>
+            </view>
+            <view class="content-sections">
+              <view class="content-item">
+                <view class="item-header">
+                  <view class="item-number">01</view>
+                  <text class="item-title">服务条款</text>
+                </view>
+                <text class="item-desc">本协议是您与校园跑腿平台之间关于使用本平台服务所订立的协议。通过使用我们的服务，您同意接受本协议的所有条款和条件。</text>
+              </view>
+              <view class="content-item">
+                <view class="item-header">
+                  <view class="item-number">02</view>
+                  <text class="item-title">账号安全</text>
+                </view>
+                <text class="item-desc">您在使用微信登录时，我们仅获取您的公开信息（昵称、头像），用于创建账号。我们承诺保护您的账号安全，不会将您的信息用于未经授权的用途。</text>
+              </view>
+              <view class="content-item">
+                <view class="item-header">
+                  <view class="item-number">03</view>
+                  <text class="item-title">用户行为规范</text>
+                </view>
+                <text class="item-desc">您承诺遵守国家法律法规，不得利用本平台从事违法活动。您应当对自己的行为负责，不得发布违法违规内容。</text>
+              </view>
+              <view class="content-item">
+                <view class="item-header">
+                  <view class="item-number">04</view>
+                  <text class="item-title">免责声明</text>
+                </view>
+                <text class="item-desc">平台将尽力保障服务的稳定性，但不保证服务不会中断。对于因不可抗力或第三方原因导致的服务中断，平台不承担责任。</text>
+              </view>
+              <view class="content-item">
+                <view class="item-header">
+                  <view class="item-number">05</view>
+                  <text class="item-title">协议修改</text>
+                </view>
+                <text class="item-desc">平台有权在必要时修改本协议，修改后会通过适当方式通知用户。继续使用服务即视为接受修改后的协议。</text>
+              </view>
+            </view>
+            <view class="content-footer">
+              <text class="update-time">最后更新时间：2024年1月</text>
+            </view>
+          </view>
+        </scroll-view>
+        <view class="modal-footer">
+          <button class="footer-btn cancel" @click="closeAgreement">取消</button>
+          <button class="footer-btn confirm" @click="agreeAndClose('agreement')">同意并继续</button>
+        </view>
+      </view>
+      <!-- 遮罩层点击区域 -->
+      <view class="modal-mask" @click="closeAgreement"></view>
+    </view>
+
+    <!-- 隐私政策弹窗 -->
+    <view v-if="showPrivacyModal" class="modal-overlay">
+      <view class="modal-container">
+        <view class="modal-header">
+          <view class="header-icon privacy">🛡️</view>
+          <text class="modal-title">隐私政策</text>
+          <view class="close-btn" @click="closePrivacy">
+            <text class="close-icon">✕</text>
+          </view>
+        </view>
+        <scroll-view class="modal-body" scroll-y>
+          <view class="agreement-content">
+            <view class="content-intro privacy-intro">
+              <view class="privacy-lock">🔐</view>
+              <text class="intro-title">您的隐私对我们很重要</text>
+              <text class="intro-desc">我们高度重视您的隐私保护，承诺仅收集必要信息并采用严格的安全措施保护您的数据。</text>
+            </view>
+            <view class="content-sections">
+              <view class="content-item">
+                <view class="item-header">
+                  <view class="item-icon">📊</view>
+                  <text class="item-title">信息收集</text>
+                </view>
+                <text class="item-desc">我们仅收集必要的用户信息：微信昵称、头像、手机号（实名认证时）。我们不会收集与提供服务无关的个人信息。</text>
+              </view>
+              <view class="content-item">
+                <view class="item-header">
+                  <view class="item-icon">🎯</view>
+                  <text class="item-title">信息使用</text>
+                </view>
+                <text class="item-desc">您的信息仅用于提供服务，包括：身份验证、订单处理、客户服务。我们不会向第三方出售或共享您的个人信息。</text>
+              </view>
+              <view class="content-item">
+                <view class="item-header">
+                  <view class="item-icon">🔒</view>
+                  <text class="item-title">信息保护</text>
+                </view>
+                <text class="item-desc">我们采用业界标准的加密技术保护您的数据安全。所有数据传输均通过HTTPS加密，存储数据经过脱敏处理。</text>
+              </view>
+              <view class="content-item">
+                <view class="item-header">
+                  <view class="item-icon">✅</view>
+                  <text class="item-title">用户权利</text>
+                </view>
+                <text class="item-desc">您有权查看、修改或删除您的个人信息。如需行使这些权利，请联系我们的客服团队。</text>
+              </view>
+              <view class="content-item">
+                <view class="item-header">
+                  <view class="item-icon">📞</view>
+                  <text class="item-title">联系我们</text>
+                </view>
+                <text class="item-desc">如有隐私相关问题，请联系客服：privacy@campuserrand.com 或拨打客服热线 400-XXX-XXXX。</text>
+              </view>
+            </view>
+            <view class="content-footer">
+              <text class="update-time">最后更新时间：2024年1月</text>
+            </view>
+          </view>
+        </scroll-view>
+        <view class="modal-footer">
+          <button class="footer-btn cancel" @click="closePrivacy">取消</button>
+          <button class="footer-btn confirm" @click="agreeAndClose('privacy')">同意并继续</button>
+        </view>
+      </view>
+      <!-- 遮罩层点击区域 -->
+      <view class="modal-mask" @click="closePrivacy"></view>
+    </view>
+  </view>
+</template>
+
+<script>
+import authApi from '@/api/auth.js'
+import { setToken } from '@/utils/auth.js'
+
+export default {
+  data() {
+    return {
+      agreed: false,
+      loading: false,
+      redirectUrl: '',
+      showAgreementModal: false,
+      showPrivacyModal: false
+    }
+  },
+  onLoad(options) {
+    if (options.redirect) {
+      this.redirectUrl = decodeURIComponent(options.redirect)
+    }
+  },
+  methods: {
+    toggleAgreement() {
+      this.agreed = !this.agreed
+    },
+
+    showUserAgreement() {
+      this.showAgreementModal = true
+    },
+
+    closeAgreement() {
+      this.showAgreementModal = false
+    },
+
+    showPrivacyPolicy() {
+      this.showPrivacyModal = true
+    },
+
+    closePrivacy() {
+      this.showPrivacyModal = false
+    },
+
+    agreeAndClose(type) {
+      this.agreed = true
+      if (type === 'agreement') {
+        this.closeAgreement()
+      } else {
+        this.closePrivacy()
+      }
+    },
+
+    async handleLogin() {
+      if (!this.agreed) {
+        uni.showToast({
+          title: '请先同意用户协议和隐私政策',
+          icon: 'none'
+        })
+        return
+      }
+
+      this.loading = true
+
+      try {
+        const loginRes = await this.wxLogin()
+        const code = loginRes.code
+
+        const userProfile = await this.getUserProfile()
+
+        const loginData = {
+          code: code,
+          nickname: userProfile.nickname,
+          avatar: userProfile.avatar,
+          gender: userProfile.gender
+        }
+
+        const res = await authApi.wxLogin(loginData)
+
+        if (res.code === 200) {
+          const { token, userInfo } = res.data
+          setToken(token)
+          uni.setStorageSync('userInfo', userInfo)
+
+          uni.showToast({
+            title: '登录成功',
+            icon: 'success'
+          })
+
+          setTimeout(() => {
+            this.navigateAfterLogin()
+          }, 1500)
+        } else {
+          throw new Error(res.message || '登录失败')
+        }
+      } catch (error) {
+        console.error('登录失败:', error)
+        uni.showToast({
+          title: error.message || '登录失败，请重试',
+          icon: 'none',
+          duration: 2000
+        })
+      } finally {
+        this.loading = false
+      }
+    },
+
+    wxLogin() {
+      return new Promise((resolve, reject) => {
+        uni.login({
+          provider: 'weixin',
+          success: (res) => {
+            if (res.code) {
+              resolve(res)
+            } else {
+              reject(new Error('获取登录凭证失败'))
+            }
+          },
+          fail: (err) => {
+            reject(new Error('微信登录失败: ' + err.errMsg))
+          }
+        })
+      })
+    },
+
+    getUserProfile() {
+      return new Promise((resolve, reject) => {
+        if (uni.getUserProfile) {
+          uni.getUserProfile({
+            desc: '用于完善用户资料',
+            success: (res) => {
+              const userInfo = res.userInfo
+              resolve({
+                nickname: userInfo.nickName,
+                avatar: userInfo.avatarUrl,
+                gender: userInfo.gender
+              })
+            },
+            fail: (err) => {
+              console.log('获取用户信息失败:', err)
+              resolve({
+                nickname: '微信用户',
+                avatar: '',
+                gender: 0
+              })
+            }
+          })
+        } else {
+          uni.getUserInfo({
+            success: (res) => {
+              const userInfo = res.userInfo
+              resolve({
+                nickname: userInfo.nickName,
+                avatar: userInfo.avatarUrl,
+                gender: userInfo.gender
+              })
+            },
+            fail: () => {
+              resolve({
+                nickname: '微信用户',
+                avatar: '',
+                gender: 0
+              })
+            }
+          })
+        }
+      })
+    },
+
+    navigateAfterLogin() {
+      if (this.redirectUrl) {
+        uni.navigateTo({
+          url: this.redirectUrl,
+          fail: () => {
+            uni.switchTab({
+              url: this.redirectUrl,
+              fail: () => {
+                uni.switchTab({
+                  url: '/pages/index/index'
+                })
+              }
+            })
+          }
+        })
+      } else {
+        uni.switchTab({
+          url: '/pages/index/index'
+        })
+      }
+    },
+
+    enterAsGuest() {
+      uni.showModal({
+        title: '提示',
+        content: '游客模式下部分功能将受到限制，是否继续？',
+        confirmColor: '#FFC300',
+        success: (res) => {
+          if (res.confirm) {
+            uni.switchTab({
+              url: '/pages/index/index'
+            })
+          }
+        }
+      })
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+// ============================================
+// 设计系统变量
+// ============================================
+$primary-gradient: linear-gradient(135deg, #FFC300 0%, #FFB300 100%);
+$primary-gradient-hover: linear-gradient(135deg, #FFD54F 0%, #FFC300 100%);
+$wechat-green: #07C160;
+$wechat-green-hover: #06ad56;
+$bg-gradient: linear-gradient(180deg, #FFF9E6 0%, #FFFFFF 50%, #F8F9FA 100%);
+
+$shadow-sm: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+$shadow-md: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
+$shadow-lg: 0 8rpx 32rpx rgba(0, 0, 0, 0.12);
+$shadow-primary: 0 8rpx 24rpx rgba(255, 195, 0, 0.35);
+$shadow-wechat: 0 8rpx 24rpx rgba(7, 193, 96, 0.35);
+
+$radius-sm: 12rpx;
+$radius-md: 16rpx;
+$radius-lg: 24rpx;
+$radius-xl: 32rpx;
+$radius-full: 9999rpx;
+
+// ============================================
+// 登录页面主体
+// ============================================
+.login-container {
+  min-height: 100vh;
+  background: $bg-gradient;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+// ============================================
+// 背景装饰
+// ============================================
+.bg-decoration {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.gradient-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80rpx);
+  opacity: 0.4;
+}
+
+.orb-1 {
+  width: 600rpx;
+  height: 600rpx;
+  background: linear-gradient(135deg, #FFC300 0%, #FFD54F 100%);
+  top: -200rpx;
+  right: -200rpx;
+  animation: float 8s ease-in-out infinite;
+}
+
+.orb-2 {
+  width: 400rpx;
+  height: 400rpx;
+  background: linear-gradient(135deg, #FFE082 0%, #FFC300 100%);
+  top: 400rpx;
+  left: -150rpx;
+  animation: float 10s ease-in-out infinite 1s;
+}
+
+.orb-3 {
+  width: 300rpx;
+  height: 300rpx;
+  background: linear-gradient(135deg, #FFF8E1 0%, #FFE082 100%);
+  bottom: 200rpx;
+  right: -100rpx;
+  animation: float 12s ease-in-out infinite 2s;
+}
+
+.grid-pattern {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    linear-gradient(rgba(255, 195, 0, 0.03) 1rpx, transparent 1rpx),
+    linear-gradient(90deg, rgba(255, 195, 0, 0.03) 1rpx, transparent 1rpx);
+  background-size: 60rpx 60rpx;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-30rpx) scale(1.05); }
+}
+
+// ============================================
+// 主内容区
+// ============================================
+.content-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40rpx;
+  position: relative;
+  z-index: 1;
+}
+
+// ============================================
+// 品牌展示区域
+// ============================================
+.brand-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 60rpx;
+}
+
+.logo-container {
+  position: relative;
+  margin-bottom: 40rpx;
+}
+
+.logo-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 240rpx;
+  height: 240rpx;
+  background: radial-gradient(circle, rgba(255, 195, 0, 0.3) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: pulse 3s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+}
+
+.logo-wrapper {
+  width: 160rpx;
+  height: 160rpx;
+  background: $primary-gradient;
+  border-radius: $radius-xl;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: $shadow-primary;
+  position: relative;
+  z-index: 1;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -4rpx;
+    background: linear-gradient(135deg, #FFD54F 0%, #FFB300 100%);
+    border-radius: $radius-xl;
+    z-index: -1;
+    opacity: 0.5;
+    filter: blur(8rpx);
+  }
+}
+
+.logo-icon {
+  font-size: 80rpx;
+  filter: drop-shadow(0 2rpx 4rpx rgba(0, 0, 0, 0.1));
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.brand-name {
+  font-size: 48rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 12rpx;
+  letter-spacing: 4rpx;
+  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.05);
+}
+
+.brand-slogan {
+  font-size: 28rpx;
+  color: #666;
+  font-weight: 400;
+  letter-spacing: 2rpx;
+}
+
+// ============================================
+// 登录卡片
+// ============================================
+.login-card {
+  width: 100%;
+  max-width: 640rpx;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20rpx);
+  border-radius: $radius-xl;
+  padding: 48rpx 40rpx;
+  box-shadow: $shadow-lg;
+  border: 1rpx solid rgba(255, 255, 255, 0.5);
+}
+
+.card-header {
+  text-align: center;
+  margin-bottom: 48rpx;
+}
+
+.welcome-text {
+  display: block;
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 12rpx;
+}
+
+.sub-text {
+  display: block;
+  font-size: 26rpx;
+  color: #999;
+}
+
+// ============================================
+// 协议同意区域
+// ============================================
+.agreement-section {
+  margin-bottom: 40rpx;
+}
+
+.checkbox-wrapper {
+  display: flex;
+  align-items: flex-start;
+  padding: 24rpx;
+  background: #f8f9fa;
+  border-radius: $radius-md;
+  border: 2rpx solid transparent;
+  transition: all 0.3s ease;
+  
+  &.checked {
+    background: rgba(255, 195, 0, 0.08);
+    border-color: rgba(255, 195, 0, 0.3);
+  }
+}
+
+.checkbox {
+  width: 40rpx;
+  height: 40rpx;
+  border: 2rpx solid #d9d9d9;
+  border-radius: 10rpx;
+  margin-right: 16rpx;
+  margin-top: 2rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  background: #fff;
+  
+  .checkbox-wrapper.checked & {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+  }
+}
+
+.check-mark {
+  animation: checkPop 0.3s ease;
+}
+
+@keyframes checkPop {
+  0% { transform: scale(0); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.check-icon {
+  color: #fff;
+  font-size: 24rpx;
+  font-weight: bold;
+}
+
+.agreement-text {
+  flex: 1;
+  font-size: 26rpx;
+  line-height: 1.6;
+  color: #666;
+}
+
+.text-normal {
+  color: #666;
+}
+
+.text-link {
+  color: var(--color-primary-dark);
+  font-weight: 600;
+  text-decoration: none;
+  position: relative;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2rpx;
+    background: var(--color-primary);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
+  
+  &:active::after {
+    transform: scaleX(1);
+  }
+}
+
+// ============================================
+// 登录按钮
+// ============================================
+.login-btn {
+  width: 100%;
+  height: 96rpx;
+  background: #e8e8e8;
+  border-radius: $radius-lg;
+  border: none;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  
+  &.active {
+    background: linear-gradient(135deg, $wechat-green 0%, $wechat-green-hover 100%);
+    box-shadow: $shadow-wechat;
+    
+    &:active {
+      transform: translateY(2rpx);
+      box-shadow: 0 4rpx 12rpx rgba(7, 193, 96, 0.25);
+    }
+    
+    .btn-shine {
+      animation: shine 2s infinite;
+    }
+  }
+  
+  &.disabled {
+    opacity: 0.6;
+  }
+}
+
+.btn-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.wechat-icon {
+  width: 40rpx;
+  height: 40rpx;
+  margin-right: 16rpx;
+  color: #fff;
+}
+
+.btn-text {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #fff;
+}
+
+.btn-shine {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  pointer-events: none;
+}
+
+@keyframes shine {
+  0% { left: -100%; }
+  100% { left: 200%; }
+}
+
+// 加载动画
+.loading-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-spinner {
+  width: 40rpx;
+  height: 40rpx;
+  border: 3rpx solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+// ============================================
+// 游客入口
+// ============================================
+.guest-section {
+  margin-top: 40rpx;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  margin-bottom: 32rpx;
+}
+
+.divider-line {
+  flex: 1;
+  height: 1rpx;
+  background: linear-gradient(90deg, transparent, #e0e0e0, transparent);
+}
+
+.divider-text {
+  padding: 0 24rpx;
+  font-size: 24rpx;
+  color: #bbb;
+}
+
+.guest-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24rpx;
+  background: transparent;
+  border: none;
+  
+  &:active {
+    opacity: 0.7;
+  }
+}
+
+.guest-text {
+  font-size: 28rpx;
+  color: #999;
+  margin-right: 8rpx;
+}
+
+.arrow-icon {
+  font-size: 28rpx;
+  color: #bbb;
+  transition: transform 0.3s ease;
+  
+  .guest-btn:active & {
+    transform: translateX(8rpx);
+  }
+}
+
+// ============================================
+// 底部版权
+// ============================================
+.footer-section {
+  padding: 40rpx;
+  position: relative;
+  z-index: 1;
+}
+
+.footer-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.safe-badge {
+  display: flex;
+  align-items: center;
+  padding: 12rpx 24rpx;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: $radius-full;
+  margin-bottom: 20rpx;
+  box-shadow: $shadow-sm;
+}
+
+.badge-icon {
+  font-size: 24rpx;
+  margin-right: 8rpx;
+}
+
+.badge-text {
+  font-size: 24rpx;
+  color: #666;
+  font-weight: 500;
+}
+
+.copyright {
+  font-size: 22rpx;
+  color: #bbb;
+  text-align: center;
+}
+
+// ============================================
+// 弹窗遮罩层
+// ============================================
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8rpx);
+  z-index: 1;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+// ============================================
+// 弹窗容器
+// ============================================
+.modal-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 680rpx;
+  max-height: 85vh;
+  background: #fff;
+  border-radius: $radius-xl;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20rpx 60rpx rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease;
+  z-index: 2;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ============================================
+// 弹窗头部
+// ============================================
+.modal-header {
+  display: flex;
+  align-items: center;
+  padding: 32rpx 40rpx;
+  background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.header-icon {
+  width: 64rpx;
+  height: 64rpx;
+  background: $primary-gradient;
+  border-radius: $radius-md;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36rpx;
+  margin-right: 20rpx;
+  box-shadow: 0 4rpx 12rpx rgba(255, 195, 0, 0.3);
+  
+  &.privacy {
+    background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  }
+}
+
+.modal-title {
+  flex: 1;
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.close-btn {
+  width: 56rpx;
+  height: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #f0f0f0;
+  transition: all 0.3s ease;
+  
+  &:active {
+    background: #e0e0e0;
+    transform: rotate(90deg);
+  }
+}
+
+.close-icon {
+  font-size: 28rpx;
+  color: #999;
+  font-weight: 300;
+}
+
+// ============================================
+// 弹窗内容区
+// ============================================
+.modal-body {
+  flex: 1;
+  max-height: 600rpx;
+}
+
+.agreement-content {
+  padding: 40rpx;
+}
+
+// 内容介绍
+.content-intro {
+  text-align: center;
+  padding: 32rpx;
+  background: linear-gradient(135deg, rgba(255, 195, 0, 0.08) 0%, rgba(255, 243, 224, 0.5) 100%);
+  border-radius: $radius-lg;
+  margin-bottom: 40rpx;
+  
+  &.privacy-intro {
+    background: linear-gradient(135deg, rgba(7, 193, 96, 0.08) 0%, rgba(232, 245, 233, 0.5) 100%);
+  }
+}
+
+.privacy-lock {
+  font-size: 64rpx;
+  margin-bottom: 16rpx;
+}
+
+.intro-title {
+  display: block;
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 12rpx;
+}
+
+.intro-desc {
+  display: block;
+  font-size: 26rpx;
+  color: #666;
+  line-height: 1.6;
+}
+
+// 内容章节
+.content-sections {
+  margin-bottom: 40rpx;
+}
+
+.content-item {
+  margin-bottom: 32rpx;
+  padding-bottom: 32rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+  
+  &:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+}
+
+.item-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.item-number {
+  width: 48rpx;
+  height: 48rpx;
+  background: $primary-gradient;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22rpx;
+  font-weight: 700;
+  color: #fff;
+  margin-right: 16rpx;
+  flex-shrink: 0;
+}
+
+.item-icon {
+  width: 48rpx;
+  height: 48rpx;
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  margin-right: 16rpx;
+  flex-shrink: 0;
+}
+
+.item-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.item-desc {
+  display: block;
+  font-size: 26rpx;
+  color: #666;
+  line-height: 1.8;
+  padding-left: 64rpx;
+}
+
+// 内容底部
+.content-footer {
+  text-align: center;
+  padding-top: 24rpx;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.update-time {
+  font-size: 24rpx;
+  color: #bbb;
+}
+
+// ============================================
+// 弹窗底部按钮
+// ============================================
+.modal-footer {
+  display: flex;
+  gap: 24rpx;
+  padding: 24rpx 40rpx 40rpx;
+  background: #fafafa;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.footer-btn {
+  flex: 1;
+  height: 80rpx;
+  border-radius: $radius-lg;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  font-weight: 600;
+  border: none;
+  transition: all 0.3s ease;
+  
+  &.cancel {
+    background: #f0f0f0;
+    color: #666;
+    
+    &:active {
+      background: #e0e0e0;
+    }
+  }
+  
+  &.confirm {
+    background: $primary-gradient;
+    color: #1a1a1a;
+    box-shadow: 0 4rpx 16rpx rgba(255, 195, 0, 0.35);
+    
+    &:active {
+      transform: translateY(2rpx);
+      box-shadow: 0 2rpx 8rpx rgba(255, 195, 0, 0.25);
+    }
+  }
+}
+
+// ============================================
+// 响应式适配
+// ============================================
+@media (min-width: 768px) {
+  .login-card {
+    max-width: 480rpx;
+    padding: 56rpx 48rpx;
+  }
+  
+  .brand-name {
+    font-size: 56rpx;
+  }
+  
+  .modal-container {
+    width: 600rpx;
+  }
+}
+
+@media (max-width: 375px) {
+  .content-wrapper {
+    padding: 32rpx;
+  }
+  
+  .login-card {
+    padding: 40rpx 32rpx;
+  }
+  
+  .brand-name {
+    font-size: 44rpx;
+  }
+  
+  .modal-container {
+    width: 620rpx;
+  }
+}
+</style>
