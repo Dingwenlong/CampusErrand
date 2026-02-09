@@ -1,108 +1,201 @@
 package com.campus.errand.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.campus.errand.entity.Task;
+import com.campus.errand.entity.Transaction;
 import com.campus.errand.entity.User;
 import com.campus.errand.mapper.TaskMapper;
+import com.campus.errand.mapper.TransactionMapper;
 import com.campus.errand.mapper.UserMapper;
 import com.campus.errand.service.AdminService;
-import com.campus.errand.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 @Service
 public class AdminServiceImpl implements AdminService {
 
-    // 默认管理员账号密码（实际应该存储在数据库中并加密）
-    private static final String DEFAULT_USERNAME = "admin";
-    private static final String DEFAULT_PASSWORD = "admin123";
-
     private final UserMapper userMapper;
     private final TaskMapper taskMapper;
-    private final JwtUtil jwtUtil;
+    private final TransactionMapper transactionMapper;
 
     @Autowired
-    public AdminServiceImpl(UserMapper userMapper, TaskMapper taskMapper, JwtUtil jwtUtil) {
+    public AdminServiceImpl(UserMapper userMapper, TaskMapper taskMapper, TransactionMapper transactionMapper) {
         this.userMapper = userMapper;
         this.taskMapper = taskMapper;
-        this.jwtUtil = jwtUtil;
-    }
-
-    @Override
-    public String login(String username, String password) {
-        // 简单的账号密码验证
-        if (DEFAULT_USERNAME.equals(username) && DEFAULT_PASSWORD.equals(password)) {
-            // 生成管理员Token（使用特殊标识）
-            return jwtUtil.generateToken(0L, "admin_openid");
-        }
-        return null;
+        this.transactionMapper = transactionMapper;
     }
 
     @Override
     public Map<String, Object> getDashboardData() {
-        Map<String, Object> data = new HashMap<>();
-
-        // 用户统计
-        Long userCount = userMapper.selectCount(null);
-        data.put("userCount", userCount);
-
-        // 任务统计
-        Long taskCount = taskMapper.selectCount(null);
-        data.put("taskCount", taskCount);
-
-        // 订单统计（这里用任务数代替，实际应该查询订单表）
-        data.put("orderCount", taskCount);
-
-        // 交易总额（模拟数据）
-        data.put("totalAmount", 12580.50);
-
-        // 今日数据（模拟）
-        data.put("todayUserCount", 5);
-        data.put("todayTaskCount", 12);
-        data.put("todayOrderCount", 8);
-        data.put("todayAmount", 368.00);
-
-        return data;
-    }
-
-    @Override
-    public Map<String, Object> getUserList(Long current, Long size, String keyword) {
-        Page<User> page = new Page<>(current, size);
-        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
-
-        if (keyword != null && !keyword.isEmpty()) {
-            wrapper.like(User::getNickname, keyword)
-                   .or()
-                   .like(User::getPhone, keyword);
-        }
-
-        wrapper.orderByDesc(User::getCreateTime);
-
-        Page<User> userPage = userMapper.selectPage(page, wrapper);
-
         Map<String, Object> result = new HashMap<>();
-        result.put("records", userPage.getRecords());
-        result.put("total", userPage.getTotal());
-        result.put("size", userPage.getSize());
-        result.put("current", userPage.getCurrent());
-        result.put("pages", userPage.getPages());
+
+        // 总用户数
+        Long userCount = userMapper.selectCount(null);
+        result.put("userCount", userCount);
+
+        // 总任务数
+        Long taskCount = taskMapper.selectCount(null);
+        result.put("taskCount", taskCount);
+
+        // 总订单数（已接单的任务）
+        LambdaQueryWrapper<Task> orderWrapper = new LambdaQueryWrapper<>();
+        orderWrapper.ne(Task::getStatus, 0);
+        Long orderCount = taskMapper.selectCount(orderWrapper);
+        result.put("orderCount", orderCount);
+
+        // 交易总额
+        LambdaQueryWrapper<Transaction> amountWrapper = new LambdaQueryWrapper<>();
+        amountWrapper.eq(Transaction::getDirection, 1)
+                    .eq(Transaction::getStatus, 1);
+        List<Transaction> incomeTransactions = transactionMapper.selectList(amountWrapper);
+        BigDecimal totalAmount = incomeTransactions.stream()
+                .map(Transaction::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        result.put("totalAmount", totalAmount);
+
+        // 今日数据
+        LocalDate today = LocalDate.now();
+        LocalDateTime todayStart = today.atStartOfDay();
+        LocalDateTime todayEnd = today.plusDays(1).atStartOfDay();
+
+        // 今日新增用户
+        LambdaQueryWrapper<User> todayUserWrapper = new LambdaQueryWrapper<>();
+        todayUserWrapper.ge(User::getCreateTime, todayStart)
+                       .lt(User::getCreateTime, todayEnd);
+        Long todayUserCount = userMapper.selectCount(todayUserWrapper);
+        result.put("todayUserCount", todayUserCount);
+
+        // 今日新增任务
+        LambdaQueryWrapper<Task> todayTaskWrapper = new LambdaQueryWrapper<>();
+        todayTaskWrapper.ge(Task::getCreateTime, todayStart)
+                       .lt(Task::getCreateTime, todayEnd);
+        Long todayTaskCount = taskMapper.selectCount(todayTaskWrapper);
+        result.put("todayTaskCount", todayTaskCount);
+
+        // 今日新增订单
+        LambdaQueryWrapper<Task> todayOrderWrapper = new LambdaQueryWrapper<>();
+        todayOrderWrapper.ge(Task::getAcceptTime, todayStart)
+                        .lt(Task::getAcceptTime, todayEnd);
+        Long todayOrderCount = taskMapper.selectCount(todayOrderWrapper);
+        result.put("todayOrderCount", todayOrderCount);
+
+        // 今日交易额
+        LambdaQueryWrapper<Transaction> todayAmountWrapper = new LambdaQueryWrapper<>();
+        todayAmountWrapper.eq(Transaction::getDirection, 1)
+                         .eq(Transaction::getStatus, 1)
+                         .ge(Transaction::getCreateTime, todayStart)
+                         .lt(Transaction::getCreateTime, todayEnd);
+        List<Transaction> todayIncomeTransactions = transactionMapper.selectList(todayAmountWrapper);
+        BigDecimal todayAmount = todayIncomeTransactions.stream()
+                .map(Transaction::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        result.put("todayAmount", todayAmount);
 
         return result;
     }
 
     @Override
-    public boolean updateUserStatus(Long userId, Integer status) {
-        User user = userMapper.selectById(userId);
-        if (user == null) {
-            return false;
+    public Map<String, Object> getTaskStatusStats() {
+        Map<String, Object> result = new HashMap<>();
+
+        // 各状态任务数量
+        int[] statusArray = {0, 1, 2, 3, 4, 5, 6};
+        String[] statusNames = {"待接单", "已接单", "待取件", "配送中", "待确认", "已完成", "已取消"};
+
+        List<Map<String, Object>> data = new ArrayList<>();
+        for (int i = 0; i < statusArray.length; i++) {
+            LambdaQueryWrapper<Task> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(Task::getStatus, statusArray[i]);
+            Long count = taskMapper.selectCount(wrapper);
+
+            Map<String, Object> item = new HashMap<>();
+            item.put("name", statusNames[i]);
+            item.put("value", count);
+            item.put("status", statusArray[i]);
+            data.add(item);
         }
-        user.setStatus(status);
-        return userMapper.updateById(user) > 0;
+
+        result.put("data", data);
+        return result;
+    }
+
+    @Override
+    public Map<String, Object> getAmountTrend() {
+        Map<String, Object> result = new HashMap<>();
+
+        // 获取最近7天的日期
+        List<String> dates = new ArrayList<>();
+        List<BigDecimal> amounts = new ArrayList<>();
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd");
+
+        for (int i = 6; i >= 0; i--) {
+            LocalDate date = LocalDate.now().minusDays(i);
+            dates.add(date.format(formatter));
+
+            LocalDateTime dayStart = date.atStartOfDay();
+            LocalDateTime dayEnd = date.plusDays(1).atStartOfDay();
+
+            // 查询当天的交易额
+            LambdaQueryWrapper<Transaction> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(Transaction::getDirection, 1)
+                   .eq(Transaction::getStatus, 1)
+                   .ge(Transaction::getCreateTime, dayStart)
+                   .lt(Transaction::getCreateTime, dayEnd);
+            List<Transaction> transactions = transactionMapper.selectList(wrapper);
+
+            BigDecimal dayAmount = transactions.stream()
+                    .map(Transaction::getAmount)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            amounts.add(dayAmount);
+        }
+
+        result.put("dates", dates);
+        result.put("amounts", amounts);
+        return result;
+    }
+
+    @Override
+    public Map<String, Object> getUserGrowth() {
+        Map<String, Object> result = new HashMap<>();
+
+        // 获取最近7天的日期
+        List<String> dates = new ArrayList<>();
+        List<Long> newUsers = new ArrayList<>();
+        List<Long> totalUsers = new ArrayList<>();
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd");
+
+        for (int i = 6; i >= 0; i--) {
+            LocalDate date = LocalDate.now().minusDays(i);
+            dates.add(date.format(formatter));
+
+            LocalDateTime dayStart = date.atStartOfDay();
+            LocalDateTime dayEnd = date.plusDays(1).atStartOfDay();
+
+            // 查询当天新增用户
+            LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
+            wrapper.ge(User::getCreateTime, dayStart)
+                   .lt(User::getCreateTime, dayEnd);
+            Long dayNewUsers = userMapper.selectCount(wrapper);
+            newUsers.add(dayNewUsers);
+
+            // 查询截止到当天的总用户数
+            LambdaQueryWrapper<User> totalWrapper = new LambdaQueryWrapper<>();
+            totalWrapper.lt(User::getCreateTime, dayEnd);
+            Long dayTotalUsers = userMapper.selectCount(totalWrapper);
+            totalUsers.add(dayTotalUsers);
+        }
+
+        result.put("dates", dates);
+        result.put("newUsers", newUsers);
+        result.put("totalUsers", totalUsers);
+        return result;
     }
 }

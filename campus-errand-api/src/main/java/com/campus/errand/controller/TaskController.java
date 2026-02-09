@@ -123,4 +123,17 @@ public class TaskController {
             return Result.error(e.getMessage());
         }
     }
+
+    @Operation(summary = "获取我的任务列表")
+    @GetMapping("/my-tasks")
+    public Result<PageResult<TaskVO>> getMyTasks(
+            @Parameter(description = "角色：1-发单者 2-接单者") @RequestParam Integer role,
+            @Parameter(description = "任务状态：0-待接单 1-已接单 2-待取件 3-配送中 4-待确认 5-已完成 6-已取消") @RequestParam(required = false) Integer status,
+            @RequestParam(defaultValue = "1") Long current,
+            @RequestParam(defaultValue = "10") Long size) {
+        Long userId = UserContext.getUserId();
+        IPage<TaskVO> page = taskService.getMyTasks(userId, role, status, current, size);
+        PageResult<TaskVO> result = new PageResult<>(page.getTotal(), page.getCurrent(), page.getSize(), page.getRecords());
+        return Result.success(result);
+    }
 }

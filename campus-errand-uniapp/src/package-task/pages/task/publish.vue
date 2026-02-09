@@ -174,15 +174,26 @@
         <text class="label">合计</text>
         <text class="amount">¥{{ calculateTotal }}</text>
       </view>
-      <button class="btn-primary" @click="publishTask">发布任务</button>
+      <button class="btn-primary" @click="handlePublish">发布任务</button>
     </view>
+
+    <!-- 支付密码弹窗 -->
+    <pay-password-modal 
+      :show="showPasswordModal"
+      @confirm="onPasswordConfirm"
+      @cancel="showPasswordModal = false"
+    />
   </view>
 </template>
 
 <script>
 import taskApi from '@/api/task.js'
+import PayPasswordModal from '@/components/pay-password-modal.vue'
 
 export default {
+  components: {
+    PayPasswordModal
+  },
   data() {
     return {
       taskTypes: [
@@ -214,7 +225,8 @@ export default {
       timeRange: [
         ['今天', '明天', '后天'],
         ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00']
-      ]
+      ],
+      showPasswordModal: false
     }
   },
   computed: {
@@ -318,14 +330,22 @@ export default {
       return true
     },
     
-    async publishTask() {
+    handlePublish() {
       if (!this.validateForm()) return
+      
+      // 显示支付密码弹窗
+      this.showPasswordModal = true
+    },
+    
+    async onPasswordConfirm(password) {
+      this.showPasswordModal = false
       
       const data = {
         ...this.form,
         reward: parseFloat(this.form.reward),
         weightFee: this.form.weightFee ? parseFloat(this.form.weightFee) : 0,
-        urgencyFee: this.form.urgencyFee ? parseFloat(this.form.urgencyFee) : 0
+        urgencyFee: this.form.urgencyFee ? parseFloat(this.form.urgencyFee) : 0,
+        payPassword: password
       }
       
       try {
@@ -341,6 +361,11 @@ export default {
           setTimeout(() => {
             uni.navigateBack()
           }, 1500)
+        } else {
+          uni.showToast({
+            title: res.message || '发布失败',
+            icon: 'none'
+          })
         }
       } catch (e) {
         uni.hideLoading()
@@ -397,87 +422,63 @@ export default {
     animation-delay: 0.6s;
   }
   
-  &:active {
-    box-shadow: var(--shadow-md);
-    transform: translateY(-2rpx);
-  }
-  
   .section-title {
-    font-size: var(--font-size-lg);
-    font-weight: bold;
+    font-size: 32rpx;
+    font-weight: 600;
     color: var(--text-primary);
     margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 2rpx solid var(--border-color);
   }
 }
 
 .type-list {
   display: flex;
   flex-wrap: wrap;
+  gap: var(--spacing-md);
   
   .type-item {
-    width: calc(25% - 18rpx);
-    margin-right: var(--spacing-md);
-    margin-bottom: var(--spacing-md);
+    flex: 1;
+    min-width: 140rpx;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: var(--spacing-md) 0;
+    padding: var(--spacing-md);
     background: var(--bg-color);
-    border-radius: var(--border-radius-sm);
+    border-radius: var(--border-radius-md);
+    border: 2rpx solid transparent;
     transition: all 0.3s ease;
     
-    &:nth-child(4n) {
-      margin-right: 0;
+    &.active {
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+      color: #fff;
+      transform: scale(1.05);
+      box-shadow: var(--shadow-md);
+      
+      .type-name {
+        color: #fff;
+      }
     }
     
     &:active {
-      background: var(--border-color);
       transform: scale(0.95);
-    }
-    
-    &.active {
-      background: var(--primary-color);
-      color: white;
-      box-shadow: var(--shadow-sm);
     }
     
     .iconfont {
       font-size: 48rpx;
       margin-bottom: var(--spacing-xs);
-      transition: all 0.3s ease;
-    }
-    
-    &.active .iconfont {
-      transform: scale(1.1);
     }
     
     .type-name {
-      font-size: var(--font-size-sm);
+      font-size: 26rpx;
+      color: var(--text-primary);
+      font-weight: 500;
     }
   }
 }
 
 .form-item {
   margin-bottom: var(--spacing-md);
-  animation: fadeInUp 0.5s ease forwards;
-  opacity: 0;
-  transform: translateY(10rpx);
-  
-  &:nth-child(1) {
-    animation-delay: 0.1s;
-  }
-  
-  &:nth-child(2) {
-    animation-delay: 0.2s;
-  }
-  
-  &:nth-child(3) {
-    animation-delay: 0.3s;
-  }
-  
-  &:nth-child(4) {
-    animation-delay: 0.4s;
-  }
   
   &:last-child {
     margin-bottom: 0;
@@ -485,15 +486,15 @@ export default {
   
   .label {
     display: block;
-    font-size: var(--font-size-base);
+    font-size: 28rpx;
     color: var(--text-secondary);
-    margin-bottom: var(--spacing-xs);
+    margin-bottom: var(--spacing-sm);
     font-weight: 500;
     
     &.required::after {
       content: '*';
-      color: var(--error-color);
-      margin-left: var(--spacing-xs);
+      color: #ff4d4f;
+      margin-left: 8rpx;
     }
   }
   
@@ -503,34 +504,26 @@ export default {
     background: var(--bg-color);
     border-radius: var(--border-radius-sm);
     padding: 0 var(--spacing-md);
-    font-size: var(--font-size-base);
+    font-size: 28rpx;
     color: var(--text-primary);
-    transition: all 0.3s ease;
     border: 2rpx solid transparent;
-  }
-  
-  input:focus, textarea:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 4rpx rgba(0, 122, 255, 0.1);
-    transform: translateY(-2rpx);
+    transition: all 0.3s ease;
+    
+    &:focus {
+      border-color: var(--primary-color);
+      background: #fff;
+    }
   }
   
   textarea {
     height: 160rpx;
     padding: var(--spacing-md);
-    resize: vertical;
   }
   
   .picker-value {
     display: flex;
     align-items: center;
-    color: var(--text-tertiary);
-    border: 2rpx solid transparent;
-    
-    &:active {
-      border-color: var(--primary-color);
-      background: rgba(0, 122, 255, 0.05);
-    }
+    color: var(--text-secondary);
   }
   
   .input-with-unit {
@@ -539,13 +532,12 @@ export default {
     background: var(--bg-color);
     border-radius: var(--border-radius-sm);
     padding: 0 var(--spacing-md);
-    transition: all 0.3s ease;
     border: 2rpx solid transparent;
+    transition: all 0.3s ease;
     
     &:focus-within {
       border-color: var(--primary-color);
-      box-shadow: 0 0 0 4rpx rgba(0, 122, 255, 0.1);
-      transform: translateY(-2rpx);
+      background: #fff;
     }
     
     input {
@@ -556,9 +548,10 @@ export default {
     }
     
     .unit {
-      font-size: var(--font-size-base);
+      font-size: 28rpx;
       color: var(--text-secondary);
       margin-left: var(--spacing-sm);
+      font-weight: 500;
     }
   }
   
@@ -566,7 +559,7 @@ export default {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--spacing-xs);
+    margin-bottom: var(--spacing-sm);
     
     .label {
       margin-bottom: 0;
@@ -580,21 +573,18 @@ export default {
   align-items: center;
   padding-top: var(--spacing-md);
   border-top: 2rpx solid var(--border-color);
-  animation: fadeInUp 0.5s ease forwards;
-  opacity: 0;
-  transform: translateY(10rpx);
-  animation-delay: 0.5s;
+  margin-top: var(--spacing-md);
   
   .label {
-    font-size: var(--font-size-lg);
+    font-size: 30rpx;
     color: var(--text-primary);
-    font-weight: 500;
+    font-weight: 600;
   }
   
   .amount {
-    font-size: var(--font-size-xl);
+    font-size: 40rpx;
     font-weight: bold;
-    color: var(--error-color);
+    color: #ff4d4f;
   }
 }
 
@@ -603,64 +593,54 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  background: var(--card-bg);
+  background: #fff;
   padding: var(--spacing-md) var(--spacing-lg);
+  padding-bottom: calc(var(--spacing-md) + constant(safe-area-inset-bottom));
+  padding-bottom: calc(var(--spacing-md) + env(safe-area-inset-bottom));
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
-  border-top: 2rpx solid var(--border-color);
-  animation: slideUp 0.5s ease forwards;
-  opacity: 0;
-  transform: translateY(100%);
-  animation-delay: 0.6s;
+  box-shadow: 0 -4rpx 20rpx rgba(0, 0, 0, 0.08);
+  z-index: 100;
   
   .amount-info {
-    display: flex;
-    align-items: center;
-    
     .label {
-      font-size: var(--font-size-base);
+      display: block;
+      font-size: 24rpx;
       color: var(--text-secondary);
-      margin-right: var(--spacing-sm);
+      margin-bottom: var(--spacing-xs);
     }
     
     .amount {
-      font-size: var(--font-size-xl);
+      font-size: 44rpx;
       font-weight: bold;
-      color: var(--error-color);
+      color: #ff4d4f;
     }
   }
   
   .btn-primary {
-    background: var(--primary-color);
-    color: white;
-    font-size: var(--font-size-base);
-    padding: var(--spacing-sm) var(--spacing-xl);
-    border-radius: var(--border-radius-lg);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+    color: #fff;
+    font-size: 30rpx;
+    padding: 24rpx 60rpx;
+    border-radius: 40rpx;
     line-height: 1.5;
-    transition: all 0.2s ease;
-    border: none;
-    outline: none;
-    box-shadow: var(--shadow-sm);
+    font-weight: 600;
+    box-shadow: var(--shadow-md);
+    transition: all 0.3s ease;
     
     &:active {
-      background-color: var(--primary-active);
-      transform: scale(0.98);
-      box-shadow: var(--shadow-md);
+      transform: scale(0.95);
+      box-shadow: var(--shadow-sm);
     }
   }
 }
 
-/* 动画效果 */
 @keyframes fadeInUp {
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  from {
+    opacity: 0;
+    transform: translateY(20rpx);
   }
-}
-
-@keyframes slideUp {
   to {
     opacity: 1;
     transform: translateY(0);

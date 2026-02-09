@@ -107,6 +107,23 @@
           }
         }
       ]
+    },
+    {
+      "root": "package-evaluation",
+      "pages": [
+        {
+          "path": "pages/evaluation/submit",
+          "style": {
+            "navigationBarTitleText": "评价"
+          }
+        },
+        {
+          "path": "pages/evaluation/list",
+          "style": {
+            "navigationBarTitleText": "我的评价"
+          }
+        }
+      ]
     }
   ],
   "preloadRule": {
@@ -117,6 +134,10 @@
     "pages/task/list": {
       "network": "all",
       "packages": ["package-task"]
+    },
+    "pages/order/list": {
+      "network": "all",
+      "packages": ["package-evaluation"]
     }
   },
   "globalStyle": {
@@ -127,25 +148,33 @@
   },
   "tabBar": {
     "color": "#999999",
-    "selectedColor": "#FFC300",
+    "selectedColor": "#667eea",
     "borderStyle": "black",
     "backgroundColor": "#ffffff",
     "list": [
       {
         "pagePath": "pages/index/index",
-        "text": "首页"
+        "text": "首页",
+        "iconPath": "static/tabbar/home.png",
+        "selectedIconPath": "static/tabbar/home-active.png"
       },
       {
         "pagePath": "pages/task/list",
-        "text": "任务"
+        "text": "任务",
+        "iconPath": "static/tabbar/task.png",
+        "selectedIconPath": "static/tabbar/task-active.png"
       },
       {
         "pagePath": "pages/order/list",
-        "text": "订单"
+        "text": "订单",
+        "iconPath": "static/tabbar/order.png",
+        "selectedIconPath": "static/tabbar/order-active.png"
       },
       {
         "pagePath": "pages/user/index",
-        "text": "我的"
+        "text": "我的",
+        "iconPath": "static/tabbar/user.png",
+        "selectedIconPath": "static/tabbar/user-active.png"
       }
     ]
   }

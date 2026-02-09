@@ -43,4 +43,15 @@ public interface TaskService extends IService<Task> {
      * @return 是否成功
      */
     boolean receiveTask(Long taskId, Long userId);
+
+    /**
+     * 获取我的任务列表
+     * @param userId 用户ID
+     * @param role 角色：1-发单者 2-接单者
+     * @param status 状态筛选
+     * @param current 当前页
+     * @param size 每页大小
+     * @return 任务列表
+     */
+    IPage<TaskVO> getMyTasks(Long userId, Integer role, Integer status, Long current, Long size);
 }

@@ -1,18 +1,17 @@
 import request from '@/utils/request'
-import type { DashboardData } from '@/types'
 
 export const getDashboardData = () => {
   return request.get('/admin/dashboard')
 }
 
-export const getUserStats = () => {
-  return request.get('/admin/stats/user')
+export const getTaskStatusStats = () => {
+  return request.get('/admin/task-status-stats')
 }
 
-export const getTaskStats = () => {
-  return request.get('/admin/stats/task')
+export const getAmountTrend = () => {
+  return request.get('/admin/amount-trend')
 }
 
-export const getAmountStats = () => {
-  return request.get('/admin/stats/amount')
+export const getUserGrowth = () => {
+  return request.get('/admin/user-growth')
 }

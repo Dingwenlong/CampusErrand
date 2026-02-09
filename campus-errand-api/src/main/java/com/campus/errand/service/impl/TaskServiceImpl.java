@@ -100,8 +100,8 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
         transaction.setAmount(totalAmount);
         transaction.setBalance(balanceAfter);
         transaction.setRelatedId(task.getId());
-        transaction.setStatus(0); // 处理中（冻结状态）
-        transaction.setRemark("发布任务冻结金额：" + task.getTitle());
+        transaction.setStatus(0); // 待结算
+        transaction.setRemark("发布任务冻结：" + task.getTitle());
         transaction.setCreateTime(LocalDateTime.now());
         transactionService.save(transaction);
 
@@ -113,11 +113,8 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
         Page<Task> page = new Page<>(current, size);
         LambdaQueryWrapper<Task> wrapper = new LambdaQueryWrapper<>();
 
-        // 默认查询待接单的任务
-        if (status == null) {
-            status = 0;
-        }
-        wrapper.eq(Task::getStatus, status);
+        // 只查询待接单的任务
+        wrapper.eq(Task::getStatus, 0);
 
         if (taskType != null) {
             wrapper.eq(Task::getTaskType, taskType);
@@ -127,17 +124,18 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
 
         IPage<Task> taskPage = page(page, wrapper);
 
+        // 转换为VO
         List<TaskVO> voList = taskPage.getRecords().stream()
                 .map(this::convertToVO)
                 .collect(Collectors.toList());
 
-        Page<TaskVO> voPage = new Page<>();
-        voPage.setCurrent(taskPage.getCurrent());
-        voPage.setSize(taskPage.getSize());
-        voPage.setTotal(taskPage.getTotal());
-        voPage.setRecords(voList);
+        Page<TaskVO> resultPage = new Page<>();
+        resultPage.setCurrent(taskPage.getCurrent());
+        resultPage.setSize(taskPage.getSize());
+        resultPage.setTotal(taskPage.getTotal());
+        resultPage.setRecords(voList);
 
-        return voPage;
+        return resultPage;
     }
 
     @Override
@@ -152,6 +150,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean acceptTask(Long taskId, Long runnerId) {
+        // 使用Redis分布式锁防止超卖
         String lockKey = "task:lock:" + taskId;
         Boolean locked = redisTemplate.opsForValue().setIfAbsent(lockKey, "1", 10, TimeUnit.SECONDS);
 
@@ -161,21 +160,30 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
 
         try {
             Task task = getById(taskId);
-            if (task == null || task.getStatus() != 0) {
+            if (task == null) {
                 return false;
             }
 
+            // 验证任务状态
+            if (task.getStatus() != 0) {
+                return false;
+            }
+
+            // 不能接自己的单
+            if (task.getUserId().equals(runnerId)) {
+                return false;
+            }
+
+            // 更新任务状态
             task.setRunnerId(runnerId);
-            task.setStatus(1);
+            task.setStatus(1); // 已接单
             task.setAcceptTime(LocalDateTime.now());
 
             boolean success = updateById(task);
 
             // 发送消息通知发单者
             if (success) {
-                User runner = userMapper.selectById(runnerId);
-                String runnerName = runner != null ? runner.getNickname() : "跑腿员";
-                messageService.sendTaskAcceptedNotification(task.getUserId(), taskId, task.getTitle(), runnerName);
+                messageService.sendTaskAcceptedNotification(task.getUserId(), taskId, task.getTitle());
             }
 
             return success;
@@ -192,8 +200,8 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
             return false;
         }
 
-        // 验证权限
-        if (!task.getUserId().equals(userId) && !task.getRunnerId().equals(userId)) {
+        // 验证权限（发单者或接单者）
+        if (!task.getUserId().equals(userId) && !userId.equals(task.getRunnerId())) {
             return false;
         }
 
@@ -520,5 +528,42 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
         }
 
         return success;
+    }
+
+    @Override
+    public IPage<TaskVO> getMyTasks(Long userId, Integer role, Integer status, Long current, Long size) {
+        Page<Task> page = new Page<>(current, size);
+        LambdaQueryWrapper<Task> wrapper = new LambdaQueryWrapper<>();
+
+        // 根据角色筛选
+        if (role == 1) {
+            // 发单者
+            wrapper.eq(Task::getUserId, userId);
+        } else if (role == 2) {
+            // 接单者
+            wrapper.eq(Task::getRunnerId, userId);
+        }
+
+        // 状态筛选
+        if (status != null) {
+            wrapper.eq(Task::getStatus, status);
+        }
+
+        wrapper.orderByDesc(Task::getCreateTime);
+
+        IPage<Task> taskPage = page(page, wrapper);
+
+        // 转换为VO
+        List<TaskVO> voList = taskPage.getRecords().stream()
+                .map(this::convertToVO)
+                .collect(Collectors.toList());
+
+        Page<TaskVO> resultPage = new Page<>();
+        resultPage.setCurrent(taskPage.getCurrent());
+        resultPage.setSize(taskPage.getSize());
+        resultPage.setTotal(taskPage.getTotal());
+        resultPage.setRecords(voList);
+
+        return resultPage;
     }
 }
