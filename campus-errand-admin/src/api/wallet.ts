@@ -1,8 +1,7 @@
 import request from '@/utils/request'
-import type { Transaction, PageResult } from '@/types'
 
-export const getTransactionList = (params: { current?: number; size?: number; userId?: number; type?: number }) => {
-  return request.get('/admin/transaction/list', { params })
+export const getTransactions = (params: any) => {
+  return request.get('/admin/wallet/transactions', { params })
 }
 
 export const getWalletStats = () => {
