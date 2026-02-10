@@ -24,18 +24,13 @@
         </view>
       </view>
 
-      <!-- 登录卡片 -->
-      <view class="login-card">
-        <view class="card-header">
-          <text class="welcome-text">欢迎回来</text>
-          <text class="sub-text">请登录以继续使用</text>
-        </view>
-
+      <!-- 登录表单区域 -->
+      <view class="login-form">
         <!-- 协议同意区域 -->
         <view class="agreement-section">
-          <view 
-            class="checkbox-wrapper" 
-            :class="{ checked: agreed }" 
+          <view
+            class="checkbox-wrapper"
+            :class="{ checked: agreed }"
             @click="toggleAgreement"
           >
             <view class="checkbox">
@@ -77,11 +72,6 @@
 
         <!-- 游客入口 -->
         <view class="guest-section">
-          <view class="divider">
-            <view class="divider-line"></view>
-            <text class="divider-text">或者</text>
-            <view class="divider-line"></view>
-          </view>
           <button class="guest-btn" @click="enterAsGuest">
             <text class="guest-text">暂不登录，先看看</text>
             <view class="arrow-icon">→</view>
@@ -288,6 +278,8 @@ export default {
     },
 
     async handleLogin() {
+      console.log('=== 登录按钮被点击 ===')
+      
       if (!this.agreed) {
         uni.showToast({
           title: '请先同意用户协议和隐私政策',
@@ -299,19 +291,28 @@ export default {
       this.loading = true
 
       try {
-        const loginRes = await this.wxLogin()
-        const code = loginRes.code
-
+        // 步骤1：获取用户信息（必须在点击后立即调用）
+        console.log('步骤1：开始获取用户信息...')
         const userProfile = await this.getUserProfile()
+        console.log('获取用户信息成功:', userProfile)
+
+        // 步骤2：获取微信登录 code
+        console.log('步骤2：开始获取微信登录 code...')
+        const loginRes = await this.wxLogin()
+        console.log('获取 code 成功:', loginRes.code)
 
         const loginData = {
-          code: code,
+          code: loginRes.code,
           nickname: userProfile.nickname,
           avatar: userProfile.avatar,
           gender: userProfile.gender
         }
 
+        // 步骤3：调用后端登录接口
+        console.log('步骤3：调用后端登录接口...')
+        console.log('请求数据:', loginData)
         const res = await authApi.wxLogin(loginData)
+        console.log('后端响应:', res)
 
         if (res.code === 200) {
           const { token, userInfo } = res.data
@@ -639,57 +640,32 @@ $radius-full: 9999rpx;
 }
 
 // ============================================
-// 登录卡片
+// 登录表单区域（扁平化设计）
 // ============================================
-.login-card {
+.login-form {
   width: 100%;
   max-width: 640rpx;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20rpx);
-  border-radius: $radius-xl;
-  padding: 48rpx 40rpx;
-  box-shadow: $shadow-lg;
-  border: 1rpx solid rgba(255, 255, 255, 0.5);
-}
-
-.card-header {
-  text-align: center;
-  margin-bottom: 48rpx;
-}
-
-.welcome-text {
-  display: block;
-  font-size: 40rpx;
-  font-weight: 700;
-  color: #1a1a1a;
-  margin-bottom: 12rpx;
-}
-
-.sub-text {
-  display: block;
-  font-size: 26rpx;
-  color: #999;
+  padding: 0 40rpx;
 }
 
 // ============================================
 // 协议同意区域
 // ============================================
 .agreement-section {
-  margin-bottom: 40rpx;
+  margin-bottom: 48rpx;
 }
 
 .checkbox-wrapper {
   display: flex;
   align-items: flex-start;
-  padding: 24rpx;
-  background: #f8f9fa;
-  border-radius: $radius-md;
-  border: 2rpx solid transparent;
+  padding: 20rpx 0;
   transition: all 0.3s ease;
-  
+
   &.checked {
-    background: rgba(255, 195, 0, 0.08);
-    border-color: rgba(255, 195, 0, 0.3);
+    .checkbox {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+    }
   }
 }
 
@@ -861,35 +837,19 @@ $radius-full: 9999rpx;
 // 游客入口
 // ============================================
 .guest-section {
-  margin-top: 40rpx;
-}
-
-.divider {
+  margin-top: 32rpx;
   display: flex;
-  align-items: center;
-  margin-bottom: 32rpx;
-}
-
-.divider-line {
-  flex: 1;
-  height: 1rpx;
-  background: linear-gradient(90deg, transparent, #e0e0e0, transparent);
-}
-
-.divider-text {
-  padding: 0 24rpx;
-  font-size: 24rpx;
-  color: #bbb;
+  justify-content: center;
 }
 
 .guest-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24rpx;
+  padding: 20rpx 32rpx;
   background: transparent;
   border: none;
-  
+
   &:active {
     opacity: 0.7;
   }
@@ -905,7 +865,7 @@ $radius-full: 9999rpx;
   font-size: 28rpx;
   color: #bbb;
   transition: transform 0.3s ease;
-  
+
   .guest-btn:active & {
     transform: translateX(8rpx);
   }

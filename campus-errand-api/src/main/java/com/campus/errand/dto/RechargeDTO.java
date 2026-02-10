@@ -2,11 +2,9 @@ package com.campus.errand.dto;
 
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
 
 import java.math.BigDecimal;
 
-@Data
 public class RechargeDTO {
 
     @NotNull(message = "充值金额不能为空")
@@ -14,4 +12,20 @@ public class RechargeDTO {
     private BigDecimal amount;
 
     private String payPassword;
+
+    public BigDecimal getAmount() {
+        return amount;
+    }
+
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
+    }
+
+    public String getPayPassword() {
+        return payPassword;
+    }
+
+    public void setPayPassword(String payPassword) {
+        this.payPassword = payPassword;
+    }
 }

@@ -1,7 +1,8 @@
 import { getToken, removeToken } from './auth.js'
 
 // API基础配置
-const BASE_URL = 'http://localhost:8080/api'
+// 开发环境使用内网IP，方便真机调试（确保手机和电脑在同一WiFi）
+const BASE_URL = 'http://192.168.3.103:8080/api'
 const TIMEOUT = 30000 // 30秒超时
 const MAX_RETRY = 3 // 最大重试次数
 const RETRY_DELAY = 1000 // 重试延迟(毫秒)

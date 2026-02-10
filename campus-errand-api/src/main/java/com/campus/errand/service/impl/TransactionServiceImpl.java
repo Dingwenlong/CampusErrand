@@ -9,7 +9,7 @@ import com.campus.errand.entity.UserWallet;
 import com.campus.errand.mapper.TransactionMapper;
 import com.campus.errand.service.TransactionService;
 import com.campus.errand.service.UserWalletService;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,10 +19,14 @@ import java.time.format.DateTimeFormatter;
 import java.util.Random;
 
 @Service
-@RequiredArgsConstructor
 public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Transaction> implements TransactionService {
 
     private final UserWalletService userWalletService;
+
+    @Autowired
+    public TransactionServiceImpl(UserWalletService userWalletService) {
+        this.userWalletService = userWalletService;
+    }
 
     @Override
     public IPage<Transaction> getTransactionList(Long userId, Integer direction, Long current, Long size) {

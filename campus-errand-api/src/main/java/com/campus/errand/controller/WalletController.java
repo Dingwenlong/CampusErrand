@@ -16,7 +16,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -26,11 +26,16 @@ import java.util.Map;
 @Tag(name = "钱包管理", description = "钱包相关接口")
 @RestController
 @RequestMapping("/wallet")
-@RequiredArgsConstructor
 public class WalletController {
 
     private final UserWalletService userWalletService;
     private final TransactionService transactionService;
+
+    @Autowired
+    public WalletController(UserWalletService userWalletService, TransactionService transactionService) {
+        this.userWalletService = userWalletService;
+        this.transactionService = transactionService;
+    }
 
     @Operation(summary = "获取钱包信息")
     @GetMapping("/info")

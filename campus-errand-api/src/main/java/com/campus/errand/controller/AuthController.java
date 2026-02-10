@@ -11,6 +11,8 @@ import com.campus.errand.vo.LoginVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,6 +25,8 @@ import java.math.BigDecimal;
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
     private final UserService userService;
     private final UserWalletService userWalletService;
@@ -38,8 +42,16 @@ public class AuthController {
     @Operation(summary = "微信小程序登录")
     @PostMapping("/wx-login")
     public Result<LoginVO> wxLogin(@Valid @RequestBody LoginDTO loginDTO) {
+        logger.info("========== 收到微信登录请求 ==========");
+        logger.info("请求参数: code={}, nickname={}, avatar={}, gender={}",
+                loginDTO.getCode(),
+                loginDTO.getNickname(),
+                loginDTO.getAvatar(),
+                loginDTO.getGender());
+
         // 模拟获取openid（实际应调用微信接口）
         String openid = "mock_openid_" + loginDTO.getCode();
+        logger.info("生成的openid: {}", openid);
 
         // 查询用户是否存在
         User user = userService.getByOpenid(openid);
@@ -90,6 +102,9 @@ public class AuthController {
         loginVO.setNickname(user.getNickname());
         loginVO.setAvatar(user.getAvatar());
         loginVO.setIsNewUser(isNewUser ? 1 : 0);
+
+        logger.info("登录成功, 用户ID: {}, 是否新用户: {}", user.getId(), isNewUser);
+        logger.info("========== 微信登录请求处理完成 ==========");
 
         return Result.success(loginVO);
     }

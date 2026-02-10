@@ -303,7 +303,7 @@ export default {
 
 /* 功能菜单区域 */
 .menu-section {
-  margin: -32rpx var(--space-6) var(--space-6);
+  margin: -16rpx var(--space-6) var(--space-6);
   background-color: #fff;
   border-radius: var(--radius-lg);
   padding: var(--space-6);
