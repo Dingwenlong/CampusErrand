@@ -37,12 +37,6 @@ public class WalletController {
         this.transactionService = transactionService;
     }
 
-    @Autowired
-    public WalletController(UserWalletService userWalletService, TransactionService transactionService) {
-        this.userWalletService = userWalletService;
-        this.transactionService = transactionService;
-    }
-
     @Operation(summary = "获取钱包信息")
     @GetMapping("/info")
     public Result<Map<String, Object>> getWalletInfo() {

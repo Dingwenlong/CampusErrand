@@ -3,56 +3,47 @@
     <!-- 统计卡片 -->
     <a-row :gutter="16" class="stat-cards">
       <a-col :span="6">
-        <a-card>
-          <Statistic
-            title="总用户数"
-            :value="stats.userCount"
-            :value-style="{ color: '#3f8600' }"
-          >
-            <template #prefix>
-              <UserOutlined />
-            </template>
-          </Statistic>
+        <a-card class="stat-card">
+          <div class="stat-icon" style="background: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%);">
+            <UserOutlined />
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">总用户数</div>
+            <div class="stat-value">{{ stats.userCount || 0 }}</div>
+          </div>
         </a-card>
       </a-col>
       <a-col :span="6">
-        <a-card>
-          <Statistic
-            title="总任务数"
-            :value="stats.taskCount"
-            :value-style="{ color: '#cf1322' }"
-          >
-            <template #prefix>
-              <FileTextOutlined />
-            </template>
-          </Statistic>
+        <a-card class="stat-card">
+          <div class="stat-icon" style="background: linear-gradient(135deg, #4ECDC4 0%, #7EDDD6 100%);">
+            <FileTextOutlined />
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">总任务数</div>
+            <div class="stat-value">{{ stats.taskCount || 0 }}</div>
+          </div>
         </a-card>
       </a-col>
       <a-col :span="6">
-        <a-card>
-          <Statistic
-            title="总订单数"
-            :value="stats.orderCount"
-            :value-style="{ color: '#1890ff' }"
-          >
-            <template #prefix>
-              <ShoppingCartOutlined />
-            </template>
-          </Statistic>
+        <a-card class="stat-card">
+          <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #8B5CF6 100%);">
+            <ShoppingCartOutlined />
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">总订单数</div>
+            <div class="stat-value">{{ stats.orderCount || 0 }}</div>
+          </div>
         </a-card>
       </a-col>
       <a-col :span="6">
-        <a-card>
-          <Statistic
-            title="交易总额"
-            :value="stats.totalAmount"
-            :precision="2"
-            :value-style="{ color: '#722ed1' }"
-          >
-            <template #prefix>
-              <DollarOutlined />
-            </template>
-          </Statistic>
+        <a-card class="stat-card">
+          <div class="stat-icon" style="background: linear-gradient(135deg, #FFA07A 0%, #FFB347 100%);">
+            <DollarOutlined />
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">交易总额</div>
+            <div class="stat-value">¥{{ (stats.totalAmount || 0).toFixed(2) }}</div>
+          </div>
         </a-card>
       </a-col>
     </a-row>
@@ -60,30 +51,42 @@
     <!-- 今日数据 -->
     <a-row :gutter="16" class="today-stats">
       <a-col :span="24">
-        <a-card title="今日数据">
+        <a-card title="📊 今日数据" class="today-card">
           <a-row :gutter="16">
             <a-col :span="6">
               <div class="today-item">
-                <div class="today-label">新增用户</div>
-                <div class="today-value">{{ stats.todayUserCount || 0 }}</div>
+                <div class="today-icon" style="background: rgba(255, 107, 107, 0.1); color: #FF6B6B;">👤</div>
+                <div class="today-info">
+                  <div class="today-label">新增用户</div>
+                  <div class="today-value">{{ stats.todayUserCount || 0 }}</div>
+                </div>
               </div>
             </a-col>
             <a-col :span="6">
               <div class="today-item">
-                <div class="today-label">新增任务</div>
-                <div class="today-value">{{ stats.todayTaskCount || 0 }}</div>
+                <div class="today-icon" style="background: rgba(78, 205, 196, 0.1); color: #4ECDC4;">📦</div>
+                <div class="today-info">
+                  <div class="today-label">新增任务</div>
+                  <div class="today-value">{{ stats.todayTaskCount || 0 }}</div>
+                </div>
               </div>
             </a-col>
             <a-col :span="6">
               <div class="today-item">
-                <div class="today-label">新增订单</div>
-                <div class="today-value">{{ stats.todayOrderCount || 0 }}</div>
+                <div class="today-icon" style="background: rgba(102, 126, 234, 0.1); color: #667eea;">🛒</div>
+                <div class="today-info">
+                  <div class="today-label">新增订单</div>
+                  <div class="today-value">{{ stats.todayOrderCount || 0 }}</div>
+                </div>
               </div>
             </a-col>
             <a-col :span="6">
               <div class="today-item">
-                <div class="today-label">今日交易额</div>
-                <div class="today-value">¥{{ (stats.todayAmount || 0).toFixed(2) }}</div>
+                <div class="today-icon" style="background: rgba(255, 195, 0, 0.1); color: #FFC300;">💰</div>
+                <div class="today-info">
+                  <div class="today-label">今日交易额</div>
+                  <div class="today-value">¥{{ (stats.todayAmount || 0).toFixed(2) }}</div>
+                </div>
               </div>
             </a-col>
           </a-row>
@@ -94,12 +97,12 @@
     <!-- 图表区域 -->
     <a-row :gutter="16" class="charts">
       <a-col :span="12">
-        <a-card title="任务状态分布" :loading="chartLoading">
+        <a-card title="📈 任务状态分布" :loading="chartLoading" class="chart-card">
           <div ref="taskStatusChart" style="height: 300px;"></div>
         </a-card>
       </a-col>
       <a-col :span="12">
-        <a-card title="近7天交易趋势" :loading="chartLoading">
+        <a-card title="💹 近7天交易趋势" :loading="chartLoading" class="chart-card">
           <div ref="amountTrendChart" style="height: 300px;"></div>
         </a-card>
       </a-col>
@@ -108,7 +111,7 @@
     <!-- 用户增长趋势 -->
     <a-row :gutter="16" class="charts">
       <a-col :span="24">
-        <a-card title="用户增长趋势" :loading="chartLoading">
+        <a-card title="📊 用户增长趋势" :loading="chartLoading" class="chart-card">
           <div ref="userGrowthChart" style="height: 300px;"></div>
         </a-card>
       </a-col>
@@ -118,7 +121,6 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { Statistic } from 'ant-design-vue'
 import {
   UserOutlined,
   FileTextOutlined,
@@ -134,15 +136,15 @@ const taskStatusChart = ref<HTMLElement>()
 const amountTrendChart = ref<HTMLElement>()
 const userGrowthChart = ref<HTMLElement>()
 
-// 任务状态颜色映射
+// 任务状态颜色映射 - 美团风格
 const statusColors: Record<number, string> = {
-  0: '#faad14', // 待接单 - 黄色
-  1: '#1890ff', // 已接单 - 蓝色
+  0: '#FFC300', // 待接单 - 黄色
+  1: '#4ECDC4', // 已接单 - 青色
   2: '#52c41a', // 待取件 - 绿色
-  3: '#722ed1', // 配送中 - 紫色
-  4: '#fa8c16', // 待确认 - 橙色
+  3: '#667eea', // 配送中 - 紫色
+  4: '#FF6B6B', // 待确认 - 红色
   5: '#52c41a', // 已完成 - 绿色
-  6: '#ff4d4f'  // 已取消 - 红色
+  6: '#999999'  // 已取消 - 灰色
 }
 
 const loadData = async () => {
@@ -239,11 +241,11 @@ const initCharts = async () => {
           smooth: true,
           areaStyle: {
             color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-              { offset: 0, color: 'rgba(102, 126, 234, 0.5)' },
-              { offset: 1, color: 'rgba(102, 126, 234, 0.1)' }
+              { offset: 0, color: 'rgba(255, 195, 0, 0.5)' },
+              { offset: 1, color: 'rgba(255, 195, 0, 0.1)' }
             ])
           },
-          itemStyle: { color: '#667eea' },
+          itemStyle: { color: '#FFC300' },
           lineStyle: {
             width: 3
           }
@@ -293,14 +295,14 @@ const initCharts = async () => {
             name: '新增用户',
             type: 'bar',
             data: newUsers,
-            itemStyle: { color: '#667eea' }
+            itemStyle: { color: '#FFC300' }
           },
           {
             name: '总用户数',
             type: 'line',
             yAxisIndex: 1,
             data: totalUsers,
-            itemStyle: { color: '#52c41a' },
+            itemStyle: { color: '#4ECDC4' },
             smooth: true
           }
         ]
@@ -324,32 +326,112 @@ onMounted(() => {
   padding: 0;
 }
 
+/* 统计卡片 */
 .stat-cards {
   margin-bottom: 24px;
 }
 
+.stat-card {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.stat-card :deep(.ant-card-body) {
+  display: flex;
+  align-items: center;
+  padding: 20px;
+}
+
+.stat-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: #fff;
+  margin-right: 16px;
+}
+
+.stat-content {
+  flex: 1;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: #999;
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
+}
+
+/* 今日数据 */
 .today-stats {
   margin-bottom: 24px;
 }
 
+.today-card {
+  border-radius: 12px;
+}
+
+.today-card :deep(.ant-card-head) {
+  border-bottom: none;
+  font-size: 16px;
+  font-weight: 600;
+}
+
 .today-item {
-  text-align: center;
+  display: flex;
+  align-items: center;
   padding: 16px;
+  background: #f8f9fa;
+  border-radius: 12px;
+}
+
+.today-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  margin-right: 12px;
+}
+
+.today-info {
+  flex: 1;
 }
 
 .today-label {
-  color: #666;
-  font-size: 14px;
-  margin-bottom: 8px;
+  font-size: 13px;
+  color: #999;
+  margin-bottom: 4px;
 }
 
 .today-value {
+  font-size: 20px;
+  font-weight: 700;
   color: #333;
-  font-size: 24px;
-  font-weight: bold;
 }
 
+/* 图表 */
 .charts {
   margin-bottom: 24px;
+}
+
+.chart-card {
+  border-radius: 12px;
+}
+
+.chart-card :deep(.ant-card-head) {
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 16px;
+  font-weight: 600;
 }
 </style>

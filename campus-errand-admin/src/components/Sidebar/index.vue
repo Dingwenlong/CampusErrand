@@ -1,14 +1,15 @@
 <template>
-  <a-layout-sider v-model:collapsed="collapsed" collapsible>
+  <a-layout-sider v-model:collapsed="collapsed" collapsible class="sidebar">
     <div class="logo">
-      <span v-if="!collapsed">校园跑腿后台</span>
-      <span v-else>跑腿</span>
+      <div class="logo-icon">🏃</div>
+      <span v-if="!collapsed" class="logo-text">校园跑腿</span>
     </div>
     <a-menu
       v-model:selectedKeys="selectedKeys"
-      theme="dark"
+      theme="light"
       mode="inline"
       @click="handleMenuClick"
+      class="custom-menu"
     >
       <a-menu-item key="/dashboard">
         <DashboardOutlined />
@@ -65,14 +66,61 @@ const handleMenuClick = ({ key }: { key: string }) => {
 </script>
 
 <style scoped>
+.sidebar {
+  background: #fff !important;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+}
+
 .logo {
   height: 64px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
+  gap: 12px;
+  border-bottom: 1px solid #f0f0f0;
+  background: linear-gradient(135deg, #FFC300 0%, #FFB300 100%);
+}
+
+.logo-icon {
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.logo-text {
   font-size: 18px;
-  font-weight: bold;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-weight: 700;
+  color: #333;
+}
+
+.custom-menu {
+  background: #fff;
+  border-right: none;
+}
+
+.custom-menu :deep(.ant-menu-item) {
+  margin: 4px 12px;
+  border-radius: 8px;
+  color: #666;
+}
+
+.custom-menu :deep(.ant-menu-item:hover) {
+  color: #FFC300;
+  background: rgba(255, 195, 0, 0.1);
+}
+
+.custom-menu :deep(.ant-menu-item-selected) {
+  background: linear-gradient(135deg, #FFC300 0%, #FFB300 100%) !important;
+  color: #333 !important;
+  font-weight: 600;
+}
+
+.custom-menu :deep(.ant-menu-item-selected .anticon) {
+  color: #333;
 }
 </style>

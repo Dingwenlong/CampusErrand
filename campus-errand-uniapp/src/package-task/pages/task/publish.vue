@@ -1,180 +1,274 @@
 <template>
-  <view class="container">
-    <!-- 任务类型选择 -->
-    <view class="section">
-      <view class="section-title">任务类型</view>
-      <view class="type-list">
-        <view 
-          class="type-item" 
-          v-for="(item, index) in taskTypes" 
-          :key="index"
-          :class="{ active: form.taskType === item.value }"
-          @click="selectType(item.value)"
-        >
-          <text class="iconfont" :class="item.icon"></text>
-          <text class="type-name">{{ item.name }}</text>
+  <view class="publish-container">
+    <!-- 顶部导航栏 -->
+    <view class="nav-header">
+      <view class="nav-back" @click="goBack">
+        <text class="nav-icon">←</text>
+      </view>
+      <text class="nav-title">发布任务</text>
+      <view class="nav-placeholder"></view>
+    </view>
+
+    <!-- 主内容区 -->
+    <scroll-view class="content-scroll" scroll-y>
+      <!-- 任务类型选择卡片 -->
+      <view class="type-card">
+        <view class="card-header">
+          <view class="header-icon">📦</view>
+          <text class="header-title">选择任务类型</text>
+        </view>
+        <view class="type-grid">
+          <view 
+            v-for="(item, index) in taskTypes" 
+            :key="index"
+            class="type-item" 
+            :class="{ active: form.taskType === item.value }"
+            @click="selectType(item.value)"
+          >
+            <view class="type-icon-wrapper" :class="'bg-' + item.value">
+              <text class="type-icon">{{ item.emoji }}</text>
+            </view>
+            <text class="type-name">{{ item.name }}</text>
+            <view v-if="form.taskType === item.value" class="selected-mark">
+              <text class="mark-icon">✓</text>
+            </view>
+          </view>
         </view>
       </view>
-    </view>
 
-    <!-- 任务信息 -->
-    <view class="section">
-      <view class="section-title">任务信息</view>
-      <view class="form-item">
-        <text class="label">任务标题</text>
-        <input 
-          v-model="form.title" 
-          placeholder="请输入任务标题，如：帮忙取快递"
-          maxlength="50"
-        />
+      <!-- 任务信息卡片 -->
+      <view class="form-card">
+        <view class="card-header">
+          <view class="header-icon">📝</view>
+          <text class="header-title">任务信息</text>
+        </view>
+        <view class="form-body">
+          <view class="input-group">
+            <text class="group-label required">任务标题</text>
+            <input 
+              v-model="form.title" 
+              class="group-input"
+              placeholder="例如：帮忙取个快递到3号楼"
+              maxlength="50"
+            />
+            <text class="input-count">{{ form.title.length }}/50</text>
+          </view>
+          <view class="input-group">
+            <text class="group-label">任务描述</text>
+            <textarea 
+              v-model="form.description" 
+              class="group-textarea"
+              placeholder="请详细描述任务内容、物品信息、注意事项等..."
+              maxlength="500"
+            />
+            <text class="input-count">{{ form.description.length }}/500</text>
+          </view>
+        </view>
       </view>
-      <view class="form-item">
-        <text class="label">任务描述</text>
-        <textarea 
-          v-model="form.description" 
-          placeholder="请详细描述任务内容..."
-          maxlength="500"
-        />
-      </view>
-    </view>
 
-    <!-- 取件地址 -->
-    <view class="section">
-      <view class="section-title">取件地址</view>
-      <view class="form-item">
-        <text class="label required">取件地址</text>
-        <input 
-          v-model="form.pickupAddress" 
-          placeholder="请输入取件地址"
-        />
-      </view>
-      <view class="form-item">
-        <text class="label">联系人</text>
-        <input 
-          v-model="form.pickupContact" 
-          placeholder="请输入联系人姓名"
-        />
-      </view>
-      <view class="form-item">
-        <text class="label">联系电话</text>
-        <input 
-          v-model="form.pickupPhone" 
-          placeholder="请输入联系电话"
-          type="number"
-          maxlength="11"
-        />
-      </view>
-    </view>
+      <!-- 地址信息卡片 -->
+      <view class="form-card">
+        <view class="card-header">
+          <view class="header-icon">📍</view>
+          <text class="header-title">地址信息</text>
+        </view>
+        <view class="form-body">
+          <!-- 取件地址 -->
+          <view class="address-section">
+            <view class="address-label">
+              <view class="label-dot pickup"></view>
+              <text class="label-text required">取件地址</text>
+            </view>
+            <input 
+              v-model="form.pickupAddress" 
+              class="address-input"
+              placeholder="请输入取件地址"
+            />
+            <view class="contact-row">
+              <input 
+                v-model="form.pickupContact" 
+                class="contact-input"
+                placeholder="联系人"
+              />
+              <input 
+                v-model="form.pickupPhone" 
+                class="contact-input phone"
+                placeholder="联系电话"
+                type="number"
+                maxlength="11"
+              />
+            </view>
+          </view>
 
-    <!-- 送达地址 -->
-    <view class="section">
-      <view class="section-title">送达地址</view>
-      <view class="form-item">
-        <text class="label required">送达地址</text>
-        <input 
-          v-model="form.deliveryAddress" 
-          placeholder="请输入送达地址"
-        />
-      </view>
-      <view class="form-item">
-        <text class="label">联系人</text>
-        <input 
-          v-model="form.deliveryContact" 
-          placeholder="请输入联系人姓名"
-        />
-      </view>
-      <view class="form-item">
-        <text class="label">联系电话</text>
-        <input 
-          v-model="form.deliveryPhone" 
-          placeholder="请输入联系电话"
-          type="number"
-          maxlength="11"
-        />
-      </view>
-    </view>
+          <!-- 地址分隔线 -->
+          <view class="address-divider">
+            <view class="divider-line"></view>
+            <view class="divider-arrow">↓</view>
+            <view class="divider-line"></view>
+          </view>
 
-    <!-- 时间设置 -->
-    <view class="section">
-      <view class="section-title">时间设置</view>
-      <view class="form-item">
-        <text class="label">期望送达时间</text>
-        <picker mode="multiSelector" :value="expectTimeIndex" :range="timeRange" @change="onExpectTimeChange">
-          <view class="picker-value">{{ form.expectTime || '请选择期望送达时间' }}</view>
-        </picker>
+          <!-- 送达地址 -->
+          <view class="address-section">
+            <view class="address-label">
+              <view class="label-dot delivery"></view>
+              <text class="label-text required">送达地址</text>
+            </view>
+            <input 
+              v-model="form.deliveryAddress" 
+              class="address-input"
+              placeholder="请输入送达地址"
+            />
+            <view class="contact-row">
+              <input 
+                v-model="form.deliveryContact" 
+                class="contact-input"
+                placeholder="联系人"
+              />
+              <input 
+                v-model="form.deliveryPhone" 
+                class="contact-input phone"
+                placeholder="联系电话"
+                type="number"
+                maxlength="11"
+              />
+            </view>
+          </view>
+        </view>
       </view>
-      <view class="form-item">
-        <text class="label">截止时间</text>
-        <picker mode="multiSelector" :value="deadlineTimeIndex" :range="timeRange" @change="onDeadlineTimeChange">
-          <view class="picker-value">{{ form.deadlineTime || '请选择截止时间' }}</view>
-        </picker>
-      </view>
-    </view>
 
-    <!-- 费用设置 -->
-    <view class="section">
-      <view class="section-title">费用设置</view>
-      <view class="form-item">
-        <text class="label required">基础赏金</text>
-        <view class="input-with-unit">
-          <input 
-            v-model="form.reward" 
-            placeholder="请输入赏金金额"
-            type="digit"
+      <!-- 时间设置卡片 -->
+      <view class="form-card">
+        <view class="card-header">
+          <view class="header-icon">⏰</view>
+          <text class="header-title">时间设置</text>
+        </view>
+        <view class="form-body">
+          <view class="time-item">
+            <view class="time-label">
+              <text class="label-icon">🎯</text>
+              <text class="label-text">期望送达</text>
+            </view>
+            <picker mode="multiSelector" :value="expectTimeIndex" :range="timeRange" @change="onExpectTimeChange">
+              <view class="time-picker" :class="{ placeholder: !form.expectTime }">
+                <text>{{ form.expectTime || '请选择期望送达时间' }}</text>
+                <text class="picker-arrow">›</text>
+              </view>
+            </picker>
+          </view>
+          <view class="time-item">
+            <view class="time-label">
+              <text class="label-icon">⏳</text>
+              <text class="label-text">截止时间</text>
+            </view>
+            <picker mode="multiSelector" :value="deadlineTimeIndex" :range="timeRange" @change="onDeadlineTimeChange">
+              <view class="time-picker" :class="{ placeholder: !form.deadlineTime }">
+                <text>{{ form.deadlineTime || '请选择截止时间' }}</text>
+                <text class="picker-arrow">›</text>
+              </view>
+            </picker>
+          </view>
+        </view>
+      </view>
+
+      <!-- 费用设置卡片 -->
+      <view class="form-card">
+        <view class="card-header">
+          <view class="header-icon">💰</view>
+          <text class="header-title">费用设置</text>
+        </view>
+        <view class="form-body">
+          <!-- 基础赏金 -->
+          <view class="fee-item">
+            <view class="fee-label">
+              <text class="label-text required">基础赏金</text>
+              <text class="label-desc">跑腿员完成任务的报酬</text>
+            </view>
+            <view class="fee-input-wrapper">
+              <text class="fee-symbol">¥</text>
+              <input 
+                v-model="form.reward" 
+                class="fee-input"
+                placeholder="0.00"
+                type="digit"
+              />
+            </view>
+          </view>
+
+          <!-- 重量附加费 -->
+          <view class="fee-item">
+            <view class="fee-label">
+              <text class="label-text">重量附加费</text>
+              <text class="label-desc">大件物品额外费用</text>
+            </view>
+            <view class="fee-input-wrapper">
+              <text class="fee-symbol">¥</text>
+              <input 
+                v-model="form.weightFee" 
+                class="fee-input"
+                placeholder="0.00"
+                type="digit"
+              />
+            </view>
+          </view>
+
+          <!-- 加急费 -->
+          <view class="fee-item urgent-item">
+            <view class="fee-label">
+              <view class="label-with-tag">
+                <text class="label-text">加急服务</text>
+                <view class="urgent-tag">⚡ 优先处理</view>
+              </view>
+            </view>
+            <switch :checked="form.isUrgent === 1" @change="toggleUrgent" color="#FFC300"/>
+          </view>
+          <view v-if="form.isUrgent === 1" class="fee-item urgent-fee">
+            <view class="fee-input-wrapper full">
+              <text class="fee-symbol">¥</text>
+              <input 
+                v-model="form.urgencyFee" 
+                class="fee-input"
+                placeholder="请输入加急费用"
+                type="digit"
+              />
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 备注卡片 -->
+      <view class="form-card">
+        <view class="card-header">
+          <view class="header-icon">💬</view>
+          <text class="header-title">备注说明</text>
+        </view>
+        <view class="form-body">
+          <textarea 
+            v-model="form.remark" 
+            class="remark-textarea"
+            placeholder="请输入其他备注信息（选填）"
+            maxlength="200"
           />
-          <text class="unit">元</text>
+          <text class="input-count">{{ form.remark.length }}/200</text>
         </view>
       </view>
-      <view class="form-item">
-        <text class="label">重量附加费</text>
-        <view class="input-with-unit">
-          <input 
-            v-model="form.weightFee" 
-            placeholder="0.00"
-            type="digit"
-          />
-          <text class="unit">元</text>
-        </view>
-      </view>
-      <view class="form-item">
-        <view class="label-with-switch">
-          <text class="label">加急</text>
-          <switch :checked="form.isUrgent === 1" @change="toggleUrgent" color="#667eea"/>
-        </view>
-        <view class="input-with-unit" v-if="form.isUrgent === 1">
-          <input 
-            v-model="form.urgencyFee" 
-            placeholder="0.00"
-            type="digit"
-          />
-          <text class="unit">元</text>
-        </view>
-      </view>
-      <view class="total-amount">
-        <text class="label">总金额</text>
-        <text class="amount">¥{{ calculateTotal }}</text>
-      </view>
-    </view>
 
-    <!-- 备注 -->
-    <view class="section">
-      <view class="section-title">备注</view>
-      <view class="form-item">
-        <textarea 
-          v-model="form.remark" 
-          placeholder="请输入备注信息（选填）"
-          maxlength="200"
-        />
-      </view>
-    </view>
+      <!-- 底部占位 -->
+      <view class="bottom-placeholder"></view>
+    </scroll-view>
 
-    <!-- 底部按钮 -->
+    <!-- 底部结算栏 -->
     <view class="bottom-bar">
-      <view class="amount-info">
-        <text class="label">合计</text>
-        <text class="amount">¥{{ calculateTotal }}</text>
+      <view class="total-section">
+        <text class="total-label">合计金额</text>
+        <view class="total-price">
+          <text class="price-symbol">¥</text>
+          <text class="price-value">{{ calculateTotal }}</text>
+        </view>
       </view>
-      <button class="btn-primary" @click="handlePublish">发布任务</button>
+      <button class="publish-btn" @click="handlePublish">
+        <text class="btn-text">发布任务</text>
+        <text class="btn-icon">→</text>
+      </button>
     </view>
 
     <!-- 支付密码弹窗 -->
@@ -197,10 +291,10 @@ export default {
   data() {
     return {
       taskTypes: [
-        { name: '取快递', value: 1, icon: 'icon-express' },
-        { name: '代买', value: 2, icon: 'icon-shopping' },
-        { name: '送件', value: 3, icon: 'icon-delivery' },
-        { name: '其他', value: 4, icon: 'icon-other' }
+        { name: '取快递', value: 1, emoji: '📦', icon: 'icon-express' },
+        { name: '代买', value: 2, emoji: '🛒', icon: 'icon-shopping' },
+        { name: '送件', value: 3, emoji: '📄', icon: 'icon-delivery' },
+        { name: '其他', value: 4, emoji: '✨', icon: 'icon-other' }
       ],
       form: {
         taskType: 1,
@@ -245,6 +339,10 @@ export default {
     }
   },
   methods: {
+    goBack() {
+      uni.navigateBack()
+    },
+    
     selectType(value) {
       this.form.taskType = value
     },
@@ -333,7 +431,6 @@ export default {
     handlePublish() {
       if (!this.validateForm()) return
       
-      // 显示支付密码弹窗
       this.showPasswordModal = true
     },
     
@@ -380,115 +477,197 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.container {
-  padding: var(--spacing-md);
-  padding-bottom: 140rpx;
-  background: var(--bg-color);
+// 设计变量
+$primary: #FFC300;
+$primary-light: #FFD54F;
+$primary-dark: #FFB300;
+$text-primary: #1a1a1a;
+$text-secondary: #666;
+$text-tertiary: #999;
+$bg-primary: #f8f9fa;
+$bg-card: #fff;
+$border-color: #f0f0f0;
+$shadow-sm: 0 2rpx 12rpx rgba(0,0,0,0.06);
+$shadow-md: 0 4rpx 20rpx rgba(0,0,0,0.08);
+$shadow-lg: 0 8rpx 32rpx rgba(0,0,0,0.12);
+$radius-sm: 12rpx;
+$radius-md: 20rpx;
+$radius-lg: 28rpx;
+
+.publish-container {
   min-height: 100vh;
+  background: linear-gradient(180deg, #FFF9E6 0%, #f8f9fa 200rpx);
 }
 
-.section {
-  background: var(--card-bg);
-  border-radius: var(--border-radius-md);
-  padding: var(--spacing-md);
-  margin-bottom: var(--spacing-md);
-  box-shadow: var(--shadow-sm);
-  transition: all 0.3s ease;
-  animation: fadeInUp 0.5s ease forwards;
-  opacity: 0;
-  transform: translateY(20rpx);
-  
-  &:nth-child(1) {
-    animation-delay: 0.1s;
-  }
-  
-  &:nth-child(2) {
-    animation-delay: 0.2s;
-  }
-  
-  &:nth-child(3) {
-    animation-delay: 0.3s;
-  }
-  
-  &:nth-child(4) {
-    animation-delay: 0.4s;
-  }
-  
-  &:nth-child(5) {
-    animation-delay: 0.5s;
-  }
-  
-  &:nth-child(6) {
-    animation-delay: 0.6s;
-  }
-  
-  .section-title {
-    font-size: 32rpx;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: var(--spacing-md);
-    padding-bottom: var(--spacing-sm);
-    border-bottom: 2rpx solid var(--border-color);
-  }
-}
-
-.type-list {
+// 导航栏
+.nav-header {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-md);
+  align-items: center;
+  justify-content: space-between;
+  padding: 40rpx 32rpx 20rpx;
+  background: linear-gradient(180deg, #FFF9E6 0%, transparent 100%);
   
-  .type-item {
-    flex: 1;
-    min-width: 140rpx;
+  .nav-back {
+    width: 64rpx;
+    height: 64rpx;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    padding: var(--spacing-md);
-    background: var(--bg-color);
-    border-radius: var(--border-radius-md);
-    border: 2rpx solid transparent;
-    transition: all 0.3s ease;
-    
-    &.active {
-      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
-      color: #fff;
-      transform: scale(1.05);
-      box-shadow: var(--shadow-md);
-      
-      .type-name {
-        color: #fff;
-      }
-    }
+    justify-content: center;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: $shadow-sm;
     
     &:active {
       transform: scale(0.95);
     }
     
-    .iconfont {
-      font-size: 48rpx;
-      margin-bottom: var(--spacing-xs);
+    .nav-icon {
+      font-size: 36rpx;
+      color: $text-primary;
+      font-weight: bold;
     }
+  }
+  
+  .nav-title {
+    font-size: 36rpx;
+    font-weight: 700;
+    color: $text-primary;
+  }
+  
+  .nav-placeholder {
+    width: 64rpx;
+  }
+}
+
+// 内容滚动区
+.content-scroll {
+  height: calc(100vh - 200rpx);
+  padding: 0 24rpx;
+}
+
+// 卡片通用样式
+.type-card, .form-card {
+  background: $bg-card;
+  border-radius: $radius-lg;
+  margin-bottom: 24rpx;
+  box-shadow: $shadow-sm;
+  overflow: hidden;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  padding: 28rpx 28rpx 20rpx;
+  border-bottom: 2rpx solid $border-color;
+  
+  .header-icon {
+    font-size: 40rpx;
+    margin-right: 16rpx;
+  }
+  
+  .header-title {
+    font-size: 32rpx;
+    font-weight: 700;
+    color: $text-primary;
+  }
+}
+
+// 任务类型选择
+.type-grid {
+  display: flex;
+  padding: 28rpx;
+  gap: 20rpx;
+}
+
+.type-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24rpx 16rpx;
+  background: $bg-primary;
+  border-radius: $radius-md;
+  border: 3rpx solid transparent;
+  position: relative;
+  transition: all 0.3s ease;
+  
+  &:active {
+    transform: scale(0.95);
+  }
+  
+  &.active {
+    background: linear-gradient(135deg, rgba(255,195,0,0.1) 0%, rgba(255,213,79,0.1) 100%);
+    border-color: $primary;
     
     .type-name {
-      font-size: 26rpx;
-      color: var(--text-primary);
-      font-weight: 500;
+      color: $primary-dark;
+      font-weight: 600;
+    }
+  }
+  
+  .type-icon-wrapper {
+    width: 88rpx;
+    height: 88rpx;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16rpx;
+    
+    &.bg-1 { background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%); }
+    &.bg-2 { background: linear-gradient(135deg, #F3E5F5 0%, #E1BEE7 100%); }
+    &.bg-3 { background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%); }
+    &.bg-4 { background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%); }
+  }
+  
+  .type-icon {
+    font-size: 44rpx;
+  }
+  
+  .type-name {
+    font-size: 26rpx;
+    color: $text-secondary;
+  }
+  
+  .selected-mark {
+    position: absolute;
+    top: 8rpx;
+    right: 8rpx;
+    width: 32rpx;
+    height: 32rpx;
+    background: $primary;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    .mark-icon {
+      font-size: 20rpx;
+      color: #fff;
+      font-weight: bold;
     }
   }
 }
 
-.form-item {
-  margin-bottom: var(--spacing-md);
+// 表单内容区
+.form-body {
+  padding: 28rpx;
+}
+
+// 输入组
+.input-group {
+  margin-bottom: 28rpx;
+  position: relative;
   
   &:last-child {
     margin-bottom: 0;
   }
   
-  .label {
+  .group-label {
     display: block;
     font-size: 28rpx;
-    color: var(--text-secondary);
-    margin-bottom: var(--spacing-sm);
+    color: $text-secondary;
+    margin-bottom: 16rpx;
     font-weight: 500;
     
     &.required::after {
@@ -498,152 +677,377 @@ export default {
     }
   }
   
-  input, textarea, .picker-value {
+  .group-input, .group-textarea {
     width: 100%;
-    height: 80rpx;
-    background: var(--bg-color);
-    border-radius: var(--border-radius-sm);
-    padding: 0 var(--spacing-md);
+    background: $bg-primary;
+    border-radius: $radius-sm;
+    padding: 24rpx;
     font-size: 28rpx;
-    color: var(--text-primary);
+    color: $text-primary;
     border: 2rpx solid transparent;
     transition: all 0.3s ease;
     
     &:focus {
-      border-color: var(--primary-color);
+      border-color: $primary;
       background: #fff;
     }
   }
   
-  textarea {
-    height: 160rpx;
-    padding: var(--spacing-md);
+  .group-input {
+    height: 88rpx;
   }
   
-  .picker-value {
-    display: flex;
-    align-items: center;
-    color: var(--text-secondary);
+  .group-textarea {
+    height: 180rpx;
   }
   
-  .input-with-unit {
+  .input-count {
+    position: absolute;
+    bottom: 16rpx;
+    right: 16rpx;
+    font-size: 22rpx;
+    color: $text-tertiary;
+  }
+}
+
+// 地址区域
+.address-section {
+  margin-bottom: 28rpx;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.address-label {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16rpx;
+  
+  .label-dot {
+    width: 24rpx;
+    height: 24rpx;
+    border-radius: 50%;
+    margin-right: 12rpx;
+    
+    &.pickup { background: #4CAF50; }
+    &.delivery { background: #FF5722; }
+  }
+  
+  .label-text {
+    font-size: 28rpx;
+    color: $text-secondary;
+    font-weight: 500;
+    
+    &.required::after {
+      content: '*';
+      color: #ff4d4f;
+      margin-left: 8rpx;
+    }
+  }
+}
+
+.address-input {
+  width: 100%;
+  height: 88rpx;
+  background: $bg-primary;
+  border-radius: $radius-sm;
+  padding: 0 24rpx;
+  font-size: 28rpx;
+  color: $text-primary;
+  margin-bottom: 16rpx;
+  border: 2rpx solid transparent;
+  
+  &:focus {
+    border-color: $primary;
+    background: #fff;
+  }
+}
+
+.contact-row {
+  display: flex;
+  gap: 16rpx;
+}
+
+.contact-input {
+  flex: 1;
+  height: 80rpx;
+  background: $bg-primary;
+  border-radius: $radius-sm;
+  padding: 0 24rpx;
+  font-size: 28rpx;
+  color: $text-primary;
+  border: 2rpx solid transparent;
+  
+  &.phone {
+    flex: 1.5;
+  }
+  
+  &:focus {
+    border-color: $primary;
+    background: #fff;
+  }
+}
+
+// 地址分隔线
+.address-divider {
+  display: flex;
+  align-items: center;
+  padding: 16rpx 0 32rpx;
+  
+  .divider-line {
+    flex: 1;
+    height: 2rpx;
+    background: linear-gradient(90deg, transparent, $border-color, transparent);
+  }
+  
+  .divider-arrow {
+    width: 48rpx;
+    height: 48rpx;
+    background: $bg-primary;
+    border-radius: 50%;
     display: flex;
     align-items: center;
-    background: var(--bg-color);
-    border-radius: var(--border-radius-sm);
-    padding: 0 var(--spacing-md);
-    border: 2rpx solid transparent;
-    transition: all 0.3s ease;
+    justify-content: center;
+    margin: 0 20rpx;
+    font-size: 24rpx;
+    color: $text-tertiary;
+  }
+}
+
+// 时间选择
+.time-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 0;
+  border-bottom: 2rpx solid $border-color;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.time-label {
+  display: flex;
+  align-items: center;
+  
+  .label-icon {
+    font-size: 32rpx;
+    margin-right: 16rpx;
+  }
+  
+  .label-text {
+    font-size: 28rpx;
+    color: $text-primary;
+  }
+}
+
+.time-picker {
+  display: flex;
+  align-items: center;
+  font-size: 28rpx;
+  color: $text-primary;
+  
+  &.placeholder {
+    color: $text-tertiary;
+  }
+  
+  .picker-arrow {
+    font-size: 32rpx;
+    color: $text-tertiary;
+    margin-left: 12rpx;
+  }
+}
+
+// 费用设置
+.fee-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx 0;
+  border-bottom: 2rpx solid $border-color;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+  
+  &.urgent-item {
+    padding: 16rpx 0;
+  }
+  
+  &.urgent-fee {
+    padding-top: 0;
+    padding-bottom: 24rpx;
+  }
+}
+
+.fee-label {
+  .label-text {
+    display: block;
+    font-size: 28rpx;
+    color: $text-primary;
+    margin-bottom: 8rpx;
+    font-weight: 500;
     
-    &:focus-within {
-      border-color: var(--primary-color);
-      background: #fff;
+    &.required::after {
+      content: '*';
+      color: #ff4d4f;
+      margin-left: 8rpx;
     }
+  }
+  
+  .label-desc {
+    font-size: 24rpx;
+    color: $text-tertiary;
+  }
+  
+  .label-with-tag {
+    display: flex;
+    align-items: center;
+    gap: 16rpx;
     
-    input {
-      flex: 1;
-      background: transparent;
-      padding: 0;
-      border: none;
-    }
-    
-    .unit {
-      font-size: 28rpx;
-      color: var(--text-secondary);
-      margin-left: var(--spacing-sm);
+    .urgent-tag {
+      padding: 6rpx 16rpx;
+      background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%);
+      border-radius: 20rpx;
+      font-size: 22rpx;
+      color: #FF9800;
       font-weight: 500;
     }
   }
-  
-  .label-with-switch {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--spacing-sm);
-    
-    .label {
-      margin-bottom: 0;
-    }
-  }
 }
 
-.total-amount {
+.fee-input-wrapper {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding-top: var(--spacing-md);
-  border-top: 2rpx solid var(--border-color);
-  margin-top: var(--spacing-md);
+  background: $bg-primary;
+  border-radius: $radius-sm;
+  padding: 16rpx 24rpx;
+  min-width: 180rpx;
+  border: 2rpx solid transparent;
+  transition: all 0.3s ease;
   
-  .label {
-    font-size: 30rpx;
-    color: var(--text-primary);
+  &:focus-within {
+    border-color: $primary;
+    background: #fff;
+  }
+  
+  &.full {
+    width: 100%;
+    margin-top: 16rpx;
+  }
+  
+  .fee-symbol {
+    font-size: 28rpx;
+    color: $text-secondary;
+    margin-right: 8rpx;
     font-weight: 600;
   }
   
-  .amount {
-    font-size: 40rpx;
-    font-weight: bold;
-    color: #ff4d4f;
+  .fee-input {
+    flex: 1;
+    font-size: 32rpx;
+    color: $text-primary;
+    font-weight: 600;
+    text-align: right;
+    background: transparent;
+    border: none;
+    padding: 0;
   }
 }
 
+// 备注
+.remark-textarea {
+  width: 100%;
+  height: 160rpx;
+  background: $bg-primary;
+  border-radius: $radius-sm;
+  padding: 24rpx;
+  font-size: 28rpx;
+  color: $text-primary;
+  border: 2rpx solid transparent;
+  margin-bottom: 16rpx;
+  
+  &:focus {
+    border-color: $primary;
+    background: #fff;
+  }
+}
+
+// 底部占位
+.bottom-placeholder {
+  height: 160rpx;
+}
+
+// 底部结算栏
 .bottom-bar {
   position: fixed;
   left: 0;
   right: 0;
   bottom: 0;
   background: #fff;
-  padding: var(--spacing-md) var(--spacing-lg);
-  padding-bottom: calc(var(--spacing-md) + constant(safe-area-inset-bottom));
-  padding-bottom: calc(var(--spacing-md) + env(safe-area-inset-bottom));
+  padding: 24rpx 32rpx;
+  padding-bottom: calc(24rpx + constant(safe-area-inset-bottom));
+  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  box-shadow: 0 -4rpx 20rpx rgba(0, 0, 0, 0.08);
+  justify-content: space-between;
+  box-shadow: 0 -4rpx 24rpx rgba(0,0,0,0.08);
   z-index: 100;
-  
-  .amount-info {
-    .label {
-      display: block;
-      font-size: 24rpx;
-      color: var(--text-secondary);
-      margin-bottom: var(--spacing-xs);
-    }
-    
-    .amount {
-      font-size: 44rpx;
-      font-weight: bold;
-      color: #ff4d4f;
-    }
+}
+
+.total-section {
+  .total-label {
+    display: block;
+    font-size: 24rpx;
+    color: $text-tertiary;
+    margin-bottom: 8rpx;
   }
   
-  .btn-primary {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
-    color: #fff;
-    font-size: 30rpx;
-    padding: 24rpx 60rpx;
-    border-radius: 40rpx;
-    line-height: 1.5;
-    font-weight: 600;
-    box-shadow: var(--shadow-md);
-    transition: all 0.3s ease;
+  .total-price {
+    display: flex;
+    align-items: baseline;
     
-    &:active {
-      transform: scale(0.95);
-      box-shadow: var(--shadow-sm);
+    .price-symbol {
+      font-size: 28rpx;
+      color: #ff4d4f;
+      font-weight: 600;
+      margin-right: 4rpx;
+    }
+    
+    .price-value {
+      font-size: 48rpx;
+      color: #ff4d4f;
+      font-weight: 700;
     }
   }
 }
 
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20rpx);
+.publish-btn {
+  display: flex;
+  align-items: center;
+  padding: 24rpx 48rpx;
+  background: linear-gradient(135deg, $primary 0%, $primary-light 100%);
+  border-radius: 44rpx;
+  box-shadow: 0 8rpx 24rpx rgba(255,195,0,0.35);
+  border: none;
+  
+  &:active {
+    transform: scale(0.96);
+    box-shadow: 0 4rpx 16rpx rgba(255,195,0,0.25);
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  
+  .btn-text {
+    font-size: 30rpx;
+    color: $text-primary;
+    font-weight: 600;
+    margin-right: 12rpx;
+  }
+  
+  .btn-icon {
+    font-size: 28rpx;
+    color: $text-primary;
   }
 }
 </style>

@@ -28,11 +28,6 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
         this.userWalletService = userWalletService;
     }
 
-    @Autowired
-    public TransactionServiceImpl(UserWalletService userWalletService) {
-        this.userWalletService = userWalletService;
-    }
-
     @Override
     public IPage<Transaction> getTransactionList(Long userId, Integer direction, Long current, Long size) {
         Page<Transaction> page = new Page<>(current, size);
