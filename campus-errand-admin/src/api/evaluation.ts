@@ -1,10 +1,13 @@
 import request from '@/utils/request'
-import type { Evaluation, PageResult } from '@/types'
 
-export const getEvaluationList = (params: { current?: number; size?: number; rating?: number }) => {
+export const getEvaluationList = (params: any) => {
   return request.get('/admin/evaluation/list', { params })
 }
 
 export const deleteEvaluation = (id: number) => {
-  return request.post(`/admin/evaluation/${id}/delete`)
+  return request.delete(`/admin/evaluation/${id}`)
+}
+
+export const getEvaluationStats = () => {
+  return request.get('/admin/evaluation/stats')
 }

@@ -30,6 +30,12 @@ public class WalletController {
 
     private final UserWalletService userWalletService;
     private final TransactionService transactionService;
+    
+    @Autowired
+    public WalletController(UserWalletService userWalletService, TransactionService transactionService) {
+        this.userWalletService = userWalletService;
+        this.transactionService = transactionService;
+    }
 
     @Autowired
     public WalletController(UserWalletService userWalletService, TransactionService transactionService) {

@@ -183,6 +183,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
 
             // 发送消息通知发单者
             if (success) {
+                // 获取跑腿员名称
                 User runner = userMapper.selectById(runnerId);
                 String runnerName = runner != null ? runner.getNickname() : "未知用户";
                 messageService.sendTaskAcceptedNotification(task.getUserId(), taskId, task.getTitle(), runnerName);

@@ -51,7 +51,11 @@ public class TaskVO {
     // 发布者信息
     private String publisherName;
     private String publisherAvatar;
+    private String publisherPhone;
     private Integer publisherCreditScore;
+    
+    // 接单者信息
+    private String runnerPhone;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
@@ -350,6 +354,22 @@ public class TaskVO {
 
     public void setPublisherCreditScore(Integer publisherCreditScore) {
         this.publisherCreditScore = publisherCreditScore;
+    }
+
+    public String getPublisherPhone() {
+        return publisherPhone;
+    }
+
+    public void setPublisherPhone(String publisherPhone) {
+        this.publisherPhone = publisherPhone;
+    }
+
+    public String getRunnerPhone() {
+        return runnerPhone;
+    }
+
+    public void setRunnerPhone(String runnerPhone) {
+        this.runnerPhone = runnerPhone;
     }
 
     public LocalDateTime getCreateTime() {

@@ -22,6 +22,11 @@ import java.util.Random;
 public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Transaction> implements TransactionService {
 
     private final UserWalletService userWalletService;
+    
+    @Autowired
+    public TransactionServiceImpl(UserWalletService userWalletService) {
+        this.userWalletService = userWalletService;
+    }
 
     @Autowired
     public TransactionServiceImpl(UserWalletService userWalletService) {
