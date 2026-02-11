@@ -12,28 +12,32 @@ CREATE TABLE IF NOT EXISTS tb_config (
 
 -- 基础配置
 INSERT INTO tb_config (config_key, config_value, description, category) VALUES
-('site.name', '校园跑腿', '系统名称', 'basic'),
-('site.logo', '', '系统Logo URL', 'basic'),
-('service.phone', '400-123-4567', '客服电话', 'basic'),
-('service.email', 'service@campus.com', '客服邮箱', 'basic');
+('site_name', '校园跑腿', '系统名称', 'basic'),
+('site_logo', '', '系统Logo URL', 'basic'),
+('service_phone', '400-123-4567', '客服电话', 'basic'),
+('service_email', 'service@campus.com', '客服邮箱', 'basic')
+ON DUPLICATE KEY UPDATE config_value = VALUES(config_value), description = VALUES(description), category = VALUES(category);
 
 -- 任务配置
 INSERT INTO tb_config (config_key, config_value, description, category) VALUES
-('task.min.reward', '1.00', '最小赏金金额', 'task'),
-('task.max.reward', '1000.00', '最大赏金金额', 'task'),
-('task.auto.cancel.hours', '24', '任务自动取消时间（小时）', 'task'),
-('task.timeout.warning.hours', '2', '任务超时提醒时间（小时）', 'task');
+('min_reward', '1.00', '最小赏金金额', 'task'),
+('max_reward', '1000.00', '最大赏金金额', 'task'),
+('auto_cancel_hours', '24', '任务自动取消时间（小时）', 'task'),
+('timeout_warning_hours', '2', '任务超时提醒时间（小时）', 'task')
+ON DUPLICATE KEY UPDATE config_value = VALUES(config_value), description = VALUES(description), category = VALUES(category);
 
 -- 钱包配置
 INSERT INTO tb_config (config_key, config_value, description, category) VALUES
-('wallet.min.withdraw', '1.00', '最低提现金额', 'wallet'),
-('wallet.max.withdraw', '5000.00', '最高提现金额', 'wallet'),
-('wallet.platform.fee', '0.00', '平台抽成比例（%）', 'wallet');
+('min_withdraw', '1.00', '最低提现金额', 'wallet'),
+('max_withdraw', '5000.00', '最高提现金额', 'wallet'),
+('platform_fee', '0.00', '平台抽成比例（%）', 'wallet')
+ON DUPLICATE KEY UPDATE config_value = VALUES(config_value), description = VALUES(description), category = VALUES(category);
 
 -- 其他配置
 INSERT INTO tb_config (config_key, config_value, description, category) VALUES
-('user.register.enabled', 'true', '用户注册开关', 'other'),
-('task.publish.enabled', 'true', '任务发布开关', 'other'),
-('user.verify.enabled', 'false', '实名认证开关', 'other'),
-('system.maintenance.mode', 'false', '系统维护开关', 'other'),
-('system.maintenance.message', '系统维护中，请稍后再试', '维护提示信息', 'other');
+('register_enabled', 'true', '用户注册开关', 'other'),
+('task_publish_enabled', 'true', '任务发布开关', 'other'),
+('verify_enabled', 'false', '实名认证开关', 'other'),
+('maintenance_mode', 'false', '系统维护开关', 'other'),
+('maintenance_message', '系统维护中，请稍后再试', '维护提示信息', 'other')
+ON DUPLICATE KEY UPDATE config_value = VALUES(config_value), description = VALUES(description), category = VALUES(category);

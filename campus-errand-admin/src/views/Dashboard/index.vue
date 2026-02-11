@@ -1,8 +1,8 @@
 <template>
   <div class="dashboard">
-    <!-- 统计卡片 -->
-    <a-row :gutter="16" class="stat-cards">
-      <a-col :span="6">
+    <!-- 统计卡片 - 响应式布局 -->
+    <a-row :gutter="[16, 16]" class="stat-cards">
+      <a-col :xs="12" :sm="12" :md="6" :lg="6" :xl="6">
         <a-card class="stat-card">
           <div class="stat-icon" style="background: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%);">
             <UserOutlined />
@@ -13,7 +13,7 @@
           </div>
         </a-card>
       </a-col>
-      <a-col :span="6">
+      <a-col :xs="12" :sm="12" :md="6" :lg="6" :xl="6">
         <a-card class="stat-card">
           <div class="stat-icon" style="background: linear-gradient(135deg, #4ECDC4 0%, #7EDDD6 100%);">
             <FileTextOutlined />
@@ -24,7 +24,7 @@
           </div>
         </a-card>
       </a-col>
-      <a-col :span="6">
+      <a-col :xs="12" :sm="12" :md="6" :lg="6" :xl="6">
         <a-card class="stat-card">
           <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #8B5CF6 100%);">
             <ShoppingCartOutlined />
@@ -35,7 +35,7 @@
           </div>
         </a-card>
       </a-col>
-      <a-col :span="6">
+      <a-col :xs="12" :sm="12" :md="6" :lg="6" :xl="6">
         <a-card class="stat-card">
           <div class="stat-icon" style="background: linear-gradient(135deg, #FFA07A 0%, #FFB347 100%);">
             <DollarOutlined />
@@ -49,11 +49,11 @@
     </a-row>
 
     <!-- 今日数据 -->
-    <a-row :gutter="16" class="today-stats">
+    <a-row :gutter="[16, 16]" class="today-stats">
       <a-col :span="24">
         <a-card title="📊 今日数据" class="today-card">
-          <a-row :gutter="16">
-            <a-col :span="6">
+          <a-row :gutter="[16, 16]">
+            <a-col :xs="12" :sm="12" :md="6" :lg="6" :xl="6">
               <div class="today-item">
                 <div class="today-icon" style="background: rgba(255, 107, 107, 0.1); color: #FF6B6B;">👤</div>
                 <div class="today-info">
@@ -62,7 +62,7 @@
                 </div>
               </div>
             </a-col>
-            <a-col :span="6">
+            <a-col :xs="12" :sm="12" :md="6" :lg="6" :xl="6">
               <div class="today-item">
                 <div class="today-icon" style="background: rgba(78, 205, 196, 0.1); color: #4ECDC4;">📦</div>
                 <div class="today-info">
@@ -71,7 +71,7 @@
                 </div>
               </div>
             </a-col>
-            <a-col :span="6">
+            <a-col :xs="12" :sm="12" :md="6" :lg="6" :xl="6">
               <div class="today-item">
                 <div class="today-icon" style="background: rgba(102, 126, 234, 0.1); color: #667eea;">🛒</div>
                 <div class="today-info">
@@ -80,7 +80,7 @@
                 </div>
               </div>
             </a-col>
-            <a-col :span="6">
+            <a-col :xs="12" :sm="12" :md="6" :lg="6" :xl="6">
               <div class="today-item">
                 <div class="today-icon" style="background: rgba(255, 195, 0, 0.1); color: #FFC300;">💰</div>
                 <div class="today-info">
@@ -94,25 +94,25 @@
       </a-col>
     </a-row>
 
-    <!-- 图表区域 -->
-    <a-row :gutter="16" class="charts">
-      <a-col :span="12">
+    <!-- 图表区域 - 响应式堆叠 -->
+    <a-row :gutter="[16, 16]" class="charts">
+      <a-col :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
         <a-card title="📈 任务状态分布" :loading="chartLoading" class="chart-card">
-          <div ref="taskStatusChart" style="height: 300px;"></div>
+          <div ref="taskStatusChart" class="chart-container"></div>
         </a-card>
       </a-col>
-      <a-col :span="12">
+      <a-col :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
         <a-card title="💹 近7天交易趋势" :loading="chartLoading" class="chart-card">
-          <div ref="amountTrendChart" style="height: 300px;"></div>
+          <div ref="amountTrendChart" class="chart-container"></div>
         </a-card>
       </a-col>
     </a-row>
 
     <!-- 用户增长趋势 -->
-    <a-row :gutter="16" class="charts">
+    <a-row :gutter="[16, 16]" class="charts">
       <a-col :span="24">
         <a-card title="📊 用户增长趋势" :loading="chartLoading" class="chart-card">
-          <div ref="userGrowthChart" style="height: 300px;"></div>
+          <div ref="userGrowthChart" class="chart-container" style="height: 300px;"></div>
         </a-card>
       </a-col>
     </a-row>
@@ -175,11 +175,15 @@ const initCharts = async () => {
         },
         legend: { 
           bottom: '5%',
-          type: 'scroll'
+          type: 'scroll',
+          textStyle: {
+            fontSize: 12
+          }
         },
         series: [{
           type: 'pie',
           radius: ['40%', '70%'],
+          center: ['50%', '45%'],
           avoidLabelOverlap: false,
           itemStyle: {
             borderRadius: 10,
@@ -188,12 +192,13 @@ const initCharts = async () => {
           },
           label: { 
             show: true,
-            formatter: '{b}\n{c}'
+            formatter: '{b}\n{c}',
+            fontSize: 11
           },
           emphasis: {
             label: {
               show: true,
-              fontSize: 16,
+              fontSize: 14,
               fontWeight: 'bold'
             }
           },
@@ -222,17 +227,22 @@ const initCharts = async () => {
           left: '3%',
           right: '4%',
           bottom: '3%',
+          top: '10%',
           containLabel: true
         },
         xAxis: {
           type: 'category',
           data: dates,
-          boundaryGap: false
+          boundaryGap: false,
+          axisLabel: {
+            fontSize: 11
+          }
         },
         yAxis: { 
           type: 'value',
           axisLabel: {
-            formatter: '¥{value}'
+            formatter: '¥{value}',
+            fontSize: 11
           }
         },
         series: [{
@@ -266,28 +276,39 @@ const initCharts = async () => {
           trigger: 'axis'
         },
         legend: {
-          data: ['新增用户', '总用户数']
+          data: ['新增用户', '总用户数'],
+          top: '5%'
         },
         grid: {
           left: '3%',
           right: '4%',
           bottom: '3%',
+          top: '15%',
           containLabel: true
         },
         xAxis: {
           type: 'category',
-          data: dates
+          data: dates,
+          axisLabel: {
+            fontSize: 11
+          }
         },
         yAxis: [
           {
             type: 'value',
             name: '新增用户',
-            position: 'left'
+            position: 'left',
+            axisLabel: {
+              fontSize: 11
+            }
           },
           {
             type: 'value',
             name: '总用户数',
-            position: 'right'
+            position: 'right',
+            axisLabel: {
+              fontSize: 11
+            }
           }
         ],
         series: [
@@ -328,7 +349,7 @@ onMounted(() => {
 
 /* 统计卡片 */
 .stat-cards {
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
 .stat-card {
@@ -339,40 +360,45 @@ onMounted(() => {
 .stat-card :deep(.ant-card-body) {
   display: flex;
   align-items: center;
-  padding: 20px;
+  padding: 16px;
 }
 
 .stat-icon {
-  width: 56px;
-  height: 56px;
+  width: 48px;
+  height: 48px;
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  font-size: 20px;
   color: #fff;
-  margin-right: 16px;
+  margin-right: 12px;
+  flex-shrink: 0;
 }
 
 .stat-content {
   flex: 1;
+  min-width: 0;
 }
 
 .stat-label {
-  font-size: 14px;
+  font-size: 13px;
   color: #999;
   margin-bottom: 4px;
 }
 
 .stat-value {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
   color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* 今日数据 */
 .today-stats {
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
 .today-card {
@@ -388,41 +414,46 @@ onMounted(() => {
 .today-item {
   display: flex;
   align-items: center;
-  padding: 16px;
+  padding: 12px;
   background: #f8f9fa;
   border-radius: 12px;
 }
 
 .today-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
-  margin-right: 12px;
+  font-size: 20px;
+  margin-right: 10px;
+  flex-shrink: 0;
 }
 
 .today-info {
   flex: 1;
+  min-width: 0;
 }
 
 .today-label {
-  font-size: 13px;
+  font-size: 12px;
   color: #999;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .today-value {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
   color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* 图表 */
 .charts {
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
 .chart-card {
@@ -433,5 +464,85 @@ onMounted(() => {
   border-bottom: 1px solid #f0f0f0;
   font-size: 16px;
   font-weight: 600;
+}
+
+.chart-container {
+  height: 250px;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .stat-card :deep(.ant-card-body) {
+    padding: 12px;
+  }
+  
+  .stat-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+    margin-right: 8px;
+  }
+  
+  .stat-label {
+    font-size: 12px;
+  }
+  
+  .stat-value {
+    font-size: 16px;
+  }
+  
+  .today-item {
+    padding: 10px;
+  }
+  
+  .today-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+    margin-right: 8px;
+  }
+  
+  .today-label {
+    font-size: 11px;
+  }
+  
+  .today-value {
+    font-size: 16px;
+  }
+  
+  .chart-container {
+    height: 220px;
+  }
+}
+
+@media (max-width: 576px) {
+  .stat-card :deep(.ant-card-body) {
+    flex-direction: column;
+    text-align: center;
+    padding: 10px;
+  }
+  
+  .stat-icon {
+    margin-right: 0;
+    margin-bottom: 8px;
+  }
+  
+  .stat-content {
+    text-align: center;
+  }
+  
+  .today-item {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .today-icon {
+    margin-right: 0;
+    margin-bottom: 6px;
+  }
+  
+  .today-info {
+    text-align: center;
+  }
 }
 </style>

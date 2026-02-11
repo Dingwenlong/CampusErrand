@@ -8,12 +8,12 @@
           <view class="location-icon-wrapper">
             <text class="iconfont icon-location-fill location-icon"></text>
           </view>
-          <text class="location-text">山东现代学院</text>
+          <text class="location-text">{{ currentSchool }}</text>
           <text class="iconfont icon-arrow-down location-arrow"></text>
         </view>
         <view class="location-right">
-          <view class="icon-btn" @click="navigateTo('/pages/message/list')">
-            <text class="iconfont icon-bell message-icon"></text>
+          <view class="icon-btn message-btn" @click="navigateTo('/pages/message/list')">
+            <text class="iconfont icon-message message-icon-text"></text>
             <view v-if="unreadCount > 0" class="badge">{{ unreadCount }}</view>
           </view>
         </view>
@@ -39,7 +39,7 @@
           :style="{ animationDelay: index * 0.05 + 's' }"
         >
           <view class="feature-icon-wrapper scale-in" :class="'icon-bg-' + item.type">
-            <text class="feature-icon">{{ item.iconText }}</text>
+            <text class="iconfont feature-icon" :class="item.iconClass"></text>
           </view>
           <text class="feature-text">{{ item.name }}</text>
         </view>
@@ -57,7 +57,7 @@
       @change="onBannerChange"
     >
       <swiper-item v-for="(item, index) in banners" :key="index">
-        <view class="banner-item scale-in" :class="'banner-' + (index + 1)">
+        <view class="banner-item scale-in" :style="{ background: item.bgColor || getDefaultBannerColor(index) }">
           <text class="banner-title">{{ item.title }}</text>
           <text class="banner-desc">{{ item.desc }}</text>
         </view>
@@ -78,7 +78,7 @@
       </view>
 
       <!-- 任务列表 -->
-      <view class="task-list">
+      <view class="task-list" v-if="taskList.length > 0">
         <view 
           class="task-card card-hover" 
           v-for="(task, index) in taskList" 
@@ -122,6 +122,13 @@
           </view>
         </view>
       </view>
+      
+      <!-- 空状态 -->
+      <view class="empty-state" v-else-if="!loading">
+        <text class="iconfont icon-empty empty-icon"></text>
+        <text class="empty-text">暂无推荐任务</text>
+        <text class="empty-subtext">去发布一个任务吧</text>
+      </view>
     </view>
 
     <!-- 加载更多 -->
@@ -133,64 +140,142 @@
 </template>
 
 <script>
+import { http } from '@/utils/request.js'
+
+const taskTypeMap = {
+  1: '取快递',
+  2: '代买',
+  3: '送件',
+  4: '外卖',
+  5: '其他'
+}
+
+const bannerColors = [
+  'linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%)',
+  'linear-gradient(135deg, #4ECDC4 0%, #7EDDD6 100%)',
+  'linear-gradient(135deg, #667eea 0%, #8B5CF6 100%)'
+]
+
 export default {
   data() {
     return {
       unreadCount: 2,
       currentBanner: 0,
       loading: false,
+      currentSchool: '山东现代学院',
+      jinanSchools: [
+        '山东现代学院',
+        '山东大学',
+        '山东师范大学',
+        '济南大学',
+        '山东财经大学',
+        '山东建筑大学',
+        '山东中医药大学',
+        '齐鲁工业大学',
+        '山东第一医科大学',
+        '山东交通学院',
+        '山东青年政治学院',
+        '山东管理学院',
+        '山东农业工程学院',
+        '山东女子学院',
+        '山东工艺美术学院',
+        '山东艺术学院'
+      ],
       features: [
-        { name: '取快递', type: 1, iconText: '📦', path: '/pages/task/list?type=1' },
-        { name: '代买', type: 2, iconText: '🛒', path: '/pages/task/list?type=2' },
-        { name: '送件', type: 3, iconText: '📄', path: '/pages/task/list?type=3' },
-        { name: '外卖', type: 4, iconText: '🍱', path: '/pages/task/list?type=4' },
-        { name: '其他', type: 5, iconText: '✨', path: '/pages/task/list?type=5' },
+        { name: '取快递', type: 1, iconClass: 'icon-package', path: '/pages/task/list?type=1' },
+        { name: '代买', type: 2, iconClass: 'icon-cart', path: '/pages/task/list?type=2' },
+        { name: '送件', type: 3, iconClass: 'icon-file', path: '/pages/task/list?type=3' },
+        { name: '外卖', type: 4, iconClass: 'icon-food', path: '/pages/task/list?type=4' },
+        { name: '其他', type: 5, iconClass: 'icon-more', path: '/pages/task/list?type=5' },
       ],
       banners: [
-        { title: '校园跑腿', desc: '便捷生活，从这里开始' },
-        { title: '安全可靠', desc: '实名认证，信用保障' },
-        { title: '快速响应', desc: '附近跑腿员，即时接单' }
+        { title: '校园跑腿', desc: '便捷生活，从这里开始', bgColor: '' },
+        { title: '安全可靠', desc: '实名认证，信用保障', bgColor: '' },
+        { title: '快速响应', desc: '附近跑腿员，即时接单', bgColor: '' }
       ],
-      taskList: [
-        {
-          id: 1,
-          type: 1,
-          typeName: '取快递',
-          title: '帮忙取个快递，送到3号楼',
-          price: '5.00',
-          from: '菜鸟驿站',
-          to: '3号楼301',
-          time: '今天 18:00前',
-          userName: '张同学'
-        },
-        {
-          id: 2,
-          type: 2,
-          typeName: '代买',
-          title: '帮忙买一份午餐',
-          price: '8.00',
-          from: '二食堂',
-          to: '图书馆',
-          time: '今天 12:00前',
-          userName: '李同学'
-        },
-        {
-          id: 3,
-          type: 3,
-          typeName: '送件',
-          title: '送一份文件到教务处',
-          price: '10.00',
-          from: '行政楼',
-          to: '教务处',
-          time: '今天 17:00前',
-          userName: '王同学'
-        }
-      ]
+      taskList: []
     }
   },
+  onLoad() {
+    const savedSchool = uni.getStorageSync('currentSchool')
+    if (savedSchool) {
+      this.currentSchool = savedSchool
+    }
+    this.fetchRecommendTasks()
+    this.fetchBanners()
+  },
+  onPullDownRefresh() {
+    this.fetchRecommendTasks()
+    this.fetchBanners()
+    uni.stopPullDownRefresh()
+  },
   methods: {
+    async fetchRecommendTasks() {
+      this.loading = true
+      try {
+        const res = await http.get('/task/list', {
+          status: 0,
+          current: 1,
+          size: 5
+        })
+        if (res.code === 200) {
+          this.taskList = res.data.records.map(task => ({
+            id: task.id,
+            type: task.taskType,
+            typeName: task.taskTypeName || taskTypeMap[task.taskType] || '其他',
+            title: task.title,
+            price: task.totalAmount || task.reward,
+            from: task.pickupAddress,
+            to: task.deliveryAddress,
+            time: this.formatTime(task.deadlineTime),
+            userName: task.publisherName || '匿名用户'
+          }))
+        }
+      } catch (error) {
+        console.error('获取推荐任务失败:', error)
+      } finally {
+        this.loading = false
+      }
+    },
+    async fetchBanners() {
+      try {
+        const res = await http.get('/banner/list')
+        if (res.code === 200 && res.data && res.data.length > 0) {
+          this.banners = res.data.map((item, index) => ({
+            title: item.title,
+            desc: item.content || item.description,
+            bgColor: item.bgColor || bannerColors[index % bannerColors.length]
+          }))
+        }
+      } catch (error) {
+        console.error('获取轮播图失败:', error)
+      }
+    },
+    formatTime(timeStr) {
+      if (!timeStr) return '暂无截止时间'
+      const date = new Date(timeStr)
+      const now = new Date()
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+      const targetDate = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+      
+      const diffDays = Math.floor((targetDate - today) / (1000 * 60 * 60 * 24))
+      const hours = date.getHours().toString().padStart(2, '0')
+      const minutes = date.getMinutes().toString().padStart(2, '0')
+      
+      if (diffDays === 0) {
+        return `今天 ${hours}:${minutes}前`
+      } else if (diffDays === 1) {
+        return `明天 ${hours}:${minutes}前`
+      } else if (diffDays > 1) {
+        return `${diffDays}天后 ${hours}:${minutes}前`
+      } else {
+        return `${date.getMonth() + 1}月${date.getDate()}日 ${hours}:${minutes}前`
+      }
+    },
+    getDefaultBannerColor(index) {
+      return bannerColors[index % bannerColors.length]
+    },
     navigateTo(path) {
-      // 判断是否是 tabBar 页面
       const tabBarPages = ['/pages/index/index', '/pages/task/list', '/pages/order/list', '/pages/user/index']
       const isTabBar = tabBarPages.some(tabPath => path === tabPath || path.startsWith(tabPath + '?'))
 
@@ -210,7 +295,6 @@ export default {
       })
     },
     grabTask(task) {
-      // 添加触觉反馈
       // #ifdef MP-WEIXIN
       if (uni.vibrateShort) {
         uni.vibrateShort({ type: 'light' })
@@ -236,9 +320,16 @@ export default {
       this.currentBanner = e.detail.current
     },
     showLocationPicker() {
-      uni.showToast({
-        title: '位置选择功能开发中',
-        icon: 'none'
+      uni.showActionSheet({
+        itemList: this.jinanSchools,
+        success: (res) => {
+          this.currentSchool = this.jinanSchools[res.tapIndex]
+          uni.setStorageSync('currentSchool', this.currentSchool)
+          uni.showToast({
+            title: `已切换到${this.currentSchool}`,
+            icon: 'none'
+          })
+        }
       })
     }
   }
@@ -246,7 +337,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-// 引入 mixins
 @import '@/static/styles/mixins.scss';
 
 .container {
@@ -303,6 +393,10 @@ export default {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
+  max-width: 280rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .location-arrow {
@@ -335,6 +429,15 @@ export default {
 .message-icon {
   font-size: 36rpx;
   color: var(--color-text-primary);
+}
+
+.message-btn {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.15) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.message-icon-text {
+  font-size: 36rpx;
 }
 
 .badge {
@@ -469,18 +572,6 @@ export default {
     align-items: center;
     color: var(--color-white);
     animation: scaleIn var(--duration-normal) var(--ease-spring);
-
-    &.banner-1 {
-      background: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%);
-    }
-
-    &.banner-2 {
-      background: linear-gradient(135deg, #4ECDC4 0%, #7EDDD6 100%);
-    }
-
-    &.banner-3 {
-      background: linear-gradient(135deg, #667eea 0%, #8B5CF6 100%);
-    }
 
     .banner-title {
       font-size: var(--font-size-3xl);
@@ -731,6 +822,30 @@ export default {
   &:active {
     background: var(--color-primary-dark);
     transform: scale(0.95);
+  }
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-12) var(--space-6);
+  
+  .empty-icon {
+    font-size: 80rpx;
+    margin-bottom: var(--space-4);
+  }
+  
+  .empty-text {
+    font-size: var(--font-size-lg);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-2);
+  }
+  
+  .empty-subtext {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-tertiary);
   }
 }
 

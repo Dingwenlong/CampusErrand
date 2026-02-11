@@ -1,8 +1,8 @@
 import { getToken, removeToken } from './auth.js'
 
 // API基础配置
-// 开发环境使用localhost，方便本地调试
-const BASE_URL = 'http://localhost:8080/api'
+// 微信小程序需要使用本地IP地址，不能使用localhost
+const BASE_URL = 'http://192.168.3.103:8080/api'
 const TIMEOUT = 30000 // 30秒超时
 const MAX_RETRY = 3 // 最大重试次数
 const RETRY_DELAY = 1000 // 重试延迟(毫秒)

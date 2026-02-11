@@ -1,84 +1,104 @@
 <template>
   <div class="task-management">
-    <!-- 统计卡片 -->
-    <a-row :gutter="16" class="stat-cards">
-      <a-col :span="6">
-        <a-card>
-          <Statistic title="总任务数" :value="stats.totalCount" :value-style="{ color: '#3f8600' }">
-            <template #prefix>
-              <FileTextOutlined />
-            </template>
-          </Statistic>
+    <!-- 统计卡片 - 响应式 -->
+    <a-row :gutter="[16, 16]" class="stat-cards">
+      <a-col :xs="12" :sm="12" :md="6" :lg="6" :xl="6">
+        <a-card class="stat-card">
+          <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #8B5CF6 100%);">
+            <FileTextOutlined />
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">总任务数</div>
+            <div class="stat-value">{{ stats.totalCount || 0 }}</div>
+          </div>
         </a-card>
       </a-col>
-      <a-col :span="6">
-        <a-card>
-          <Statistic title="待接单" :value="stats.statusCount?.['待接单'] || 0" :value-style="{ color: '#faad14' }">
-            <template #prefix>
-              <ClockCircleOutlined />
-            </template>
-          </Statistic>
+      <a-col :xs="12" :sm="12" :md="6" :lg="6" :xl="6">
+        <a-card class="stat-card">
+          <div class="stat-icon" style="background: linear-gradient(135deg, #faad14 0%, #ffc53d 100%);">
+            <ClockCircleOutlined />
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">待接单</div>
+            <div class="stat-value">{{ stats.statusCount?.['待接单'] || 0 }}</div>
+          </div>
         </a-card>
       </a-col>
-      <a-col :span="6">
-        <a-card>
-          <Statistic title="进行中" :value="(stats.statusCount?.['已接单'] || 0) + (stats.statusCount?.['待取件'] || 0) + (stats.statusCount?.['配送中'] || 0)" :value-style="{ color: '#1890ff' }">
-            <template #prefix>
-              <CarryOutOutlined />
-            </template>
-          </Statistic>
+      <a-col :xs="12" :sm="12" :md="6" :lg="6" :xl="6">
+        <a-card class="stat-card">
+          <div class="stat-icon" style="background: linear-gradient(135deg, #1890ff 0%, #69c0ff 100%);">
+            <CarryOutOutlined />
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">进行中</div>
+            <div class="stat-value">{{ (stats.statusCount?.['已接单'] || 0) + (stats.statusCount?.['待取件'] || 0) + (stats.statusCount?.['配送中'] || 0) }}</div>
+          </div>
         </a-card>
       </a-col>
-      <a-col :span="6">
-        <a-card>
-          <Statistic title="今日新增" :value="stats.todayCount || 0" :value-style="{ color: '#722ed1' }">
-            <template #prefix>
-              <PlusOutlined />
-            </template>
-          </Statistic>
+      <a-col :xs="12" :sm="12" :md="6" :lg="6" :xl="6">
+        <a-card class="stat-card">
+          <div class="stat-icon" style="background: linear-gradient(135deg, #52c41a 0%, #95de64 100%);">
+            <PlusOutlined />
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">今日新增</div>
+            <div class="stat-value">{{ stats.todayCount || 0 }}</div>
+          </div>
         </a-card>
       </a-col>
     </a-row>
 
     <!-- 搜索筛选 -->
     <a-card class="search-card">
-      <a-form layout="inline" :model="searchForm">
-        <a-form-item label="任务类型">
-          <a-select v-model:value="searchForm.taskType" placeholder="全部类型" style="width: 120px" allowClear>
-            <a-select-option :value="1">取快递</a-select-option>
-            <a-select-option :value="2">代买</a-select-option>
-            <a-select-option :value="3">送件</a-select-option>
-            <a-select-option :value="4">其他</a-select-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item label="任务状态">
-          <a-select v-model:value="searchForm.status" placeholder="全部状态" style="width: 120px" allowClear>
-            <a-select-option :value="0">待接单</a-select-option>
-            <a-select-option :value="1">已接单</a-select-option>
-            <a-select-option :value="2">待取件</a-select-option>
-            <a-select-option :value="3">配送中</a-select-option>
-            <a-select-option :value="4">待确认</a-select-option>
-            <a-select-option :value="5">已完成</a-select-option>
-            <a-select-option :value="6">已取消</a-select-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item label="关键词">
-          <a-input v-model:value="searchForm.keyword" placeholder="任务标题" allowClear />
-        </a-form-item>
-        <a-form-item>
-          <a-button type="primary" @click="handleSearch">
-            <SearchOutlined />
-            搜索
-          </a-button>
-          <a-button style="margin-left: 8px" @click="handleReset">
-            重置
-          </a-button>
-        </a-form-item>
+      <a-form :model="searchForm" class="search-form">
+        <a-row :gutter="[16, 16]">
+          <a-col :xs="24" :sm="12" :md="8" :lg="6" :xl="6">
+            <a-form-item label="任务类型" class="form-item">
+              <a-select v-model:value="searchForm.taskType" placeholder="全部类型" allowClear>
+                <a-select-option :value="1">取快递</a-select-option>
+                <a-select-option :value="2">代买</a-select-option>
+                <a-select-option :value="3">送件</a-select-option>
+                <a-select-option :value="4">其他</a-select-option>
+              </a-select>
+            </a-form-item>
+          </a-col>
+          <a-col :xs="24" :sm="12" :md="8" :lg="6" :xl="6">
+            <a-form-item label="任务状态" class="form-item">
+              <a-select v-model:value="searchForm.status" placeholder="全部状态" allowClear>
+                <a-select-option :value="0">待接单</a-select-option>
+                <a-select-option :value="1">已接单</a-select-option>
+                <a-select-option :value="2">待取件</a-select-option>
+                <a-select-option :value="3">配送中</a-select-option>
+                <a-select-option :value="4">待确认</a-select-option>
+                <a-select-option :value="5">已完成</a-select-option>
+                <a-select-option :value="6">已取消</a-select-option>
+              </a-select>
+            </a-form-item>
+          </a-col>
+          <a-col :xs="24" :sm="12" :md="8" :lg="6" :xl="6">
+            <a-form-item label="关键词" class="form-item">
+              <a-input v-model:value="searchForm.keyword" placeholder="任务标题" allowClear />
+            </a-form-item>
+          </a-col>
+          <a-col :xs="24" :sm="12" :md="8" :lg="6" :xl="6">
+            <a-form-item class="form-item">
+              <a-space>
+                <a-button type="primary" @click="handleSearch">
+                  <SearchOutlined />
+                  搜索
+                </a-button>
+                <a-button @click="handleReset">
+                  重置
+                </a-button>
+              </a-space>
+            </a-form-item>
+          </a-col>
+        </a-row>
       </a-form>
     </a-card>
 
-    <!-- 任务列表 -->
-    <a-card title="任务列表">
+    <!-- 任务列表 - 桌面端表格 -->
+    <a-card class="table-card desktop-table" v-if="!isMobile">
       <a-table
         :columns="columns"
         :data-source="taskList"
@@ -87,7 +107,6 @@
         @change="handleTableChange"
         rowKey="id"
       >
-        <!-- 任务类型 -->
         <template #bodyCell="{ column, record }">
           <template v-if="column.key === 'taskType'">
             <a-tag :color="getTaskTypeColor(record.taskType)">
@@ -149,33 +168,113 @@
       </a-table>
     </a-card>
 
+    <!-- 任务列表 - 移动端卡片 -->
+    <div class="mobile-list" v-else>
+      <a-card v-for="task in taskList" :key="task.id" class="task-card">
+        <div class="task-card-header">
+          <div class="task-title-section">
+            <a-tag :color="getTaskTypeColor(task.taskType)" class="task-type-tag">
+              {{ task.taskTypeName }}
+            </a-tag>
+            <span class="task-title">{{ task.title }}</span>
+          </div>
+          <a-tag :color="getStatusColor(task.status)" class="status-tag">
+            {{ task.statusName }}
+          </a-tag>
+        </div>
+        
+        <div class="task-card-body">
+          <div class="info-row">
+            <span class="info-label">赏金:</span>
+            <span class="info-value price">¥{{ task.totalAmount }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">发布者:</span>
+            <div class="user-info">
+              <a-avatar :src="task.publisherAvatar" :size="20" />
+              <span>{{ task.publisherName }}</span>
+            </div>
+          </div>
+          <div class="info-row">
+            <span class="info-label">接单者:</span>
+            <div class="user-info" v-if="task.runnerName">
+              <a-avatar :src="task.runnerAvatar" :size="20" />
+              <span>{{ task.runnerName }}</span>
+            </div>
+            <span v-else class="info-value">-</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">创建时间:</span>
+            <span class="info-value">{{ task.createTime }}</span>
+          </div>
+        </div>
+        
+        <div class="task-card-footer">
+          <a-button type="link" size="small" @click="handleView(task)">
+            查看
+          </a-button>
+          <a-button 
+            type="link" 
+            size="small" 
+            danger 
+            @click="handleCancel(task)"
+            v-if="task.status === 0 || task.status === 1 || task.status === 2"
+          >
+            取消
+          </a-button>
+          <a-button 
+            type="link" 
+            size="small" 
+            danger 
+            @click="handleDelete(task)"
+            v-if="task.status === 6"
+          >
+            删除
+          </a-button>
+        </div>
+      </a-card>
+      
+      <!-- 移动端分页 -->
+      <div class="mobile-pagination">
+        <a-pagination
+          v-model:current="pagination.current"
+          :total="pagination.total"
+          :pageSize="pagination.pageSize"
+          size="small"
+          show-less-items
+          @change="handlePageChange"
+        />
+      </div>
+    </div>
+
     <!-- 任务详情弹窗 -->
     <a-modal
       v-model:visible="detailVisible"
       title="任务详情"
       width="700px"
       :footer="null"
+      class="task-detail-modal"
     >
-      <a-descriptions :column="2" bordered v-if="currentTask">
+      <a-descriptions :column="isMobile ? 1 : 2" bordered v-if="currentTask">
         <a-descriptions-item label="任务ID">{{ currentTask.id }}</a-descriptions-item>
         <a-descriptions-item label="任务类型">
           <a-tag :color="getTaskTypeColor(currentTask.taskType)">{{ currentTask.taskTypeName }}</a-tag>
         </a-descriptions-item>
-        <a-descriptions-item label="任务标题" :span="2">{{ currentTask.title }}</a-descriptions-item>
+        <a-descriptions-item label="任务标题" :span="isMobile ? 1 : 2">{{ currentTask.title }}</a-descriptions-item>
         <a-descriptions-item label="任务状态">
           <a-tag :color="getStatusColor(currentTask.status)">{{ currentTask.statusName }}</a-tag>
         </a-descriptions-item>
         <a-descriptions-item label="赏金金额">
           <span style="color: #ff4d4f; font-weight: bold;">¥{{ currentTask.totalAmount }}</span>
         </a-descriptions-item>
-        <a-descriptions-item label="发布者" :span="2">
+        <a-descriptions-item label="发布者" :span="isMobile ? 1 : 2">
           <div class="user-info">
             <a-avatar :src="currentTask.publisherAvatar" />
             <span style="margin-left: 8px;">{{ currentTask.publisherName }}</span>
             <span style="margin-left: 8px; color: #999;">{{ currentTask.publisherPhone }}</span>
           </div>
         </a-descriptions-item>
-        <a-descriptions-item label="接单者" :span="2">
+        <a-descriptions-item label="接单者" :span="isMobile ? 1 : 2">
           <div class="user-info" v-if="currentTask.runnerName">
             <a-avatar :src="currentTask.runnerAvatar" />
             <span style="margin-left: 8px;">{{ currentTask.runnerName }}</span>
@@ -183,8 +282,8 @@
           </div>
           <span v-else style="color: #999;">暂无接单者</span>
         </a-descriptions-item>
-        <a-descriptions-item label="取件地址" :span="2">{{ currentTask.pickupAddress }}</a-descriptions-item>
-        <a-descriptions-item label="送达地址" :span="2">{{ currentTask.deliveryAddress }}</a-descriptions-item>
+        <a-descriptions-item label="取件地址" :span="isMobile ? 1 : 2">{{ currentTask.pickupAddress }}</a-descriptions-item>
+        <a-descriptions-item label="送达地址" :span="isMobile ? 1 : 2">{{ currentTask.deliveryAddress }}</a-descriptions-item>
         <a-descriptions-item label="创建时间">{{ formatTime(currentTask.createTime) }}</a-descriptions-item>
         <a-descriptions-item label="接单时间">{{ currentTask.acceptTime ? formatTime(currentTask.acceptTime) : '-' }}</a-descriptions-item>
       </a-descriptions>
@@ -217,7 +316,9 @@ import {
   SearchOutlined
 } from '@ant-design/icons-vue'
 import { getTaskList, getTaskDetail, cancelTask, deleteTask, getTaskStats } from '@/api/task'
+import { useResponsive } from '@/composables/useResponsive'
 
+const { isMobile } = useResponsive()
 const loading = ref(false)
 const taskList = ref([])
 const stats = ref<any>({})
@@ -318,6 +419,12 @@ const handleReset = () => {
 const handleTableChange = (pag: any) => {
   pagination.current = pag.current
   pagination.pageSize = pag.pageSize
+  loadTaskList()
+}
+
+// 分页变化
+const handlePageChange = (page: number) => {
+  pagination.current = page
   loadTaskList()
 }
 
@@ -433,16 +540,240 @@ onMounted(() => {
   padding: 0;
 }
 
+/* 统计卡片 */
 .stat-cards {
   margin-bottom: 24px;
+}
+
+.stat-card {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.stat-card :deep(.ant-card-body) {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: #fff;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.stat-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: #999;
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .search-card {
   margin-bottom: 24px;
 }
 
+.search-form :deep(.ant-form-item) {
+  margin-bottom: 0;
+}
+
+.table-card {
+  margin-bottom: 24px;
+}
+
 .user-info {
   display: flex;
   align-items: center;
+  gap: 8px;
+}
+
+/* 移动端卡片列表 */
+.mobile-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.task-card {
+  border-radius: 12px;
+}
+
+.task-card :deep(.ant-card-body) {
+  padding: 16px;
+}
+
+.task-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.task-title-section {
+  flex: 1;
+  min-width: 0;
+}
+
+.task-type-tag {
+  margin-bottom: 6px;
+}
+
+.task-title {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+  line-height: 1.4;
+}
+
+.status-tag {
+  flex-shrink: 0;
+}
+
+.task-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.info-label {
+  font-size: 13px;
+  color: #999;
+  min-width: 60px;
+}
+
+.info-value {
+  font-size: 13px;
+  color: #333;
+}
+
+.info-value.price {
+  color: #ff4d4f;
+  font-weight: 600;
+}
+
+.task-card-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.mobile-pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+  padding: 16px;
+  background: #fff;
+  border-radius: 12px;
+}
+
+/* 响应式适配 */
+@media (max-width: 768px) {
+  .stat-cards {
+    margin-bottom: 16px;
+  }
+  
+  .stat-card :deep(.ant-card-body) {
+    padding: 12px;
+  }
+  
+  .stat-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+    margin-right: 8px;
+  }
+  
+  .stat-label {
+    font-size: 12px;
+  }
+  
+  .stat-value {
+    font-size: 16px;
+  }
+  
+  .search-card {
+    margin-bottom: 16px;
+  }
+  
+  .search-form :deep(.ant-form-item-label) {
+    padding-bottom: 4px;
+  }
+  
+  .form-item {
+    margin-bottom: 0;
+  }
+  
+  .task-card :deep(.ant-card-body) {
+    padding: 12px;
+  }
+  
+  .task-card-header {
+    gap: 8px;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+  }
+  
+  .task-title {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 576px) {
+  .stat-card :deep(.ant-card-body) {
+    flex-direction: column;
+    text-align: center;
+    padding: 10px;
+  }
+  
+  .stat-icon {
+    margin-right: 0;
+    margin-bottom: 8px;
+  }
+  
+  .stat-content {
+    text-align: center;
+  }
+  
+  .task-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .status-tag {
+    align-self: flex-start;
+  }
 }
 </style>

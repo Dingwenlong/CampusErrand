@@ -45,6 +45,12 @@ const routes = [
         meta: { title: '评价管理', icon: 'StarOutlined' }
       },
       {
+        path: 'banner',
+        name: 'Banner',
+        component: () => import('@/views/Banner/index.vue'),
+        meta: { title: '轮播图管理', icon: 'PictureOutlined' }
+      },
+      {
         path: 'setting',
         name: 'Setting',
         component: () => import('@/views/Setting/index.vue'),

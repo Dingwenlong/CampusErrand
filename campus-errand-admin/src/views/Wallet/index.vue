@@ -1,97 +1,95 @@
 <template>
   <div class="wallet-management">
-    <!-- 统计卡片 -->
-    <a-row :gutter="16" class="stat-cards">
-      <a-col :span="6">
-        <a-card>
-          <Statistic title="总交易笔数" :value="stats.totalCount" :value-style="{ color: '#3f8600' }">
-            <template #prefix>
-              <TransactionOutlined />
-            </template>
-          </Statistic>
+    <!-- 统计卡片 - 响应式 -->
+    <a-row :gutter="[16, 16]" class="stat-cards">
+      <a-col :xs="12" :sm="12" :md="6" :lg="6" :xl="6">
+        <a-card class="stat-card">
+          <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #8B5CF6 100%);">
+            <TransactionOutlined />
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">总交易笔数</div>
+            <div class="stat-value">{{ stats.totalCount || 0 }}</div>
+          </div>
         </a-card>
       </a-col>
-      <a-col :span="6">
-        <a-card>
-          <Statistic title="总收入" :value="stats.totalIncome" :precision="2" :value-style="{ color: '#52c41a' }">
-            <template #prefix>
-              <ArrowDownOutlined />
-            </template>
-          </Statistic>
+      <a-col :xs="12" :sm="12" :md="6" :lg="6" :xl="6">
+        <a-card class="stat-card">
+          <div class="stat-icon" style="background: linear-gradient(135deg, #52c41a 0%, #95de64 100%);">
+            <ArrowDownOutlined />
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">总收入</div>
+            <div class="stat-value">¥{{ (stats.totalIncome || 0).toFixed(2) }}</div>
+          </div>
         </a-card>
       </a-col>
-      <a-col :span="6">
-        <a-card>
-          <Statistic title="总支出" :value="stats.totalExpense" :precision="2" :value-style="{ color: '#ff4d4f' }">
-            <template #prefix>
-              <ArrowUpOutlined />
-            </template>
-          </Statistic>
+      <a-col :xs="12" :sm="12" :md="6" :lg="6" :xl="6">
+        <a-card class="stat-card">
+          <div class="stat-icon" style="background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%);">
+            <ArrowUpOutlined />
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">总支出</div>
+            <div class="stat-value">¥{{ (stats.totalExpense || 0).toFixed(2) }}</div>
+          </div>
         </a-card>
       </a-col>
-      <a-col :span="6">
-        <a-card>
-          <Statistic title="今日交易" :value="stats.todayCount || 0" :value-style="{ color: '#722ed1' }">
-            <template #prefix>
-              <CalendarOutlined />
-            </template>
-          </Statistic>
-        </a-card>
-      </a-col>
-    </a-row>
-
-    <!-- 交易类型统计 -->
-    <a-row :gutter="16" class="type-stats">
-      <a-col :span="24">
-        <a-card title="交易类型统计">
-          <a-row :gutter="16">
-            <a-col :span="4" v-for="(stat, type) in stats.typeStats" :key="type">
-              <div class="type-stat-item">
-                <div class="type-name">{{ type }}</div>
-                <div class="type-count">{{ stat.count }}笔</div>
-                <div class="type-amount">¥{{ stat.amount?.toFixed(2) }}</div>
-              </div>
-            </a-col>
-          </a-row>
+      <a-col :xs="12" :sm="12" :md="6" :lg="6" :xl="6">
+        <a-card class="stat-card">
+          <div class="stat-icon" style="background: linear-gradient(135deg, #722ed1 0%, #b37feb 100%);">
+            <CalendarOutlined />
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">今日交易</div>
+            <div class="stat-value">{{ stats.todayCount || 0 }}</div>
+          </div>
         </a-card>
       </a-col>
     </a-row>
 
     <!-- 搜索筛选 -->
     <a-card class="search-card">
-      <a-form layout="inline" :model="searchForm">
-        <a-form-item label="交易类型">
-          <a-select v-model:value="searchForm.transactionType" placeholder="全部类型" style="width: 140px" allowClear>
-            <a-select-option :value="1">充值</a-select-option>
-            <a-select-option :value="2">提现</a-select-option>
-            <a-select-option :value="3">任务支付</a-select-option>
-            <a-select-option :value="4">任务收入</a-select-option>
-            <a-select-option :value="5">退款</a-select-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item label="交易方向">
-          <a-select v-model:value="searchForm.direction" placeholder="全部方向" style="width: 120px" allowClear>
-            <a-select-option :value="1">收入</a-select-option>
-            <a-select-option :value="2">支出</a-select-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item label="时间范围">
-          <a-range-picker v-model:value="searchForm.dateRange" show-time format="YYYY-MM-DD HH:mm:ss" />
-        </a-form-item>
-        <a-form-item>
-          <a-button type="primary" @click="handleSearch">
-            <SearchOutlined />
-            搜索
-          </a-button>
-          <a-button style="margin-left: 8px" @click="handleReset">
-            重置
-          </a-button>
-        </a-form-item>
+      <a-form :model="searchForm" class="search-form">
+        <a-row :gutter="[16, 16]">
+          <a-col :xs="24" :sm="12" :md="8" :lg="6" :xl="6">
+            <a-form-item label="交易类型" class="form-item">
+              <a-select v-model:value="searchForm.transactionType" placeholder="全部类型" allowClear>
+                <a-select-option :value="1">充值</a-select-option>
+                <a-select-option :value="2">提现</a-select-option>
+                <a-select-option :value="3">任务支付</a-select-option>
+                <a-select-option :value="4">任务收入</a-select-option>
+                <a-select-option :value="5">退款</a-select-option>
+              </a-select>
+            </a-form-item>
+          </a-col>
+          <a-col :xs="24" :sm="12" :md="8" :lg="6" :xl="6">
+            <a-form-item label="交易方向" class="form-item">
+              <a-select v-model:value="searchForm.direction" placeholder="全部方向" allowClear>
+                <a-select-option :value="1">收入</a-select-option>
+                <a-select-option :value="2">支出</a-select-option>
+              </a-select>
+            </a-form-item>
+          </a-col>
+          <a-col :xs="24" :sm="24" :md="8" :lg="12" :xl="12">
+            <a-form-item class="form-item">
+              <a-space>
+                <a-button type="primary" @click="handleSearch">
+                  <SearchOutlined />
+                  搜索
+                </a-button>
+                <a-button @click="handleReset">
+                  重置
+                </a-button>
+              </a-space>
+            </a-form-item>
+          </a-col>
+        </a-row>
       </a-form>
     </a-card>
 
-    <!-- 交易流水列表 -->
-    <a-card title="交易流水">
+    <!-- 交易流水列表 - 桌面端 -->
+    <a-card class="table-card desktop-table" v-if="!isMobile">
       <a-table
         :columns="columns"
         :data-source="transactionList"
@@ -134,14 +132,54 @@
         </template>
       </a-table>
     </a-card>
+
+    <!-- 移动端卡片列表 -->
+    <div class="mobile-list" v-else>
+      <a-card v-for="item in transactionList" :key="item.id" class="transaction-card">
+        <div class="transaction-header">
+          <a-tag :color="getTypeColor(item.transactionType)">{{ item.transactionTypeName }}</a-tag>
+          <span :style="{ color: item.direction === 1 ? '#52c41a' : '#ff4d4f', fontWeight: 'bold' }">
+            {{ item.direction === 1 ? '+' : '-' }}¥{{ item.amount }}
+          </span>
+        </div>
+        <div class="transaction-body">
+          <div class="info-row">
+            <span class="info-label">用户:</span>
+            <span class="info-value">{{ item.userName }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">方向:</span>
+            <a-tag :color="item.direction === 1 ? 'green' : 'red'" size="small">
+              {{ item.directionName }}
+            </a-tag>
+          </div>
+          <div class="info-row">
+            <span class="info-label">状态:</span>
+            <a-tag :color="getStatusColor(item.status)" size="small">{{ item.statusName }}</a-tag>
+          </div>
+          <div class="info-row">
+            <span class="info-label">时间:</span>
+            <span class="info-value">{{ item.createTime }}</span>
+          </div>
+        </div>
+      </a-card>
+      <div class="mobile-pagination">
+        <a-pagination
+          v-model:current="pagination.current"
+          :total="pagination.total"
+          :pageSize="pagination.pageSize"
+          size="small"
+          show-less-items
+          @change="handlePageChange"
+        />
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { message } from 'ant-design-vue'
-import type { Dayjs } from 'dayjs'
-import dayjs from 'dayjs'
 import {
   TransactionOutlined,
   ArrowDownOutlined,
@@ -150,7 +188,9 @@ import {
   SearchOutlined
 } from '@ant-design/icons-vue'
 import { getTransactions, getWalletStats } from '@/api/wallet'
+import { useResponsive } from '@/composables/useResponsive'
 
+const { isMobile } = useResponsive()
 const loading = ref(false)
 const transactionList = ref([])
 const stats = ref<any>({})
@@ -159,11 +199,9 @@ const stats = ref<any>({})
 const searchForm = reactive<{
   transactionType: number | undefined
   direction: number | undefined
-  dateRange: Dayjs[] | undefined
 }>({
   transactionType: undefined,
-  direction: undefined,
-  dateRange: undefined
+  direction: undefined
 })
 
 // 分页
@@ -211,12 +249,6 @@ const loadTransactions = async () => {
       direction: searchForm.direction
     }
 
-    // 处理时间范围
-    if (searchForm.dateRange && searchForm.dateRange.length === 2) {
-      params.startTime = searchForm.dateRange[0].format('YYYY-MM-DD HH:mm:ss')
-      params.endTime = searchForm.dateRange[1].format('YYYY-MM-DD HH:mm:ss')
-    }
-
     const res = await getTransactions(params)
     if (res.code === 200) {
       transactionList.value = res.data.records
@@ -240,7 +272,6 @@ const handleSearch = () => {
 const handleReset = () => {
   searchForm.transactionType = undefined
   searchForm.direction = undefined
-  searchForm.dateRange = undefined
   pagination.current = 1
   loadTransactions()
 }
@@ -249,6 +280,12 @@ const handleReset = () => {
 const handleTableChange = (pag: any) => {
   pagination.current = pag.current
   pagination.pageSize = pag.pageSize
+  loadTransactions()
+}
+
+// 分页变化
+const handlePageChange = (page: number) => {
+  pagination.current = page
   loadTransactions()
 }
 
@@ -285,61 +322,180 @@ onMounted(() => {
   padding: 0;
 }
 
+/* 统计卡片 */
 .stat-cards {
   margin-bottom: 24px;
 }
 
-.type-stats {
-  margin-bottom: 24px;
+.stat-card {
+  border-radius: 12px;
+  overflow: hidden;
 }
 
-.type-stat-item {
-  text-align: center;
+.stat-card :deep(.ant-card-body) {
+  display: flex;
+  align-items: center;
   padding: 16px;
-  background: #f6ffed;
-  border-radius: 8px;
 }
 
-.type-stat-item:nth-child(2) {
-  background: #e6f7ff;
-}
-
-.type-stat-item:nth-child(3) {
-  background: #fff2f0;
-}
-
-.type-stat-item:nth-child(4) {
-  background: #f6ffed;
-}
-
-.type-stat-item:nth-child(5) {
-  background: #f9f0ff;
-}
-
-.type-name {
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 8px;
-}
-
-.type-count {
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 20px;
-  font-weight: bold;
-  color: #333;
+  color: #fff;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.stat-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: #999;
   margin-bottom: 4px;
 }
 
-.type-amount {
-  font-size: 14px;
-  color: #ff4d4f;
+.stat-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .search-card {
   margin-bottom: 24px;
 }
 
+.search-form :deep(.ant-form-item) {
+  margin-bottom: 0;
+}
+
+.table-card {
+  margin-bottom: 24px;
+}
+
 .user-info {
   display: flex;
   flex-direction: column;
+}
+
+/* 移动端卡片列表 */
+.mobile-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.transaction-card {
+  border-radius: 12px;
+}
+
+.transaction-card :deep(.ant-card-body) {
+  padding: 16px;
+}
+
+.transaction-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.transaction-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.info-label {
+  font-size: 13px;
+  color: #999;
+  min-width: 50px;
+}
+
+.info-value {
+  font-size: 13px;
+  color: #333;
+}
+
+.mobile-pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+  padding: 16px;
+  background: #fff;
+  border-radius: 12px;
+}
+
+/* 响应式适配 */
+@media (max-width: 768px) {
+  .stat-cards {
+    margin-bottom: 16px;
+  }
+  
+  .stat-card :deep(.ant-card-body) {
+    padding: 12px;
+  }
+  
+  .stat-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+    margin-right: 8px;
+  }
+  
+  .stat-label {
+    font-size: 12px;
+  }
+  
+  .stat-value {
+    font-size: 15px;
+  }
+  
+  .search-card {
+    margin-bottom: 16px;
+  }
+  
+  .search-form :deep(.ant-form-item-label) {
+    padding-bottom: 4px;
+  }
+  
+  .form-item {
+    margin-bottom: 0;
+  }
+}
+
+@media (max-width: 576px) {
+  .stat-card :deep(.ant-card-body) {
+    flex-direction: column;
+    text-align: center;
+    padding: 10px;
+  }
+  
+  .stat-icon {
+    margin-right: 0;
+    margin-bottom: 8px;
+  }
+  
+  .stat-content {
+    text-align: center;
+  }
 }
 </style>

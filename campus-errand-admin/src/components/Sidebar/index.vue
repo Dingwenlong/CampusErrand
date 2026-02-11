@@ -1,5 +1,13 @@
 <template>
-  <a-layout-sider v-model:collapsed="collapsed" collapsible class="sidebar">
+  <!-- 桌面端侧边栏 -->
+  <a-layout-sider 
+    v-if="!mobile" 
+    :collapsed="collapsed"
+    @update:collapsed="$emit('update:collapsed', $event)"
+    collapsible 
+    class="sidebar"
+    :width="200"
+  >
     <div class="logo">
       <div class="logo-icon">🏃</div>
       <span v-if="!collapsed" class="logo-text">校园跑腿</span>
@@ -31,16 +39,64 @@
         <StarOutlined />
         <span>评价管理</span>
       </a-menu-item>
+      <a-menu-item key="/banner">
+        <PictureOutlined />
+        <span>轮播图管理</span>
+      </a-menu-item>
       <a-menu-item key="/setting">
         <SettingOutlined />
         <span>系统设置</span>
       </a-menu-item>
     </a-menu>
   </a-layout-sider>
+
+  <!-- 移动端侧边栏 -->
+  <div v-else class="mobile-sidebar">
+    <div class="logo">
+      <div class="logo-icon">🏃</div>
+      <span class="logo-text">校园跑腿</span>
+    </div>
+    <a-menu
+      v-model:selectedKeys="selectedKeys"
+      theme="light"
+      mode="inline"
+      @click="handleMobileMenuClick"
+      class="custom-menu mobile-menu"
+    >
+      <a-menu-item key="/dashboard">
+        <DashboardOutlined />
+        <span>数据仪表盘</span>
+      </a-menu-item>
+      <a-menu-item key="/user">
+        <UserOutlined />
+        <span>用户管理</span>
+      </a-menu-item>
+      <a-menu-item key="/task">
+        <FileTextOutlined />
+        <span>任务管理</span>
+      </a-menu-item>
+      <a-menu-item key="/wallet">
+        <WalletOutlined />
+        <span>钱包管理</span>
+      </a-menu-item>
+      <a-menu-item key="/evaluation">
+        <StarOutlined />
+        <span>评价管理</span>
+      </a-menu-item>
+      <a-menu-item key="/banner">
+        <PictureOutlined />
+        <span>轮播图管理</span>
+      </a-menu-item>
+      <a-menu-item key="/setting">
+        <SettingOutlined />
+        <span>系统设置</span>
+      </a-menu-item>
+    </a-menu>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, defineProps, defineEmits } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   DashboardOutlined,
@@ -48,12 +104,22 @@ import {
   FileTextOutlined,
   WalletOutlined,
   StarOutlined,
+  PictureOutlined,
   SettingOutlined
 } from '@ant-design/icons-vue'
 
+const props = defineProps<{
+  mobile?: boolean
+  collapsed?: boolean
+}>()
+
+const emit = defineEmits<{
+  (e: 'update:collapsed', value: boolean): void
+  (e: 'close'): void
+}>()
+
 const route = useRoute()
 const router = useRouter()
-const collapsed = ref(false)
 const selectedKeys = ref<string[]>([route.path])
 
 watch(() => route.path, (newPath) => {
@@ -63,12 +129,22 @@ watch(() => route.path, (newPath) => {
 const handleMenuClick = ({ key }: { key: string }) => {
   router.push(key)
 }
+
+const handleMobileMenuClick = ({ key }: { key: string }) => {
+  router.push(key)
+  emit('close')
+}
 </script>
 
 <style scoped>
 .sidebar {
   background: #fff !important;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+}
+
+.mobile-sidebar {
+  background: #fff;
+  height: 100%;
 }
 
 .logo {
@@ -101,6 +177,10 @@ const handleMenuClick = ({ key }: { key: string }) => {
 .custom-menu {
   background: #fff;
   border-right: none;
+}
+
+.mobile-menu {
+  padding-top: 8px;
 }
 
 .custom-menu :deep(.ant-menu-item) {

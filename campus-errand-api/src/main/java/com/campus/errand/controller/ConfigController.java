@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Tag(name = "系统配置", description = "系统配置管理接口")
 @RestController
@@ -58,5 +59,21 @@ public class ConfigController {
     public Result<Boolean> batchUpdate(@RequestBody List<Config> configs) {
         boolean success = configService.updateBatchById(configs);
         return Result.success(success);
+    }
+
+    @Operation(summary = "保存配置（支持新增和更新）")
+    @PostMapping("/save")
+    public Result<Boolean> saveConfig(@RequestBody Map<String, String> configMap) {
+        boolean allSuccess = true;
+        for (Map.Entry<String, String> entry : configMap.entrySet()) {
+            boolean success = configService.updateConfig(entry.getKey(), entry.getValue());
+            if (!success) {
+                allSuccess = false;
+            }
+        }
+        if (!allSuccess) {
+            return Result.error("部分配置保存失败");
+        }
+        return Result.success(true);
     }
 }

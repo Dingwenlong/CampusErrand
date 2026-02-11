@@ -1,6 +1,15 @@
 <template>
   <a-layout-header class="header">
     <div class="header-left">
+      <!-- 移动端菜单按钮 -->
+      <a-button
+        v-if="isMobile"
+        type="text"
+        class="menu-btn"
+        @click="$emit('toggle-menu')"
+      >
+        <MenuOutlined />
+      </a-button>
       <span class="page-title">后台管理系统</span>
     </div>
     <div class="header-right">
@@ -9,7 +18,7 @@
           <div class="avatar">
             <span class="avatar-text">管</span>
           </div>
-          <span class="username">管理员</span>
+          <span v-if="!isMobile" class="username">管理员</span>
           <DownOutlined />
         </a>
         <template #overlay>
@@ -28,8 +37,16 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
-import { DownOutlined, LogoutOutlined } from '@ant-design/icons-vue'
+import { DownOutlined, LogoutOutlined, MenuOutlined } from '@ant-design/icons-vue'
 import { useUserStore } from '@/store/user'
+
+defineProps<{
+  isMobile?: boolean
+}>()
+
+defineEmits<{
+  (e: 'toggle-menu'): void
+}>()
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -56,6 +73,18 @@ const handleMenuClick = ({ key }: { key: string }) => {
 .header-left {
   display: flex;
   align-items: center;
+  gap: 12px;
+}
+
+.menu-btn {
+  font-size: 18px;
+  color: #333;
+  padding: 0 8px;
+}
+
+.menu-btn:hover {
+  color: #FFC300;
+  background: rgba(255, 195, 0, 0.1);
 }
 
 .page-title {
@@ -107,5 +136,20 @@ const handleMenuClick = ({ key }: { key: string }) => {
 .dropdown-menu :deep(.ant-dropdown-menu-item:hover) {
   color: #FFC300;
   background: rgba(255, 195, 0, 0.1);
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .header {
+    padding: 0 16px;
+  }
+  
+  .page-title {
+    font-size: 16px;
+  }
+  
+  .user-info {
+    padding: 4px 8px;
+  }
 }
 </style>
