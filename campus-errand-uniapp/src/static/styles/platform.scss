@@ -1,5 +1,5 @@
 /* ============================================
-   平台适配样式 - Platform Adaptation Styles
+   平台适配样式 - Platform Adaptation Styles (优化版)
    ============================================ */
 
 /* --------------------------------------------
@@ -9,6 +9,14 @@
 .ios {
   /* iOS 状态栏高度 */
   --status-bar-height: 44rpx;
+  
+  /* iOS 字体优化 */
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+  
+  /* iOS 滚动回弹效果 */
+  scroll-view {
+    -webkit-overflow-scrolling: touch;
+  }
 }
 
 .ios .nav-bar {
@@ -61,9 +69,11 @@
   border-radius: var(--radius-lg);
 }
 
-/* iOS 滚动回弹效果 */
-.ios scroll-view {
-  -webkit-overflow-scrolling: touch;
+/* iOS 操作反馈 */
+.ios .btn,
+.ios .card-hover,
+.ios .list-item {
+  transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
 /* --------------------------------------------
@@ -73,6 +83,9 @@
 .android {
   /* Android 状态栏高度 */
   --status-bar-height: 40rpx;
+  
+  /* Android 字体优化 */
+  font-family: 'Roboto', 'Noto Sans', 'PingFang SC', 'Microsoft YaHei', sans-serif;
 }
 
 .android .nav-bar {
@@ -149,18 +162,19 @@
    3. 微信小程序适配
    -------------------------------------------- */
 
-.mp-weixin .custom-nav {
-  padding-top: var(--status-bar-height);
+/* #ifdef MP-WEIXIN */
+page {
+  /* 微信小程序特定样式 */
+  --mp-safe-area-top: 0rpx;
 }
 
-.mp-weixin .custom-nav .nav-content {
-  height: 88rpx;
-}
-
-/* 微信小程序按钮样式调整 */
+/* 微信小程序按钮重置 */
 .mp-weixin button {
   margin: 0;
   padding: 0;
+  background: none;
+  border: none;
+  font-size: inherit;
   line-height: inherit;
 }
 
@@ -171,39 +185,184 @@
 /* 微信小程序输入框 */
 .mp-weixin input,
 .mp-weixin textarea {
-  min-height: auto;
+  outline: none;
 }
+
+/* 微信小程序图片 */
+.mp-weixin image {
+  display: block;
+  max-width: 100%;
+}
+
+/* 微信小程序滚动视图 */
+.mp-weixin scroll-view {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 微信小程序导航栏适配 */
+.mp-weixin .custom-nav {
+  padding-top: constant(safe-area-inset-top);
+  padding-top: env(safe-area-inset-top);
+}
+
+/* 微信小程序底部安全区域 */
+.mp-weixin .safe-bottom {
+  padding-bottom: constant(safe-area-inset-bottom);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* 微信小程序分享按钮样式 */
+.mp-weixin .share-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  line-height: inherit;
+  font-size: inherit;
+}
+
+.mp-weixin .share-btn::after {
+  border: none;
+}
+
+/* 微信小程序骨架屏适配 */
+.mp-weixin .skeleton {
+  background: linear-gradient(90deg, var(--color-bg-secondary) 25%, var(--color-bg-tertiary) 50%, var(--color-bg-secondary) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* 微信小程序加载状态 */
+.mp-weixin .loading-spinner {
+  width: 40rpx;
+  height: 40rpx;
+  border: 4rpx solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* 微信小程序空状态 */
+.mp-weixin .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-16) var(--space-6);
+}
+
+/* 微信小程序触摸反馈优化 */
+.mp-weixin .pressable {
+  transition: transform 0.15s ease-out;
+}
+
+.mp-weixin .pressable:active {
+  transform: scale(0.96);
+}
+
+/* 微信小程序卡片阴影优化 */
+.mp-weixin .card-hover {
+  transition: all 0.2s ease-out;
+}
+
+.mp-weixin .card-hover:active {
+  transform: translateY(-2rpx);
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.12);
+}
+
+/* 微信小程序文本溢出处理 */
+.mp-weixin .text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mp-weixin .text-ellipsis-2 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+/* 微信小程序 flex 布局修复 */
+.mp-weixin .flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mp-weixin .flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mp-weixin .flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 微信小程序安全区域适配 */
+.mp-weixin .safe-area-inset-top {
+  padding-top: constant(safe-area-inset-top);
+  padding-top: env(safe-area-inset-top);
+}
+
+.mp-weixin .safe-area-inset-bottom {
+  padding-bottom: constant(safe-area-inset-bottom);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* 微信小程序按钮禁用状态 */
+.mp-weixin .btn-disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* 微信小程序图片加载占位 */
+.mp-weixin .img-wrapper {
+  background-color: var(--color-bg-secondary);
+  position: relative;
+  overflow: hidden;
+}
+
+.mp-weixin .img-wrapper::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  animation: shimmer 1.5s infinite;
+}
+/* #endif */
 
 /* --------------------------------------------
    4. H5 平台适配
    -------------------------------------------- */
 
-/* H5 滚动条样式 */
-.h5 ::-webkit-scrollbar {
-  width: 8rpx;
-  height: 8rpx;
-}
-
-.h5 ::-webkit-scrollbar-track {
-  background: var(--color-bg);
-}
-
-.h5 ::-webkit-scrollbar-thumb {
-  background: var(--color-border-dark);
-  border-radius: var(--radius-full);
-}
-
-.h5 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-text-tertiary);
-}
-
-/* H5 按钮 hover 效果 */
-.h5 .btn:hover {
-  opacity: 0.9;
-}
-
-.h5 .btn:active {
-  opacity: 1;
+/* #ifdef H5 */
+.h5 {
+  /* H5 滚动条样式 */
+  ::-webkit-scrollbar {
+    width: 8rpx;
+    height: 8rpx;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: var(--color-bg-secondary);
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-border-dark);
+    border-radius: var(--radius-full);
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-text-tertiary);
+  }
 }
 
 /* H5 链接样式 */
@@ -216,163 +375,135 @@
   text-decoration: underline;
 }
 
+/* H5 选择文本 */
+.h5 .selectable {
+  user-select: text;
+  -webkit-user-select: text;
+}
+/* #endif */
+
 /* --------------------------------------------
-   5. 安全区域适配
+   5. 响应式适配
    -------------------------------------------- */
 
-.safe-area-top {
-  padding-top: env(safe-area-inset-top);
+/* 小屏幕适配 */
+@media screen and (max-width: 320px) {
+  page {
+    --font-size-base: 26rpx;
+  }
+  
+  .container {
+    padding: var(--space-4);
+  }
 }
 
-.safe-area-bottom {
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-.safe-area-left {
-  padding-left: env(safe-area-inset-left);
-}
-
-.safe-area-right {
-  padding-right: env(safe-area-inset-right);
-}
-
-.safe-area-all {
-  padding-top: env(safe-area-inset-top);
-  padding-bottom: env(safe-area-inset-bottom);
-  padding-left: env(safe-area-inset-left);
-  padding-right: env(safe-area-inset-right);
-}
-
-.fixed-bottom {
-  padding-bottom: calc(var(--space-6) + env(safe-area-inset-bottom));
+/* 大屏幕适配 */
+@media screen and (min-width: 768px) {
+  page {
+    --font-size-base: 30rpx;
+  }
+  
+  .container {
+    max-width: 750rpx;
+    margin: 0 auto;
+  }
 }
 
 /* --------------------------------------------
-   6. 暗黑模式适配
+   6. 暗黑模式适配 (预留)
    -------------------------------------------- */
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    /* 文字颜色 */
-    --color-text-primary: #f9fafb;
-    --color-text-secondary: #d1d5db;
-    --color-text-tertiary: #9ca3af;
-    --color-text-placeholder: #6b7280;
-    --color-text-disabled: #6b7280;
+  /* 暗黑模式变量 */
+  page {
+    --color-bg: #1a1a1a;
+    --color-bg-secondary: #2d2d2d;
+    --color-bg-tertiary: #3d3d3d;
+    --color-surface: #2d2d2d;
+    --color-surface-elevated: #3d3d3d;
+    --color-surface-pressed: #3d3d3d;
     
-    /* 背景颜色 */
-    --color-bg: #111827;
-    --color-bg-secondary: #1f2937;
-    --color-bg-tertiary: #374151;
-    --color-surface: #1f2937;
-    --color-surface-elevated: #374151;
+    --color-text-primary: #ffffff;
+    --color-text-secondary: #a0a0a0;
+    --color-text-tertiary: #666666;
+    --color-text-placeholder: #555555;
     
-    /* 边框颜色 */
-    --color-border: #374151;
-    --color-border-light: #1f2937;
-    --color-border-dark: #4b5563;
+    --color-border: #3d3d3d;
+    --color-border-light: #2d2d2d;
+    --color-border-dark: #4d4d4d;
     
-    /* 分割线颜色 */
-    --color-divider: #374151;
-    
-    /* 遮罩颜色 */
-    --color-mask: rgba(0, 0, 0, 0.7);
-    --color-mask-light: rgba(0, 0, 0, 0.5);
-    
-    /* 阴影调整 */
-    --shadow-sm: 0 2rpx 8rpx rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4rpx 16rpx rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 8rpx 32rpx rgba(0, 0, 0, 0.5);
+    --color-divider: #3d3d3d;
   }
-  
-  /* 暗黑模式下的图片亮度调整 */
-  image,
-  img {
-    opacity: 0.9;
-  }
-  
-  /* 暗黑模式下的卡片样式 */
-  .card {
-    background-color: var(--color-surface);
-    border: 1rpx solid var(--color-border);
-  }
-  
-  /* 暗黑模式下的输入框 */
-  .form-input,
-  .form-textarea {
-    background-color: var(--color-bg-secondary);
-    border-color: var(--color-border);
-    color: var(--color-text-primary);
-  }
-  
-  .form-input::placeholder,
-  .form-textarea::placeholder {
-    color: var(--color-text-placeholder);
-  }
-}
-
-/* 强制暗黑模式类 */
-.dark-mode {
-  --color-text-primary: #f9fafb;
-  --color-text-secondary: #d1d5db;
-  --color-text-tertiary: #9ca3af;
-  --color-bg: #111827;
-  --color-bg-secondary: #1f2937;
-  --color-surface: #1f2937;
-  --color-border: #374151;
-  --color-divider: #374151;
 }
 
 /* --------------------------------------------
-   7. 响应式适配
+   7. 横屏适配
    -------------------------------------------- */
 
-/* 小屏手机适配 */
-@media (max-width: 375px) {
-  :root {
-    --font-size-base: 28rpx;
-    --font-size-lg: 32rpx;
-    --font-size-xl: 36rpx;
+@media screen and (orientation: landscape) {
+  .landscape-hide {
+    display: none;
   }
   
-  .container {
-    padding: var(--space-4);
-  }
-  
-  .card {
-    padding: var(--space-4);
+  .landscape-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
   }
 }
 
-/* 大屏手机适配 */
-@media (min-width: 414px) {
-  :root {
-    --font-size-base: 34rpx;
-    --font-size-lg: 38rpx;
-    --font-size-xl: 42rpx;
-  }
-  
-  .container {
-    padding: var(--space-8);
-  }
-  
-  .card {
-    padding: var(--space-8);
+/* --------------------------------------------
+   8. 高分辨率屏幕适配
+   -------------------------------------------- */
+
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .hairline {
+    border-width: 0.5rpx;
   }
 }
 
-/* 平板适配 */
-@media (min-width: 768px) {
-  .container {
-    max-width: 750rpx;
-    margin: 0 auto;
+@media (-webkit-min-device-pixel-ratio: 3), (min-resolution: 288dpi) {
+  .hairline {
+    border-width: 0.33rpx;
   }
 }
 
-/* 横屏适配 */
-@media (orientation: landscape) {
-  .container {
-    max-width: 750rpx;
-    margin: 0 auto;
+/* --------------------------------------------
+   9. 无障碍适配
+   -------------------------------------------- */
+
+/* #ifdef H5 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+/* #endif */
+
+/* 高对比度模式 */
+@media (prefers-contrast: high) {
+  page {
+    --color-text-primary: #000000;
+    --color-text-secondary: #333333;
+    --color-border: #000000;
+  }
+}
+
+/* --------------------------------------------
+   10. 打印样式
+   -------------------------------------------- */
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  page {
+    background: white !important;
+    color: black !important;
   }
 }

@@ -4,19 +4,23 @@
     <view class="header-section">
       <!-- 定位栏 -->
       <view class="location-bar">
-        <view class="location-left">
-          <text class="iconfont icon-location-fill location-icon"></text>
+        <view class="location-left" @click="showLocationPicker">
+          <view class="location-icon-wrapper">
+            <text class="iconfont icon-location-fill location-icon"></text>
+          </view>
           <text class="location-text">山东现代学院</text>
           <text class="iconfont icon-arrow-down location-arrow"></text>
         </view>
         <view class="location-right">
-          <text class="iconfont icon-bell message-icon"></text>
-          <text class="iconfont icon-comment message-icon"></text>
+          <view class="icon-btn" @click="navigateTo('/pages/message/list')">
+            <text class="iconfont icon-bell message-icon"></text>
+            <view v-if="unreadCount > 0" class="badge">{{ unreadCount }}</view>
+          </view>
         </view>
       </view>
 
       <!-- 搜索栏 -->
-      <view class="search-bar" @click="navigateTo('/pages/task/list')">
+      <view class="search-bar pressable" @click="navigateTo('/pages/task/list')">
         <view class="search-input">
           <text class="iconfont icon-search search-icon"></text>
           <text class="search-placeholder">搜索任务、跑腿服务</text>
@@ -27,8 +31,14 @@
     <!-- 功能入口网格 -->
     <view class="feature-section">
       <view class="feature-grid">
-        <view class="feature-item" v-for="(item, index) in features" :key="index" @click="navigateTo(item.path)">
-          <view class="feature-icon-wrapper" :class="'icon-bg-' + item.type">
+        <view 
+          class="feature-item pressable" 
+          v-for="(item, index) in features" 
+          :key="index" 
+          @click="navigateTo(item.path)"
+          :style="{ animationDelay: index * 0.05 + 's' }"
+        >
+          <view class="feature-icon-wrapper scale-in" :class="'icon-bg-' + item.type">
             <text class="feature-icon">{{ item.iconText }}</text>
           </view>
           <text class="feature-text">{{ item.name }}</text>
@@ -37,9 +47,17 @@
     </view>
 
     <!-- 轮播图 -->
-    <swiper class="banner-swiper" indicator-dots autoplay circular indicator-color="rgba(255,255,255,0.5)" indicator-active-color="#FFC300">
+    <swiper 
+      class="banner-swiper" 
+      indicator-dots 
+      autoplay 
+      circular 
+      indicator-color="rgba(255,255,255,0.5)" 
+      indicator-active-color="#FFC300"
+      @change="onBannerChange"
+    >
       <swiper-item v-for="(item, index) in banners" :key="index">
-        <view class="banner-item" :class="'banner-' + (index + 1)">
+        <view class="banner-item scale-in" :class="'banner-' + (index + 1)">
           <text class="banner-title">{{ item.title }}</text>
           <text class="banner-desc">{{ item.desc }}</text>
         </view>
@@ -53,14 +71,21 @@
           <view class="title-line"></view>
           <text class="section-title">推荐任务</text>
         </view>
-        <text class="section-more" @click="navigateTo('/pages/task/list')">
-          更多 <text class="iconfont icon-arrow-right more-arrow"></text>
-        </text>
+        <view class="section-more pressable" @click="navigateTo('/pages/task/list')">
+          <text>更多</text>
+          <text class="iconfont icon-arrow-right more-arrow"></text>
+        </view>
       </view>
 
       <!-- 任务列表 -->
       <view class="task-list">
-        <view class="task-card" v-for="(task, index) in taskList" :key="index" @click="goTaskDetail(task)">
+        <view 
+          class="task-card card-hover" 
+          v-for="(task, index) in taskList" 
+          :key="index" 
+          @click="goTaskDetail(task)"
+          :style="{ animationDelay: index * 0.1 + 's' }"
+        >
           <view class="task-main">
             <view class="task-header">
               <view class="task-type-tag" :class="'type-' + task.type">{{ task.typeName }}</view>
@@ -72,11 +97,15 @@
             <view class="task-title">{{ task.title }}</view>
             <view class="task-info">
               <view class="info-item">
-                <text class="iconfont icon-location info-icon"></text>
+                <view class="info-icon-wrapper">
+                  <text class="iconfont icon-location info-icon"></text>
+                </view>
                 <text class="info-text">{{ task.from }} → {{ task.to }}</text>
               </view>
               <view class="info-item">
-                <text class="iconfont icon-time info-icon"></text>
+                <view class="info-icon-wrapper time">
+                  <text class="iconfont icon-time info-icon"></text>
+                </view>
                 <text class="info-text">{{ task.time }}</text>
               </view>
             </view>
@@ -89,10 +118,16 @@
               </view>
               <text class="user-name">{{ task.userName }}</text>
             </view>
-            <button class="grab-btn" @click.stop="grabTask(task)">立即接单</button>
+            <button class="grab-btn pressable" @click.stop="grabTask(task)">立即接单</button>
           </view>
         </view>
       </view>
+    </view>
+
+    <!-- 加载更多 -->
+    <view class="load-more" v-if="loading">
+      <view class="loading-spinner"></view>
+      <text>加载中...</text>
     </view>
   </view>
 </template>
@@ -101,6 +136,9 @@
 export default {
   data() {
     return {
+      unreadCount: 2,
+      currentBanner: 0,
+      loading: false,
       features: [
         { name: '取快递', type: 1, iconText: '📦', path: '/pages/task/list?type=1' },
         { name: '代买', type: 2, iconText: '🛒', path: '/pages/task/list?type=2' },
@@ -172,17 +210,35 @@ export default {
       })
     },
     grabTask(task) {
+      // 添加触觉反馈
+      // #ifdef MP-WEIXIN
+      if (uni.vibrateShort) {
+        uni.vibrateShort({ type: 'light' })
+      }
+      // #endif
+      
       uni.showModal({
         title: '确认接单',
         content: `确定要接这个${task.typeName}任务吗？`,
+        confirmColor: '#FFC300',
         success: (res) => {
           if (res.confirm) {
             uni.showToast({
               title: '接单成功',
-              icon: 'success'
+              icon: 'success',
+              duration: 1500
             })
           }
         }
+      })
+    },
+    onBannerChange(e) {
+      this.currentBanner = e.detail.current
+    },
+    showLocationPicker() {
+      uni.showToast({
+        title: '位置选择功能开发中',
+        icon: 'none'
       })
     }
   }
@@ -190,17 +246,21 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+// 引入 mixins
+@import '@/static/styles/mixins.scss';
+
 .container {
   min-height: 100vh;
-  background-color: #F5F5F5;
-  padding-bottom: var(--space-6);
+  background-color: var(--color-bg);
+  padding-bottom: var(--space-8);
 }
 
 /* 顶部黄色区域 */
 .header-section {
-  background: linear-gradient(180deg, #FFC300 0%, #FFB300 100%);
+  background: var(--color-primary-gradient);
   padding: var(--space-4) var(--space-6) var(--space-8);
-  border-radius: 0 0 32rpx 32rpx;
+  border-radius: 0 0 var(--radius-3xl) var(--radius-3xl);
+  box-shadow: var(--shadow-md);
 }
 
 /* 定位栏 */
@@ -214,43 +274,95 @@ export default {
 .location-left {
   display: flex;
   align-items: center;
+  padding: var(--space-2) var(--space-3);
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-full);
+  transition: all var(--duration-fast) var(--ease-out);
+  
+  &:active {
+    background-color: rgba(255, 255, 255, 0.3);
+    transform: scale(0.98);
+  }
+}
+
+.location-icon-wrapper {
+  @include flex-center;
+  width: 48rpx;
+  height: 48rpx;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-full);
+  margin-right: var(--space-2);
 }
 
 .location-icon {
-  font-size: 32rpx;
-  color: #333;
-  margin-right: var(--space-2);
+  font-size: 28rpx;
+  color: var(--color-text-primary);
 }
 
 .location-text {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-bold);
-  color: #333;
+  color: var(--color-text-primary);
 }
 
 .location-arrow {
-  font-size: 24rpx;
-  color: #333;
+  font-size: 20rpx;
+  color: var(--color-text-primary);
   margin-left: var(--space-1);
 }
 
 .location-right {
   display: flex;
   align-items: center;
-  gap: var(--space-5);
+  gap: var(--space-4);
+}
+
+.icon-btn {
+  position: relative;
+  @include flex-center;
+  width: 72rpx;
+  height: 72rpx;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-full);
+  transition: all var(--duration-fast) var(--ease-out);
+  
+  &:active {
+    background-color: rgba(255, 255, 255, 0.3);
+    transform: scale(0.95);
+  }
 }
 
 .message-icon {
-  font-size: 40rpx;
-  color: #333;
+  font-size: 36rpx;
+  color: var(--color-text-primary);
+}
+
+.badge {
+  position: absolute;
+  top: 4rpx;
+  right: 4rpx;
+  min-width: 32rpx;
+  height: 32rpx;
+  padding: 0 8rpx;
+  background-color: var(--color-error);
+  color: var(--color-white);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-bold);
+  border-radius: var(--radius-full);
+  @include flex-center;
 }
 
 /* 搜索栏 */
 .search-bar {
-  background-color: #fff;
+  background-color: var(--color-white);
   border-radius: var(--radius-full);
   padding: var(--space-3) var(--space-5);
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--duration-fast) var(--ease-out);
+  
+  &:active {
+    box-shadow: var(--shadow-md);
+  }
 }
 
 .search-input {
@@ -260,18 +372,18 @@ export default {
 
 .search-icon {
   font-size: 32rpx;
-  color: #999;
+  color: var(--color-text-tertiary);
   margin-right: var(--space-3);
 }
 
 .search-placeholder {
   font-size: var(--font-size-base);
-  color: #999;
+  color: var(--color-text-placeholder);
 }
 
 /* 功能入口区域 */
 .feature-section {
-  margin: var(--space-4) var(--space-6) var(--space-4);
+  margin: var(--space-4) var(--space-6);
   position: relative;
   z-index: 1;
 }
@@ -279,8 +391,8 @@ export default {
 .feature-grid {
   display: flex;
   justify-content: space-around;
-  background-color: #fff;
-  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+  border-radius: var(--radius-xl);
   padding: var(--space-6) var(--space-4);
   box-shadow: var(--shadow-sm);
 }
@@ -290,35 +402,44 @@ export default {
   flex-direction: column;
   align-items: center;
   padding: var(--space-2);
+  animation: slideUp var(--duration-normal) var(--ease-out) both;
 }
 
 .feature-icon-wrapper {
   width: 96rpx;
   height: 96rpx;
-  border-radius: var(--radius-lg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border-radius: var(--radius-xl);
+  @include flex-center;
   margin-bottom: var(--space-3);
+  transition: all var(--duration-fast) var(--ease-out);
+  
+  &:active {
+    transform: scale(0.95);
+  }
 
   &.icon-bg-1 {
     background: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%);
+    box-shadow: 0 8rpx 24rpx rgba(255, 107, 107, 0.3);
   }
 
   &.icon-bg-2 {
     background: linear-gradient(135deg, #4ECDC4 0%, #7EDDD6 100%);
+    box-shadow: 0 8rpx 24rpx rgba(78, 205, 196, 0.3);
   }
 
   &.icon-bg-3 {
     background: linear-gradient(135deg, #667eea 0%, #8B5CF6 100%);
+    box-shadow: 0 8rpx 24rpx rgba(102, 126, 234, 0.3);
   }
 
   &.icon-bg-4 {
     background: linear-gradient(135deg, #FFA07A 0%, #FFB347 100%);
+    box-shadow: 0 8rpx 24rpx rgba(255, 160, 122, 0.3);
   }
 
   &.icon-bg-5 {
     background: linear-gradient(135deg, #45B7D1 0%, #74C7E3 100%);
+    box-shadow: 0 8rpx 24rpx rgba(69, 183, 209, 0.3);
   }
 }
 
@@ -336,7 +457,7 @@ export default {
 .banner-swiper {
   height: 280rpx;
   margin: 0 var(--space-6) var(--space-6);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   overflow: hidden;
 
   .banner-item {
@@ -346,7 +467,8 @@ export default {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    color: #fff;
+    color: var(--color-white);
+    animation: scaleIn var(--duration-normal) var(--ease-spring);
 
     &.banner-1 {
       background: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%);
@@ -361,9 +483,10 @@ export default {
     }
 
     .banner-title {
-      font-size: 44rpx;
-      font-weight: bold;
+      font-size: var(--font-size-3xl);
+      font-weight: var(--font-weight-bold);
       margin-bottom: var(--space-2);
+      text-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.1);
     }
 
     .banner-desc {
@@ -392,9 +515,9 @@ export default {
 
 .title-line {
   width: 8rpx;
-  height: 36rpx;
-  background: linear-gradient(180deg, #FFC300 0%, #FFB300 100%);
-  border-radius: 4rpx;
+  height: 40rpx;
+  background: var(--color-primary-gradient);
+  border-radius: var(--radius-full);
   margin-right: var(--space-3);
 }
 
@@ -405,10 +528,15 @@ export default {
 }
 
 .section-more {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
   display: flex;
   align-items: center;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  transition: all var(--duration-fast) var(--ease-out);
+  
+  &:active {
+    color: var(--color-primary-dark);
+  }
 }
 
 .more-arrow {
@@ -416,170 +544,261 @@ export default {
   margin-left: var(--space-1);
 }
 
-/* 任务卡片 */
+/* 任务列表 */
 .task-list {
-  .task-card {
-    background-color: #fff;
-    border-radius: var(--radius-lg);
-    margin-bottom: var(--space-5);
-    box-shadow: var(--shadow-sm);
-    overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
 
-    &:active {
-      box-shadow: var(--shadow-md);
-    }
+.task-card {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  animation: slideUp var(--duration-normal) var(--ease-out) both;
+  transition: all var(--duration-fast) var(--ease-out);
+  
+  &:active {
+    transform: translateY(-2rpx);
+    box-shadow: var(--shadow-md);
+  }
+}
 
-    .task-main {
-      padding: var(--space-5);
-    }
+.task-main {
+  padding: var(--space-5);
+}
 
-    .task-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: var(--space-4);
-    }
+.task-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-3);
+}
 
-    .task-type-tag {
-      padding: 6rpx 16rpx;
-      border-radius: var(--radius-sm);
-      font-size: var(--font-size-xs);
-      font-weight: var(--font-weight-medium);
+.task-type-tag {
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--radius-sm);
+  
+  &.type-1 {
+    background-color: var(--color-task-express-soft);
+    color: var(--color-task-express);
+  }
+  
+  &.type-2 {
+    background-color: var(--color-task-shopping-soft);
+    color: var(--color-task-shopping);
+  }
+  
+  &.type-3 {
+    background-color: var(--color-task-delivery-soft);
+    color: var(--color-task-delivery);
+  }
+  
+  &.type-4, &.type-5 {
+    background-color: var(--color-task-other-soft);
+    color: var(--color-task-other);
+  }
+}
 
-      &.type-1 {
-        background-color: rgba(255, 107, 107, 0.1);
-        color: #FF6B6B;
-      }
+.task-price {
+  display: flex;
+  align-items: baseline;
+  color: var(--color-error);
+  
+  .price-symbol {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-bold);
+  }
+  
+  .price-value {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+  }
+}
 
-      &.type-2 {
-        background-color: rgba(78, 205, 196, 0.1);
-        color: #4ECDC4;
-      }
+.task-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-4);
+  line-height: var(--line-height-snug);
+}
 
-      &.type-3 {
-        background-color: rgba(102, 126, 234, 0.1);
-        color: #667eea;
-      }
-    }
+.task-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
 
-    .task-price {
-      display: flex;
-      align-items: baseline;
+.info-item {
+  display: flex;
+  align-items: center;
+}
 
-      .price-symbol {
-        font-size: var(--font-size-sm);
-        color: #FF4D4F;
-        font-weight: var(--font-weight-bold);
-      }
+.info-icon-wrapper {
+  @include flex-center;
+  width: 48rpx;
+  height: 48rpx;
+  background-color: var(--color-primary-soft);
+  border-radius: var(--radius-md);
+  margin-right: var(--space-2);
+  
+  &.time {
+    background-color: var(--color-info-soft);
+  }
+}
 
-      .price-value {
-        font-size: 40rpx;
-        color: #FF4D4F;
-        font-weight: var(--font-weight-bold);
-      }
-    }
+.info-icon {
+  font-size: 24rpx;
+  color: var(--color-primary-dark);
+  
+  .time & {
+    color: var(--color-info);
+  }
+}
 
-    .task-title {
-      font-size: var(--font-size-base);
-      color: var(--color-text-primary);
-      font-weight: var(--font-weight-medium);
-      margin-bottom: var(--space-4);
-      line-height: 1.5;
-    }
+.info-text {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
 
-    .task-info {
-      .info-item {
-        display: flex;
-        align-items: center;
-        margin-bottom: var(--space-2);
+.task-divider {
+  height: 2rpx;
+  background-color: var(--color-divider);
+  margin: 0 var(--space-5);
+}
 
-        &:last-child {
-          margin-bottom: 0;
-        }
+.task-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-4) var(--space-5);
+}
 
-        .info-icon {
-          font-size: 24rpx;
-          color: var(--color-text-tertiary);
-          margin-right: var(--space-2);
-        }
+.user-info {
+  display: flex;
+  align-items: center;
+}
 
-        .info-text {
-          font-size: var(--font-size-sm);
-          color: var(--color-text-secondary);
-        }
-      }
-    }
+.user-avatar {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: var(--radius-full);
+  @include flex-center;
+  margin-right: var(--space-3);
+  
+  &.avatar-bg-1 {
+    background: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%);
+  }
+  
+  &.avatar-bg-2 {
+    background: linear-gradient(135deg, #4ECDC4 0%, #7EDDD6 100%);
+  }
+  
+  &.avatar-bg-3 {
+    background: linear-gradient(135deg, #667eea 0%, #8B5CF6 100%);
+  }
+  
+  &.avatar-bg-4, &.avatar-bg-5 {
+    background: linear-gradient(135deg, #45B7D1 0%, #74C7E3 100%);
+  }
+}
 
-    .task-divider {
-      height: 2rpx;
-      background-color: var(--color-divider);
-      margin: 0 var(--space-5);
-    }
+.avatar-text {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-white);
+}
 
-    .task-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: var(--space-4) var(--space-5);
+.user-name {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
 
-      .user-info {
-        display: flex;
-        align-items: center;
+.grab-btn {
+  padding: var(--space-2) var(--space-5);
+  background: var(--color-primary-gradient);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-primary);
+  transition: all var(--duration-fast) var(--ease-out);
+  
+  &:active {
+    background: var(--color-primary-dark);
+    transform: scale(0.95);
+  }
+}
 
-        .user-avatar {
-          width: 56rpx;
-          height: 56rpx;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin-right: var(--space-3);
+/* 加载更多 */
+.load-more {
+  @include flex-center;
+  padding: var(--space-6);
+  gap: var(--space-3);
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-sm);
+}
 
-          &.avatar-bg-1 {
-            background: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%);
-          }
+.loading-spinner {
+  width: 32rpx;
+  height: 32rpx;
+  border: 4rpx solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
 
-          &.avatar-bg-2 {
-            background: linear-gradient(135deg, #4ECDC4 0%, #7EDDD6 100%);
-          }
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
-          &.avatar-bg-3 {
-            background: linear-gradient(135deg, #667eea 0%, #8B5CF6 100%);
-          }
+/* 动画 */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
-          .avatar-text {
-            color: #fff;
-            font-size: 24rpx;
-            font-weight: var(--font-weight-bold);
-          }
-        }
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
 
-        .user-name {
-          font-size: var(--font-size-sm);
-          color: var(--color-text-secondary);
-        }
-      }
+.scale-in {
+  animation: scaleIn var(--duration-normal) var(--ease-spring);
+}
 
-      .grab-btn {
-        background: linear-gradient(135deg, #FFC300 0%, #FFB300 100%);
-        color: #333;
-        font-size: var(--font-size-sm);
-        font-weight: var(--font-weight-semibold);
-        padding: 16rpx 32rpx;
-        border-radius: var(--radius-full);
-        border: none;
-        line-height: 1;
+.pressable {
+  transition: transform var(--duration-fast) var(--ease-out);
+  
+  &:active {
+    transform: scale(0.96);
+  }
+}
 
-        &:active {
-          opacity: 0.9;
-          transform: scale(0.98);
-        }
-
-        &::after {
-          border: none;
-        }
-      }
-    }
+.card-hover {
+  transition: all var(--duration-fast) var(--ease-out);
+  
+  &:active {
+    transform: translateY(-2rpx);
+    box-shadow: var(--shadow-md);
   }
 }
 </style>

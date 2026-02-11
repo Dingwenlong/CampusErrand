@@ -1,23 +1,31 @@
 <template>
   <view class="container" v-if="task">
     <!-- 状态栏 -->
-    <view class="status-bar">
-      <text class="status-text">{{ task.statusName }}</text>
-      <text class="status-desc">{{ getStatusDesc(task.status) }}</text>
+    <view class="status-bar" :class="'status-' + task.status">
+      <view class="status-icon">
+        <text class="iconfont" :class="getStatusIcon(task.status)"></text>
+      </view>
+      <view class="status-content">
+        <text class="status-text">{{ task.statusName }}</text>
+        <text class="status-desc">{{ getStatusDesc(task.status) }}</text>
+      </view>
     </view>
 
     <!-- 任务信息 -->
-    <view class="info-card">
+    <view class="info-card card-hover">
       <view class="info-header">
         <view class="task-type" :class="'type-' + task.taskType">{{ task.taskTypeName }}</view>
-        <text class="task-price">¥{{ task.totalAmount }}</text>
+        <view class="task-price">
+          <text class="price-symbol">¥</text>
+          <text class="price-value">{{ task.totalAmount }}</text>
+        </view>
       </view>
       <view class="task-title">{{ task.title }}</view>
       <view class="task-desc" v-if="task.description">{{ task.description }}</view>
     </view>
 
     <!-- 地址信息 -->
-    <view class="address-card">
+    <view class="address-card card-hover">
       <view class="address-item">
         <view class="address-icon pickup">
           <text class="iconfont icon-location"></text>
@@ -26,11 +34,19 @@
           <view class="address-title">取件地址</view>
           <view class="address-detail">{{ task.pickupAddress }}</view>
           <view class="address-contact" v-if="task.pickupContact || task.pickupPhone">
-            {{ task.pickupContact }} {{ task.pickupPhone }}
+            <text class="contact-name">{{ task.pickupContact }}</text>
+            <text class="contact-phone" v-if="task.pickupPhone">{{ task.pickupPhone }}</text>
           </view>
         </view>
+        <view class="address-action" v-if="task.pickupPhone" @click="makeCall(task.pickupPhone)">
+          <text class="iconfont icon-phone"></text>
+        </view>
       </view>
-      <view class="address-divider"></view>
+      <view class="address-divider">
+        <view class="divider-dot"></view>
+        <view class="divider-dot"></view>
+        <view class="divider-dot"></view>
+      </view>
       <view class="address-item">
         <view class="address-icon delivery">
           <text class="iconfont icon-location"></text>
@@ -39,48 +55,70 @@
           <view class="address-title">送达地址</view>
           <view class="address-detail">{{ task.deliveryAddress }}</view>
           <view class="address-contact" v-if="task.deliveryContact || task.deliveryPhone">
-            {{ task.deliveryContact }} {{ task.deliveryPhone }}
+            <text class="contact-name">{{ task.deliveryContact }}</text>
+            <text class="contact-phone" v-if="task.deliveryPhone">{{ task.deliveryPhone }}</text>
           </view>
+        </view>
+        <view class="address-action" v-if="task.deliveryPhone" @click="makeCall(task.deliveryPhone)">
+          <text class="iconfont icon-phone"></text>
         </view>
       </view>
     </view>
 
     <!-- 时间信息 -->
-    <view class="time-card">
+    <view class="time-card card-hover">
       <view class="time-item">
-        <text class="time-label">发布时间</text>
-        <text class="time-value">{{ task.createTime }}</text>
+        <view class="time-icon">
+          <text class="iconfont icon-time"></text>
+        </view>
+        <view class="time-content">
+          <text class="time-label">发布时间</text>
+          <text class="time-value">{{ task.createTime }}</text>
+        </view>
       </view>
       <view class="time-item" v-if="task.expectTime">
-        <text class="time-label">期望送达</text>
-        <text class="time-value">{{ task.expectTime }}</text>
+        <view class="time-icon expect">
+          <text class="iconfont icon-clock"></text>
+        </view>
+        <view class="time-content">
+          <text class="time-label">期望送达</text>
+          <text class="time-value">{{ task.expectTime }}</text>
+        </view>
       </view>
       <view class="time-item" v-if="task.deadlineTime">
-        <text class="time-label">截止时间</text>
-        <text class="time-value">{{ task.deadlineTime }}</text>
+        <view class="time-icon deadline">
+          <text class="iconfont icon-deadline"></text>
+        </view>
+        <view class="time-content">
+          <text class="time-label">截止时间</text>
+          <text class="time-value">{{ task.deadlineTime }}</text>
+        </view>
       </view>
     </view>
 
     <!-- 发布者信息 -->
-    <view class="publisher-card">
+    <view class="publisher-card card-hover">
       <view class="publisher-header">
         <text class="section-title">发布者信息</text>
       </view>
       <view class="publisher-info">
-        <view class="publisher-avatar avatar-gradient">
+        <view class="publisher-avatar" :class="'avatar-type-' + task.taskType">
           <text class="avatar-text">{{ task.publisherName ? task.publisherName.charAt(0) : '?' }}</text>
         </view>
         <view class="publisher-detail">
           <text class="publisher-name">{{ task.publisherName }}</text>
           <view class="publisher-stats">
-            <text class="credit">信用 {{ task.publisherCreditScore }}</text>
+            <view class="credit-badge">
+              <text class="credit-icon">⭐</text>
+              <text class="credit-value">{{ task.publisherCreditScore }}</text>
+            </view>
           </view>
         </view>
       </view>
     </view>
 
     <!-- 接单者信息 -->
-    <view class="runner-card" v-if="task.runnerId">
+    <view class="runner-card card-hover" v-if="task.runnerId">
       <view class="runner-header">
         <text class="section-title">接单者信息</text>
       </view>
@@ -90,58 +128,82 @@
         </view>
         <view class="runner-detail">
           <text class="runner-name">{{ task.runnerName }}</text>
+          <view class="runner-stats">
+            <view class="credit-badge">
+              <text class="credit-icon">⭐</text>
+              <text class="credit-value">{{ task.runnerCreditScore || 100 }}</text>
+            </view>
+          </view>
         </view>
       </view>
     </view>
 
     <!-- 备注 -->
-    <view class="remark-card" v-if="task.remark">
-      <view class="remark-title">备注</view>
+    <view class="remark-card card-hover" v-if="task.remark">
+      <view class="remark-header">
+        <text class="iconfont icon-remark"></text>
+        <text class="remark-title">备注</text>
+      </view>
       <view class="remark-content">{{ task.remark }}</view>
     </view>
+
+    <!-- 底部占位 -->
+    <view class="bottom-placeholder"></view>
 
     <!-- 底部操作栏 -->
     <view class="bottom-bar">
       <view class="price-info">
         <text class="price-label">任务金额</text>
-        <text class="price-value">¥{{ task.totalAmount }}</text>
+        <view class="price-value-wrapper">
+          <text class="price-symbol">¥</text>
+          <text class="price-value">{{ task.totalAmount }}</text>
+        </view>
       </view>
       <view class="action-btns">
         <button 
-          class="btn-primary" 
+          class="btn-primary pressable" 
           v-if="task.status === 0 && task.userId !== currentUserId"
           @click="acceptTask"
         >
-          立即抢单
+          <text class="iconfont icon-accept"></text>
+          <text>立即抢单</text>
         </button>
         <button 
-          class="btn-primary" 
+          class="btn-primary pressable" 
           v-if="task.status === 1 && task.runnerId === currentUserId"
           @click="updateStatus(2)"
         >
-          确认取件
+          <text class="iconfont icon-check"></text>
+          <text>确认取件</text>
         </button>
         <button 
-          class="btn-primary" 
+          class="btn-primary pressable" 
           v-if="task.status === 2 && task.runnerId === currentUserId"
           @click="updateStatus(3)"
         >
-          开始配送
+          <text class="iconfont icon-deliver"></text>
+          <text>开始配送</text>
         </button>
         <button 
-          class="btn-primary" 
+          class="btn-primary pressable" 
           v-if="task.status === 3 && task.runnerId === currentUserId"
           @click="updateStatus(4)"
         >
-          确认送达
+          <text class="iconfont icon-check-circle"></text>
+          <text>确认送达</text>
         </button>
         <button 
-          class="btn-primary" 
+          class="btn-primary pressable" 
           v-if="task.status === 4 && task.userId === currentUserId"
           @click="updateStatus(5)"
         >
-          确认完成
+          <text class="iconfont icon-complete"></text>
+          <text>确认完成</text>
         </button>
+        <view class="status-badge" v-if="task.status === 5 || task.status === 6">
+          <text class="iconfont icon-finished"></text>
+          <text>{{ task.status === 5 ? '已完成' : '已取消' }}</text>
+        </view>
       </view>
     </view>
   </view>
@@ -180,6 +242,13 @@ export default {
     },
     
     async acceptTask() {
+      // 触觉反馈
+      // #ifdef MP-WEIXIN
+      if (uni.vibrateShort) {
+        uni.vibrateShort({ type: 'medium' })
+      }
+      // #endif
+      
       uni.showModal({
         title: '确认抢单',
         content: '确定要接这个任务吗？',
@@ -213,6 +282,13 @@ export default {
         5: '确认完成'
       }
       
+      // 触觉反馈
+      // #ifdef MP-WEIXIN
+      if (uni.vibrateShort) {
+        uni.vibrateShort({ type: 'light' })
+      }
+      // #endif
+      
       uni.showModal({
         title: statusMap[status],
         content: `确定要${statusMap[status]}吗？`,
@@ -238,6 +314,25 @@ export default {
       })
     },
     
+    makeCall(phone) {
+      uni.makePhoneCall({
+        phoneNumber: phone
+      })
+    },
+    
+    getStatusIcon(status) {
+      const iconMap = {
+        0: 'icon-waiting',
+        1: 'icon-accepted',
+        2: 'icon-pickup',
+        3: 'icon-delivering',
+        4: 'icon-delivered',
+        5: 'icon-completed',
+        6: 'icon-cancelled'
+      }
+      return iconMap[status] || 'icon-waiting'
+    },
+    
     getStatusDesc(status) {
       const descMap = {
         0: '等待接单中',
@@ -255,146 +350,183 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '@/static/styles/mixins.scss';
+
 .container {
-  padding: var(--spacing-md);
-  padding-bottom: 140rpx;
-  background: var(--bg-color);
+  padding: var(--space-6);
+  padding-bottom: calc(140rpx + env(safe-area-inset-bottom));
+  background-color: var(--color-bg);
   min-height: 100vh;
 }
 
 .status-bar {
-  background: var(--primary-color);
-  border-radius: var(--border-radius-md);
-  padding: var(--spacing-xl);
-  margin-bottom: var(--spacing-md);
-  color: white;
+  display: flex;
+  align-items: center;
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  margin-bottom: var(--space-6);
   box-shadow: var(--shadow-md);
-  animation: fadeInUp 0.5s ease forwards;
-  opacity: 0;
-  transform: translateY(20rpx);
+  animation: slideIn var(--duration-normal) var(--ease-out) both;
+  
+  &.status-0 {
+    background: linear-gradient(135deg, #FFC300 0%, #FFB300 100%);
+  }
+  
+  &.status-1, &.status-2, &.status-3 {
+    background: linear-gradient(135deg, #1890FF 0%, #36CFC9 100%);
+  }
+  
+  &.status-4 {
+    background: linear-gradient(135deg, #52C41A 0%, #73D13D 100%);
+  }
+  
+  &.status-5 {
+    background: linear-gradient(135deg, #52C41A 0%, #95DE64 100%);
+  }
+  
+  &.status-6 {
+    background: linear-gradient(135deg, #8C8C8C 0%, #BFBFBF 100%);
+  }
+}
+
+.status-bar {
+  .status-icon {
+    width: 80rpx;
+    height: 80rpx;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: var(--space-5);
+    
+    .iconfont {
+      font-size: 40rpx;
+      color: var(--color-white);
+    }
+  }
+  
+  .status-content {
+    flex: 1;
+  }
   
   .status-text {
     display: block;
     font-size: var(--font-size-xl);
-    font-weight: bold;
-    margin-bottom: var(--spacing-xs);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-white);
+    margin-bottom: var(--space-1);
   }
   
   .status-desc {
-    font-size: var(--font-size-base);
-    opacity: 0.9;
+    font-size: var(--font-size-sm);
+    color: rgba(255, 255, 255, 0.9);
   }
 }
 
 .info-card {
-  background: var(--card-bg);
-  border-radius: var(--border-radius-md);
-  padding: var(--spacing-md);
-  margin-bottom: var(--spacing-md);
+  background-color: var(--color-surface);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  margin-bottom: var(--space-6);
   box-shadow: var(--shadow-sm);
-  transition: all 0.3s ease;
-  animation: fadeInUp 0.5s ease forwards;
-  opacity: 0;
-  transform: translateY(20rpx);
+  animation: slideIn var(--duration-normal) var(--ease-out) both;
   animation-delay: 0.1s;
-  
-  &:active {
-    box-shadow: var(--shadow-md);
-    transform: translateY(-2rpx);
-  }
   
   .info-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--spacing-sm);
+    margin-bottom: var(--space-4);
     
     .task-type {
-      padding: var(--spacing-xs) var(--spacing-sm);
-      border-radius: var(--border-radius-sm);
+      padding: var(--space-1) var(--space-3);
+      border-radius: var(--radius-sm);
       font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-medium);
       
       &.type-1 {
-        background: rgba(24, 144, 255, 0.1);
-        color: var(--info-color);
+        background-color: var(--color-task-express-soft);
+        color: var(--color-task-express);
       }
       
       &.type-2 {
-        background: rgba(82, 196, 26, 0.1);
-        color: var(--success-color);
+        background-color: var(--color-task-shopping-soft);
+        color: var(--color-task-shopping);
       }
       
       &.type-3 {
-        background: rgba(250, 173, 20, 0.1);
-        color: var(--warning-color);
+        background-color: var(--color-task-delivery-soft);
+        color: var(--color-task-delivery);
       }
       
-      &.type-4 {
-        background: rgba(114, 46, 209, 0.1);
-        color: var(--primary-color);
+      &.type-4, &.type-5 {
+        background-color: var(--color-task-other-soft);
+        color: var(--color-task-other);
       }
     }
     
     .task-price {
-      font-size: var(--font-size-xl);
-      font-weight: bold;
-      color: var(--error-color);
+      display: flex;
+      align-items: baseline;
+      color: var(--color-error);
+      
+      .price-symbol {
+        font-size: var(--font-size-sm);
+        font-weight: var(--font-weight-bold);
+      }
+      
+      .price-value {
+        font-size: var(--font-size-2xl);
+        font-weight: var(--font-weight-bold);
+      }
     }
   }
   
   .task-title {
     font-size: var(--font-size-lg);
-    color: var(--text-primary);
-    font-weight: bold;
-    margin-bottom: var(--spacing-xs);
-    line-height: 1.4;
+    color: var(--color-text-primary);
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: var(--space-3);
+    line-height: var(--line-height-snug);
   }
   
   .task-desc {
     font-size: var(--font-size-base);
-    color: var(--text-secondary);
-    line-height: 1.6;
+    color: var(--color-text-secondary);
+    line-height: var(--line-height-relaxed);
   }
 }
 
 .address-card {
-  background: var(--card-bg);
-  border-radius: var(--border-radius-md);
-  padding: var(--spacing-md);
-  margin-bottom: var(--spacing-md);
+  background-color: var(--color-surface);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  margin-bottom: var(--space-6);
   box-shadow: var(--shadow-sm);
-  transition: all 0.3s ease;
-  animation: fadeInUp 0.5s ease forwards;
-  opacity: 0;
-  transform: translateY(20rpx);
+  animation: slideIn var(--duration-normal) var(--ease-out) both;
   animation-delay: 0.2s;
-  
-  &:active {
-    box-shadow: var(--shadow-md);
-    transform: translateY(-2rpx);
-  }
   
   .address-item {
     display: flex;
     align-items: flex-start;
     
     .address-icon {
-      width: 64rpx;
-      height: 64rpx;
+      width: 72rpx;
+      height: 72rpx;
       border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-right: var(--spacing-md);
+      @include flex-center;
+      margin-right: var(--space-4);
+      flex-shrink: 0;
       
       &.pickup {
-        background: rgba(82, 196, 26, 0.1);
-        color: var(--success-color);
+        background-color: var(--color-task-shopping-soft);
+        color: var(--color-task-shopping);
       }
       
       &.delivery {
-        background: rgba(255, 77, 79, 0.1);
-        color: var(--error-color);
+        background-color: rgba(255, 77, 79, 0.1);
+        color: var(--color-error);
       }
       
       .iconfont {
@@ -406,98 +538,168 @@ export default {
       flex: 1;
       
       .address-title {
-        font-size: var(--font-size-sm);
-        color: var(--text-tertiary);
-        margin-bottom: var(--spacing-xs);
+        font-size: var(--font-size-xs);
+        color: var(--color-text-tertiary);
+        margin-bottom: var(--space-1);
+        text-transform: uppercase;
+        letter-spacing: 1rpx;
       }
       
       .address-detail {
         font-size: var(--font-size-base);
-        color: var(--text-primary);
-        font-weight: 500;
-        margin-bottom: var(--spacing-xs);
-        line-height: 1.3;
+        color: var(--color-text-primary);
+        font-weight: var(--font-weight-medium);
+        margin-bottom: var(--space-2);
+        line-height: var(--line-height-snug);
       }
       
       .address-contact {
-        font-size: var(--font-size-sm);
-        color: var(--text-secondary);
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        
+        .contact-name {
+          font-size: var(--font-size-sm);
+          color: var(--color-text-secondary);
+        }
+        
+        .contact-phone {
+          font-size: var(--font-size-sm);
+          color: var(--color-primary);
+          background-color: var(--color-primary-soft);
+          padding: var(--space-1) var(--space-3);
+          border-radius: var(--radius-sm);
+        }
+      }
+    }
+    
+    .address-action {
+      width: 72rpx;
+      height: 72rpx;
+      border-radius: 50%;
+      background-color: var(--color-success-soft);
+      @include flex-center;
+      margin-left: var(--space-4);
+      transition: all var(--duration-fast) var(--ease-out);
+      
+      &:active {
+        transform: scale(0.95);
+        background-color: var(--color-success);
+        
+        .iconfont {
+          color: var(--color-white);
+        }
+      }
+      
+      .iconfont {
+        font-size: var(--font-size-lg);
+        color: var(--color-success);
       }
     }
   }
   
   .address-divider {
-    height: 2rpx;
-    background: var(--border-color);
-    margin: var(--spacing-md) 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-4) 0;
+    margin-left: 36rpx;
+    
+    .divider-dot {
+      width: 8rpx;
+      height: 8rpx;
+      border-radius: 50%;
+      background-color: var(--color-border);
+      margin: 0 var(--space-1);
+      
+      &:nth-child(2) {
+        width: 6rpx;
+        height: 6rpx;
+      }
+    }
   }
 }
 
 .time-card {
-  background: var(--card-bg);
-  border-radius: var(--border-radius-md);
-  padding: var(--spacing-md);
-  margin-bottom: var(--spacing-md);
+  background-color: var(--color-surface);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  margin-bottom: var(--space-6);
   box-shadow: var(--shadow-sm);
-  transition: all 0.3s ease;
-  animation: fadeInUp 0.5s ease forwards;
-  opacity: 0;
-  transform: translateY(20rpx);
+  animation: slideIn var(--duration-normal) var(--ease-out) both;
   animation-delay: 0.3s;
-  
-  &:active {
-    box-shadow: var(--shadow-md);
-    transform: translateY(-2rpx);
-  }
   
   .time-item {
     display: flex;
-    justify-content: space-between;
-    margin-bottom: var(--spacing-md);
+    align-items: center;
+    margin-bottom: var(--space-4);
     
     &:last-child {
       margin-bottom: 0;
     }
     
-    .time-label {
-      font-size: var(--font-size-base);
-      color: var(--text-secondary);
+    .time-icon {
+      width: 56rpx;
+      height: 56rpx;
+      border-radius: var(--radius-md);
+      background-color: var(--color-bg);
+      @include flex-center;
+      margin-right: var(--space-4);
+      
+      &.expect {
+        background-color: var(--color-primary-soft);
+        color: var(--color-primary);
+      }
+      
+      &.deadline {
+        background-color: rgba(255, 77, 79, 0.1);
+        color: var(--color-error);
+      }
+      
+      .iconfont {
+        font-size: var(--font-size-base);
+        color: var(--color-text-secondary);
+      }
     }
     
-    .time-value {
-      font-size: var(--font-size-base);
-      color: var(--text-primary);
-      font-weight: 500;
+    .time-content {
+      flex: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      
+      .time-label {
+        font-size: var(--font-size-sm);
+        color: var(--color-text-secondary);
+      }
+      
+      .time-value {
+        font-size: var(--font-size-sm);
+        color: var(--color-text-primary);
+        font-weight: var(--font-weight-medium);
+      }
     }
   }
 }
 
 .publisher-card,
 .runner-card {
-  background: var(--card-bg);
-  border-radius: var(--border-radius-md);
-  padding: var(--spacing-md);
-  margin-bottom: var(--spacing-md);
+  background-color: var(--color-surface);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  margin-bottom: var(--space-6);
   box-shadow: var(--shadow-sm);
-  transition: all 0.3s ease;
-  animation: fadeInUp 0.5s ease forwards;
-  opacity: 0;
-  transform: translateY(20rpx);
+  animation: slideIn var(--duration-normal) var(--ease-out) both;
   animation-delay: 0.4s;
-  
-  &:active {
-    box-shadow: var(--shadow-md);
-    transform: translateY(-2rpx);
-  }
   
   .publisher-header,
   .runner-header {
-    margin-bottom: var(--spacing-md);
+    margin-bottom: var(--space-5);
     
     .section-title {
-      font-size: var(--font-size-lg);
-      font-weight: bold;
-      color: var(--text-primary);
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-primary);
     }
   }
   
@@ -511,20 +713,34 @@ export default {
       width: 100rpx;
       height: 100rpx;
       border-radius: 50%;
-      margin-right: var(--spacing-lg);
+      margin-right: var(--space-5);
       box-shadow: var(--shadow-sm);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      @include flex-center;
+
+      &.avatar-type-1 {
+        background: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%);
+      }
+
+      &.avatar-type-2 {
+        background: linear-gradient(135deg, #4ECDC4 0%, #7EDDD6 100%);
+      }
+
+      &.avatar-type-3 {
+        background: linear-gradient(135deg, #667eea 0%, #8B5CF6 100%);
+      }
+
+      &.avatar-type-4, &.avatar-type-5 {
+        background: linear-gradient(135deg, #FFA07A 0%, #FFB347 100%);
+      }
 
       &.avatar-gradient {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       }
 
       .avatar-text {
-        color: #fff;
+        color: var(--color-white);
         font-size: 40rpx;
-        font-weight: bold;
+        font-weight: var(--font-weight-bold);
       }
     }
     
@@ -534,18 +750,30 @@ export default {
       .runner-name {
         display: block;
         font-size: var(--font-size-lg);
-        color: var(--text-primary);
-        font-weight: 500;
-        margin-bottom: var(--spacing-xs);
+        color: var(--color-text-primary);
+        font-weight: var(--font-weight-semibold);
+        margin-bottom: var(--space-2);
       }
       
-      .publisher-stats {
-        .credit {
-          font-size: var(--font-size-sm);
-          color: var(--warning-color);
-          background: rgba(250, 173, 20, 0.1);
-          padding: var(--spacing-xs) var(--spacing-sm);
-          border-radius: var(--border-radius-sm);
+      .publisher-stats,
+      .runner-stats {
+        .credit-badge {
+          display: flex;
+          align-items: center;
+          background-color: var(--color-primary-soft);
+          padding: var(--space-1) var(--space-3);
+          border-radius: var(--radius-sm);
+          
+          .credit-icon {
+            font-size: var(--font-size-xs);
+            margin-right: 4rpx;
+          }
+          
+          .credit-value {
+            font-size: var(--font-size-xs);
+            color: var(--color-primary-dark);
+            font-weight: var(--font-weight-semibold);
+          }
         }
       }
     }
@@ -553,34 +781,44 @@ export default {
 }
 
 .remark-card {
-  background: var(--card-bg);
-  border-radius: var(--border-radius-md);
-  padding: var(--spacing-md);
-  margin-bottom: var(--spacing-md);
+  background-color: var(--color-surface);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  margin-bottom: var(--space-6);
   box-shadow: var(--shadow-sm);
-  transition: all 0.3s ease;
-  animation: fadeInUp 0.5s ease forwards;
-  opacity: 0;
-  transform: translateY(20rpx);
+  animation: slideIn var(--duration-normal) var(--ease-out) both;
   animation-delay: 0.5s;
   
-  &:active {
-    box-shadow: var(--shadow-md);
-    transform: translateY(-2rpx);
-  }
-  
-  .remark-title {
-    font-size: var(--font-size-lg);
-    font-weight: bold;
-    color: var(--text-primary);
-    margin-bottom: var(--spacing-sm);
+  .remark-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--space-4);
+    
+    .iconfont {
+      font-size: var(--font-size-base);
+      color: var(--color-text-tertiary);
+      margin-right: var(--space-2);
+    }
+    
+    .remark-title {
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-primary);
+    }
   }
   
   .remark-content {
     font-size: var(--font-size-base);
-    color: var(--text-secondary);
-    line-height: 1.6;
+    color: var(--color-text-secondary);
+    line-height: var(--line-height-relaxed);
+    background-color: var(--color-bg);
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
   }
+}
+
+.bottom-placeholder {
+  height: 140rpx;
 }
 
 .bottom-bar {
@@ -588,51 +826,108 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  background: var(--card-bg);
-  padding: var(--spacing-md) var(--spacing-lg);
+  background-color: var(--color-surface);
+  padding: var(--space-4) var(--space-6);
+  padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom));
+  box-shadow: 0 -4rpx 20rpx rgba(0, 0, 0, 0.08);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
-  border-top: 2rpx solid var(--border-color);
+  z-index: 100;
   
   .price-info {
+    display: flex;
+    flex-direction: column;
+    
     .price-label {
-      display: block;
       font-size: var(--font-size-xs);
-      color: var(--text-tertiary);
-      margin-bottom: var(--spacing-xs);
+      color: var(--color-text-tertiary);
+      margin-bottom: var(--space-1);
     }
     
-    .price-value {
-      font-size: var(--font-size-xl);
-      font-weight: bold;
-      color: var(--error-color);
+    .price-value-wrapper {
+      display: flex;
+      align-items: baseline;
+      
+      .price-symbol {
+        font-size: var(--font-size-sm);
+        font-weight: var(--font-weight-bold);
+        color: var(--color-error);
+      }
+      
+      .price-value {
+        font-size: var(--font-size-2xl);
+        font-weight: var(--font-weight-bold);
+        color: var(--color-error);
+      }
     }
   }
   
   .action-btns {
     .btn-primary {
-      background: var(--primary-color);
-      color: white;
+      @include flex-center;
+      gap: var(--space-2);
+      min-width: 200rpx;
+      height: 80rpx;
+      padding: 0 var(--space-6);
+      background: var(--color-primary-gradient);
+      border-radius: var(--radius-full);
       font-size: var(--font-size-base);
-      padding: var(--spacing-sm) var(--spacing-xl);
-      border-radius: var(--border-radius-lg);
-      line-height: 1.5;
-      transition: all 0.2s ease;
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-primary);
       border: none;
-      outline: none;
+      transition: all var(--duration-fast) var(--ease-out);
       
       &:active {
-        background-color: var(--primary-active);
-        transform: scale(0.98);
+        transform: scale(0.95);
+        box-shadow: var(--shadow-primary);
+      }
+      
+      .iconfont {
+        font-size: var(--font-size-base);
+      }
+    }
+    
+    .status-badge {
+      @include flex-center;
+      gap: var(--space-2);
+      height: 80rpx;
+      padding: 0 var(--space-6);
+      background-color: var(--color-bg);
+      border-radius: var(--radius-full);
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-secondary);
+      
+      .iconfont {
+        font-size: var(--font-size-base);
       }
     }
   }
 }
 
-/* 动画效果 */
-@keyframes fadeInUp {
+.pressable {
+  transition: transform var(--duration-fast) var(--ease-out);
+  
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.card-hover {
+  transition: all var(--duration-fast) var(--ease-out);
+  
+  &:active {
+    transform: translateY(-2rpx);
+    box-shadow: var(--shadow-md);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20rpx);
+  }
   to {
     opacity: 1;
     transform: translateY(0);

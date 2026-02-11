@@ -209,7 +209,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@use '@/static/styles/mixins.scss' as *;
+@import '@/static/styles/mixins.scss';
 
 .container {
   display: flex;

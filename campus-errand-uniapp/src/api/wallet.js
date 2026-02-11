@@ -9,7 +9,7 @@ export default {
    * @returns {Promise} 钱包信息，包含余额、冻结金额等
    */
   getBalance() {
-    return http.get('/wallet/balance')
+    return http.get('/wallet/info')
   },
 
   /**
@@ -57,13 +57,5 @@ export default {
       return Promise.reject(new Error('支付密码不能为空'))
     }
     return http.post('/wallet/verify-pay-password', { payPassword: password })
-  },
-
-  /**
-   * 检查是否已设置支付密码
-   * @returns {Promise} 检查结果 true-已设置 false-未设置
-   */
-  hasPayPassword() {
-    return http.get('/wallet/has-pay-password')
   }
 }
