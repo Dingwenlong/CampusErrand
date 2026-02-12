@@ -2,8 +2,7 @@
   <!-- 桌面端侧边栏 -->
   <a-layout-sider 
     v-if="!mobile" 
-    :collapsed="collapsed"
-    @update:collapsed="$emit('update:collapsed', $event)"
+    v-model:collapsed="localCollapsed"
     collapsible 
     class="sidebar"
     :width="200"
@@ -102,7 +101,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   DashboardOutlined,
@@ -127,6 +126,10 @@ const emit = defineEmits<{
 const route = useRoute()
 const router = useRouter()
 const selectedKeys = ref<string[]>([route.path])
+const localCollapsed = computed({
+  get: () => !!props.collapsed,
+  set: (value: boolean) => emit('update:collapsed', value)
+})
 
 watch(() => route.path, (newPath) => {
   selectedKeys.value = [newPath]

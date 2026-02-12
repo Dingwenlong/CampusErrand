@@ -88,10 +88,5 @@ export interface Evaluation {
 export interface DashboardData {
   userCount: number
   taskCount: number
-  orderCount: number
   totalAmount: number
-  todayUserCount: number
-  todayTaskCount: number
-  todayOrderCount: number
-  todayAmount: number
 }

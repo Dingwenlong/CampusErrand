@@ -1,8 +1,8 @@
 <template>
   <div class="dashboard">
-    <!-- 统计卡片 - 响应式布局 -->
+    <!-- 统计卡片 -->
     <a-row :gutter="[16, 16]" class="stat-cards">
-      <a-col :xs="12" :sm="12" :md="6" :lg="6" :xl="6">
+      <a-col :xs="24" :sm="12" :md="8" :lg="8" :xl="8">
         <a-card class="stat-card">
           <div class="stat-icon" style="background: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%);">
             <UserOutlined />
@@ -13,7 +13,7 @@
           </div>
         </a-card>
       </a-col>
-      <a-col :xs="12" :sm="12" :md="6" :lg="6" :xl="6">
+      <a-col :xs="24" :sm="12" :md="8" :lg="8" :xl="8">
         <a-card class="stat-card">
           <div class="stat-icon" style="background: linear-gradient(135deg, #4ECDC4 0%, #7EDDD6 100%);">
             <FileTextOutlined />
@@ -24,72 +24,15 @@
           </div>
         </a-card>
       </a-col>
-      <a-col :xs="12" :sm="12" :md="6" :lg="6" :xl="6">
+      <a-col :xs="24" :sm="12" :md="8" :lg="8" :xl="8">
         <a-card class="stat-card">
           <div class="stat-icon" style="background: linear-gradient(135deg, #1d4ed8 0%, #0ea5e9 100%);">
-            <ShoppingCartOutlined />
-          </div>
-          <div class="stat-content">
-            <div class="stat-label">总订单数</div>
-            <div class="stat-value">{{ stats.orderCount || 0 }}</div>
-          </div>
-        </a-card>
-      </a-col>
-      <a-col :xs="12" :sm="12" :md="6" :lg="6" :xl="6">
-        <a-card class="stat-card">
-          <div class="stat-icon" style="background: linear-gradient(135deg, #FFA07A 0%, #FFB347 100%);">
             <DollarOutlined />
           </div>
           <div class="stat-content">
             <div class="stat-label">交易总额</div>
-            <div class="stat-value">¥{{ (stats.totalAmount || 0).toFixed(2) }}</div>
+            <div class="stat-value">¥{{ formatAmount(stats.totalAmount) }}</div>
           </div>
-        </a-card>
-      </a-col>
-    </a-row>
-
-    <!-- 今日数据 -->
-    <a-row :gutter="[16, 16]" class="today-stats">
-      <a-col :span="24">
-        <a-card title="📊 今日数据" class="today-card">
-          <a-row :gutter="[16, 16]">
-            <a-col :xs="12" :sm="12" :md="6" :lg="6" :xl="6">
-              <div class="today-item">
-                <div class="today-icon" style="background: rgba(255, 107, 107, 0.1); color: #FF6B6B;">👤</div>
-                <div class="today-info">
-                  <div class="today-label">新增用户</div>
-                  <div class="today-value">{{ stats.todayUserCount || 0 }}</div>
-                </div>
-              </div>
-            </a-col>
-            <a-col :xs="12" :sm="12" :md="6" :lg="6" :xl="6">
-              <div class="today-item">
-                <div class="today-icon" style="background: rgba(78, 205, 196, 0.1); color: #4ECDC4;">📦</div>
-                <div class="today-info">
-                  <div class="today-label">新增任务</div>
-                  <div class="today-value">{{ stats.todayTaskCount || 0 }}</div>
-                </div>
-              </div>
-            </a-col>
-            <a-col :xs="12" :sm="12" :md="6" :lg="6" :xl="6">
-              <div class="today-item">
-                <div class="today-icon" style="background: rgba(102, 126, 234, 0.1); color: #667eea;">🛒</div>
-                <div class="today-info">
-                  <div class="today-label">新增订单</div>
-                  <div class="today-value">{{ stats.todayOrderCount || 0 }}</div>
-                </div>
-              </div>
-            </a-col>
-            <a-col :xs="12" :sm="12" :md="6" :lg="6" :xl="6">
-              <div class="today-item">
-                <div class="today-icon" style="background: rgba(255, 195, 0, 0.1); color: #FFC300;">💰</div>
-                <div class="today-info">
-                  <div class="today-label">今日交易额</div>
-                  <div class="today-value">¥{{ (stats.todayAmount || 0).toFixed(2) }}</div>
-                </div>
-              </div>
-            </a-col>
-          </a-row>
         </a-card>
       </a-col>
     </a-row>
@@ -120,21 +63,34 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import {
   UserOutlined,
   FileTextOutlined,
-  ShoppingCartOutlined,
   DollarOutlined
 } from '@ant-design/icons-vue'
 import * as echarts from 'echarts'
+import type { EChartsType } from 'echarts'
 import { getDashboardData, getTaskStatusStats, getAmountTrend, getUserGrowth } from '@/api/dashboard'
 
-const stats = ref<Record<string, number>>({})
+interface DashboardStats {
+  userCount: number
+  taskCount: number
+  totalAmount: number | string
+}
+
+const stats = ref<DashboardStats>({
+  userCount: 0,
+  taskCount: 0,
+  totalAmount: 0
+})
 const chartLoading = ref(false)
 const taskStatusChart = ref<HTMLElement>()
 const amountTrendChart = ref<HTMLElement>()
 const userGrowthChart = ref<HTMLElement>()
+const taskStatusChartInstance = ref<EChartsType | null>(null)
+const amountTrendChartInstance = ref<EChartsType | null>(null)
+const userGrowthChartInstance = ref<EChartsType | null>(null)
 
 // 任务状态颜色映射 - 美团风格
 const statusColors: Record<number, string> = {
@@ -147,11 +103,17 @@ const statusColors: Record<number, string> = {
   6: '#999999'  // 已取消 - 灰色
 }
 
+const formatAmount = (value: number | string | undefined) => Number(value || 0).toFixed(2)
+
 const loadData = async () => {
   try {
     const res = await getDashboardData()
     if (res.code === 200) {
-      stats.value = res.data
+      stats.value = {
+        userCount: Number(res.data?.userCount || 0),
+        taskCount: Number(res.data?.taskCount || 0),
+        totalAmount: res.data?.totalAmount || 0
+      }
     }
   } catch (error) {
     console.error('加载仪表盘数据失败', error)
@@ -165,7 +127,9 @@ const initCharts = async () => {
     // 加载任务状态分布数据
     const statusRes = await getTaskStatusStats()
     if (statusRes.code === 200 && taskStatusChart.value) {
-      const chart = echarts.init(taskStatusChart.value)
+      taskStatusChartInstance.value?.dispose()
+      taskStatusChartInstance.value = echarts.init(taskStatusChart.value)
+      const chart = taskStatusChartInstance.value
       const statusData = statusRes.data.data || []
       
       chart.setOption({
@@ -214,7 +178,9 @@ const initCharts = async () => {
     // 加载交易趋势数据
     const trendRes = await getAmountTrend()
     if (trendRes.code === 200 && amountTrendChart.value) {
-      const chart = echarts.init(amountTrendChart.value)
+      amountTrendChartInstance.value?.dispose()
+      amountTrendChartInstance.value = echarts.init(amountTrendChart.value)
+      const chart = amountTrendChartInstance.value
       const dates = trendRes.data.dates || []
       const amounts = trendRes.data.amounts || []
       
@@ -266,7 +232,9 @@ const initCharts = async () => {
     // 加载用户增长趋势数据
     const growthRes = await getUserGrowth()
     if (growthRes.code === 200 && userGrowthChart.value) {
-      const chart = echarts.init(userGrowthChart.value)
+      userGrowthChartInstance.value?.dispose()
+      userGrowthChartInstance.value = echarts.init(userGrowthChart.value)
+      const chart = userGrowthChartInstance.value
       const dates = growthRes.data.dates || []
       const newUsers = growthRes.data.newUsers || []
       const totalUsers = growthRes.data.totalUsers || []
@@ -336,9 +304,30 @@ const initCharts = async () => {
   }
 }
 
+const resizeCharts = () => {
+  taskStatusChartInstance.value?.resize()
+  amountTrendChartInstance.value?.resize()
+  userGrowthChartInstance.value?.resize()
+}
+
+const disposeCharts = () => {
+  taskStatusChartInstance.value?.dispose()
+  amountTrendChartInstance.value?.dispose()
+  userGrowthChartInstance.value?.dispose()
+  taskStatusChartInstance.value = null
+  amountTrendChartInstance.value = null
+  userGrowthChartInstance.value = null
+}
+
 onMounted(() => {
   loadData()
   initCharts()
+  window.addEventListener('resize', resizeCharts)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', resizeCharts)
+  disposeCharts()
 })
 </script>
 
@@ -396,61 +385,6 @@ onMounted(() => {
   text-overflow: ellipsis;
 }
 
-/* 今日数据 */
-.today-stats {
-  margin-bottom: 16px;
-}
-
-.today-card {
-  border-radius: 12px;
-}
-
-.today-card :deep(.ant-card-head) {
-  border-bottom: none;
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.today-item {
-  display: flex;
-  align-items: center;
-  padding: 12px;
-  background: #f8f9fa;
-  border-radius: 12px;
-}
-
-.today-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  margin-right: 10px;
-  flex-shrink: 0;
-}
-
-.today-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.today-label {
-  font-size: 12px;
-  color: #999;
-  margin-bottom: 2px;
-}
-
-.today-value {
-  font-size: 18px;
-  font-weight: 700;
-  color: #333;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 /* 图表 */
 .charts {
   margin-bottom: 16px;
@@ -491,25 +425,6 @@ onMounted(() => {
     font-size: 16px;
   }
   
-  .today-item {
-    padding: 10px;
-  }
-  
-  .today-icon {
-    width: 36px;
-    height: 36px;
-    font-size: 18px;
-    margin-right: 8px;
-  }
-  
-  .today-label {
-    font-size: 11px;
-  }
-  
-  .today-value {
-    font-size: 16px;
-  }
-  
   .chart-container {
     height: 220px;
   }
@@ -531,18 +446,5 @@ onMounted(() => {
     text-align: center;
   }
   
-  .today-item {
-    flex-direction: column;
-    text-align: center;
-  }
-  
-  .today-icon {
-    margin-right: 0;
-    margin-bottom: 6px;
-  }
-  
-  .today-info {
-    text-align: center;
-  }
 }
 </style>

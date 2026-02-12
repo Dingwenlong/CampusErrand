@@ -43,12 +43,6 @@ public class AdminServiceImpl implements AdminService {
         Long taskCount = taskMapper.selectCount(null);
         result.put("taskCount", taskCount);
 
-        // 总订单数（已接单的任务）
-        LambdaQueryWrapper<Task> orderWrapper = new LambdaQueryWrapper<>();
-        orderWrapper.ne(Task::getStatus, 0);
-        Long orderCount = taskMapper.selectCount(orderWrapper);
-        result.put("orderCount", orderCount);
-
         // 交易总额
         LambdaQueryWrapper<Transaction> amountWrapper = new LambdaQueryWrapper<>();
         amountWrapper.eq(Transaction::getDirection, 1)
@@ -58,44 +52,6 @@ public class AdminServiceImpl implements AdminService {
                 .map(Transaction::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         result.put("totalAmount", totalAmount);
-
-        // 今日数据
-        LocalDate today = LocalDate.now();
-        LocalDateTime todayStart = today.atStartOfDay();
-        LocalDateTime todayEnd = today.plusDays(1).atStartOfDay();
-
-        // 今日新增用户
-        LambdaQueryWrapper<User> todayUserWrapper = new LambdaQueryWrapper<>();
-        todayUserWrapper.ge(User::getCreateTime, todayStart)
-                       .lt(User::getCreateTime, todayEnd);
-        Long todayUserCount = userMapper.selectCount(todayUserWrapper);
-        result.put("todayUserCount", todayUserCount);
-
-        // 今日新增任务
-        LambdaQueryWrapper<Task> todayTaskWrapper = new LambdaQueryWrapper<>();
-        todayTaskWrapper.ge(Task::getCreateTime, todayStart)
-                       .lt(Task::getCreateTime, todayEnd);
-        Long todayTaskCount = taskMapper.selectCount(todayTaskWrapper);
-        result.put("todayTaskCount", todayTaskCount);
-
-        // 今日新增订单
-        LambdaQueryWrapper<Task> todayOrderWrapper = new LambdaQueryWrapper<>();
-        todayOrderWrapper.ge(Task::getAcceptTime, todayStart)
-                        .lt(Task::getAcceptTime, todayEnd);
-        Long todayOrderCount = taskMapper.selectCount(todayOrderWrapper);
-        result.put("todayOrderCount", todayOrderCount);
-
-        // 今日交易额
-        LambdaQueryWrapper<Transaction> todayAmountWrapper = new LambdaQueryWrapper<>();
-        todayAmountWrapper.eq(Transaction::getDirection, 1)
-                         .eq(Transaction::getStatus, 1)
-                         .ge(Transaction::getCreateTime, todayStart)
-                         .lt(Transaction::getCreateTime, todayEnd);
-        List<Transaction> todayIncomeTransactions = transactionMapper.selectList(todayAmountWrapper);
-        BigDecimal todayAmount = todayIncomeTransactions.stream()
-                .map(Transaction::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-        result.put("todayAmount", todayAmount);
 
         return result;
     }

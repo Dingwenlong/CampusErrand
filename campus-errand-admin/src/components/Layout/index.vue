@@ -15,7 +15,12 @@
     </a-drawer>
     
     <a-layout>
-      <Header :is-mobile="isMobile" @toggle-menu="mobileMenuOpen = !mobileMenuOpen" />
+      <Header
+        :is-mobile="isMobile"
+        :collapsed="collapsed"
+        @toggle-menu="mobileMenuOpen = !mobileMenuOpen"
+        @toggle-collapse="collapsed = !collapsed"
+      />
       <a-layout-content class="content-shell" :class="{ 'mobile': isMobile }">
         <router-view />
       </a-layout-content>
@@ -24,14 +29,25 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import Sidebar from '@/components/Sidebar/index.vue'
 import Header from '@/components/Header/index.vue'
 import { useResponsive } from '@/composables/useResponsive'
 
 const { isMobile } = useResponsive()
-const collapsed = ref(false)
+const SIDEBAR_COLLAPSED_KEY = 'admin_sidebar_collapsed'
+const collapsed = ref(localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === '1')
 const mobileMenuOpen = ref(false)
+
+watch(collapsed, (value) => {
+  localStorage.setItem(SIDEBAR_COLLAPSED_KEY, value ? '1' : '0')
+})
+
+watch(isMobile, (value) => {
+  if (value) {
+    mobileMenuOpen.value = false
+  }
+})
 </script>
 
 <style scoped>

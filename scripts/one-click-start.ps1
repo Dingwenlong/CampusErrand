@@ -104,7 +104,7 @@ function Start-LongRunningProcess([string]$Name, [string]$Command, [string]$Work
         throw "未找到可用 PowerShell（pwsh/powershell）。"
     }
 
-    $proc = Start-Process -FilePath $shell -WorkingDirectory $WorkingDirectory -ArgumentList @("-NoExit", "-Command", $Command) -PassThru
+    $proc = Start-Process -FilePath $shell -WorkingDirectory $WorkingDirectory -ArgumentList @("-NoExit", "-Command", $Command) -WindowStyle Minimized -PassThru
     Write-Ok "$Name 已启动，PID=$($proc.Id)"
     return $proc
 }

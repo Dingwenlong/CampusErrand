@@ -10,6 +10,15 @@
       >
         <MenuOutlined />
       </a-button>
+      <a-button
+        v-else
+        type="text"
+        class="menu-btn"
+        @click="$emit('toggle-collapse')"
+      >
+        <MenuUnfoldOutlined v-if="collapsed" />
+        <MenuFoldOutlined v-else />
+      </a-button>
       <div class="title-group">
         <span class="page-title">后台管理系统</span>
         <span v-if="!isMobile" class="page-subtitle">Campus Errand Operations</span>
@@ -41,15 +50,17 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
-import { DownOutlined, LogoutOutlined, MenuOutlined } from '@ant-design/icons-vue'
+import { DownOutlined, LogoutOutlined, MenuOutlined, MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons-vue'
 import { useUserStore } from '@/store/user'
 
 defineProps<{
   isMobile?: boolean
+  collapsed?: boolean
 }>()
 
 defineEmits<{
   (e: 'toggle-menu'): void
+  (e: 'toggle-collapse'): void
 }>()
 
 const router = useRouter()
@@ -86,6 +97,7 @@ const handleMenuClick = ({ key }: { key: string }) => {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  line-height: 24px !important;
 }
 
 .menu-btn {

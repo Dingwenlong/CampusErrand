@@ -151,6 +151,34 @@ CREATE TABLE IF NOT EXISTS tb_message (
     INDEX idx_create_time (create_time)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='消息通知表';
 
+-- 轮播图表
+CREATE TABLE IF NOT EXISTS tb_banner (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    title VARCHAR(100) NOT NULL COMMENT '标题',
+    content VARCHAR(255) DEFAULT NULL COMMENT '内容描述',
+    bg_color VARCHAR(255) DEFAULT NULL COMMENT '背景色',
+    image_url VARCHAR(500) DEFAULT NULL COMMENT '图片URL',
+    link_url VARCHAR(500) DEFAULT NULL COMMENT '链接URL',
+    sort_order INT DEFAULT 0 COMMENT '排序，数字越小越靠前',
+    status TINYINT DEFAULT 1 COMMENT '状态：0-禁用 1-启用',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    INDEX idx_status (status),
+    INDEX idx_sort_order (sort_order)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='轮播图表';
+
+-- 初始化默认轮播图数据（仅当表为空）
+INSERT INTO tb_banner (title, content, bg_color, sort_order, status)
+SELECT t.title, t.content, t.bg_color, t.sort_order, t.status
+FROM (
+    SELECT '校园跑腿' AS title, '便捷生活，从这里开始' AS content, 'linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%)' AS bg_color, 1 AS sort_order, 1 AS status
+    UNION ALL
+    SELECT '安全可靠', '实名认证，信用保障', 'linear-gradient(135deg, #4ECDC4 0%, #7EDDD6 100%)', 2, 1
+    UNION ALL
+    SELECT '快速响应', '附近跑腿员，即时接单', 'linear-gradient(135deg, #667eea 0%, #8B5CF6 100%)', 3, 1
+) AS t
+WHERE NOT EXISTS (SELECT 1 FROM tb_banner LIMIT 1);
+
 -- 系统配置表
 CREATE TABLE IF NOT EXISTS tb_config (
     id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',

@@ -16,6 +16,9 @@ public class DatabaseUpdateConfig implements CommandLineRunner {
         try {
             // 修复数据库字符集
             fixDatabaseCharset();
+
+            // 检查并创建轮播图表
+            ensureBannerTable();
             
             // 检查并添加 tb_task 表的字段
             addTaskTableColumns();
@@ -74,6 +77,26 @@ public class DatabaseUpdateConfig implements CommandLineRunner {
             jdbcTemplate.execute("ALTER TABLE tb_config ADD COLUMN category VARCHAR(50) DEFAULT 'other' COMMENT '配置分类' AFTER description");
             System.out.println("已添加 tb_config.category 字段");
         }
+    }
+
+    private void ensureBannerTable() {
+        jdbcTemplate.execute(
+            "CREATE TABLE IF NOT EXISTS tb_banner (" +
+            "id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID', " +
+            "title VARCHAR(100) NOT NULL COMMENT '标题', " +
+            "content VARCHAR(255) DEFAULT NULL COMMENT '内容描述', " +
+            "bg_color VARCHAR(255) DEFAULT NULL COMMENT '背景色', " +
+            "image_url VARCHAR(500) DEFAULT NULL COMMENT '图片URL', " +
+            "link_url VARCHAR(500) DEFAULT NULL COMMENT '链接URL', " +
+            "sort_order INT DEFAULT 0 COMMENT '排序，数字越小越靠前', " +
+            "status TINYINT DEFAULT 1 COMMENT '状态：0-禁用 1-启用', " +
+            "create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间', " +
+            "update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间', " +
+            "INDEX idx_status (status), " +
+            "INDEX idx_sort_order (sort_order)" +
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='轮播图表'"
+        );
+        System.out.println("已确保 tb_banner 表存在");
     }
 
     private boolean columnExists(String tableName, String columnName) {
