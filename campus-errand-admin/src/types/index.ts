@@ -17,13 +17,39 @@ export interface PageResult<T> {
 // 用户类型
 export interface User {
   id: number
+  openid: string
+  unionid: string
   nickname: string
   avatar: string
-  gender: number
   phone: string
-  creditScore: number
+  gender: number
+  userType: number
   status: number
+  isVerified: number
+  realName: string
+  idCard: string
+  studentId: string
+  schoolName: string
+  creditScore: number
+  totalOrders: number
+  completedOrders: number
+  cancelledOrders: number
   createTime: string
+  updateTime: string
+}
+
+// 用户钱包类型
+export interface UserWallet {
+  userId: number
+  balance: number
+  frozenAmount: number
+  totalIncome: number
+  totalExpense: number
+}
+
+// 用户详情（包含钱包信息）
+export interface UserDetail extends User {
+  wallet?: UserWallet
 }
 
 // 任务类型

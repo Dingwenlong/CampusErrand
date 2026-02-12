@@ -165,12 +165,12 @@
 @mixin btn-primary {
   @include btn-base;
   background: var(--color-primary-gradient);
-  color: var(--color-text-primary);
+  color: var(--color-text-inverse);
   box-shadow: var(--shadow-primary);
   
   &:active {
     background: var(--color-primary-dark);
-    box-shadow: 0 2rpx 8rpx rgba(255, 195, 0, 0.4);
+    box-shadow: 0 2rpx 8rpx rgba(255, 107, 53, 0.4);
   }
 }
 
@@ -286,7 +286,7 @@
   right: 0;
   padding-bottom: env(safe-area-inset-bottom);
   background-color: var(--color-surface);
-  box-shadow: 0 -4rpx 20rpx rgba(0, 0, 0, 0.05);
+  box-shadow: 0 -4rpx 20rpx rgba(74, 55, 40, 0.05);
 }
 
 // --------------------------------------------

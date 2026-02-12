@@ -428,7 +428,7 @@ export default {
       uni.showModal({
         title: '提示',
         content: '游客模式下部分功能将受到限制，是否继续？',
-        confirmColor: '#f59e0b',
+        confirmColor: '#FF6B35',
         success: (res) => {
           if (res.confirm) {
             uni.switchTab({
@@ -446,16 +446,16 @@ export default {
 // ============================================
 // 设计系统变量
 // ============================================
-$primary-gradient: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
-$primary-gradient-hover: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-primary) 100%);
+$primary-gradient: linear-gradient(135deg, #FF6B35 0%, #FF8C5A 100%);
+$primary-gradient-hover: linear-gradient(135deg, #FF8C5A 0%, #FF6B35 100%);
 $wechat-green: #07C160;
 $wechat-green-hover: #06ad56;
-$bg-gradient: linear-gradient(180deg, #FFF9E6 0%, #FFFFFF 50%, #F8F9FA 100%);
+$bg-gradient: linear-gradient(180deg, #FFF8F0 0%, #FFFFFF 50%, #FFF5EB 100%);
 
-$shadow-sm: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
-$shadow-md: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
-$shadow-lg: 0 8rpx 32rpx rgba(0, 0, 0, 0.12);
-$shadow-primary: 0 8rpx 24rpx rgba(255, 195, 0, 0.35);
+$shadow-sm: 0 2rpx 8rpx rgba(74, 55, 40, 0.04);
+$shadow-md: 0 4rpx 16rpx rgba(74, 55, 40, 0.08);
+$shadow-lg: 0 8rpx 32rpx rgba(74, 55, 40, 0.12);
+$shadow-primary: 0 8rpx 24rpx rgba(255, 107, 53, 0.35);
 $shadow-wechat: 0 8rpx 24rpx rgba(7, 193, 96, 0.35);
 
 $radius-sm: 12rpx;
@@ -499,7 +499,7 @@ $radius-full: 9999rpx;
 .orb-1 {
   width: 600rpx;
   height: 600rpx;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+  background: linear-gradient(135deg, #FF6B35 0%, #FF8C5A 100%);
   top: -200rpx;
   right: -200rpx;
   animation: float 8s ease-in-out infinite;
@@ -508,7 +508,7 @@ $radius-full: 9999rpx;
 .orb-2 {
   width: 400rpx;
   height: 400rpx;
-  background: linear-gradient(135deg, #FFE082 0%, var(--color-primary) 100%);
+  background: linear-gradient(135deg, #FFB347 0%, #FF6B35 100%);
   top: 400rpx;
   left: -150rpx;
   animation: float 10s ease-in-out infinite 1s;
@@ -517,7 +517,7 @@ $radius-full: 9999rpx;
 .orb-3 {
   width: 300rpx;
   height: 300rpx;
-  background: linear-gradient(135deg, #FFF8E1 0%, #FFE082 100%);
+  background: linear-gradient(135deg, #FFF0E5 0%, #FFB347 100%);
   bottom: 200rpx;
   right: -100rpx;
   animation: float 12s ease-in-out infinite 2s;
@@ -530,8 +530,8 @@ $radius-full: 9999rpx;
   right: 0;
   bottom: 0;
   background-image: 
-    linear-gradient(rgba(255, 195, 0, 0.03) 1rpx, transparent 1rpx),
-    linear-gradient(90deg, rgba(255, 195, 0, 0.03) 1rpx, transparent 1rpx);
+    linear-gradient(rgba(255, 107, 53, 0.03) 1rpx, transparent 1rpx),
+    linear-gradient(90deg, rgba(255, 107, 53, 0.03) 1rpx, transparent 1rpx);
   background-size: 60rpx 60rpx;
 }
 
@@ -576,7 +576,7 @@ $radius-full: 9999rpx;
   transform: translate(-50%, -50%);
   width: 240rpx;
   height: 240rpx;
-  background: radial-gradient(circle, rgba(255, 195, 0, 0.3) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(255, 107, 53, 0.3) 0%, transparent 70%);
   border-radius: 50%;
   animation: pulse 3s ease-in-out infinite;
 }
@@ -602,7 +602,7 @@ $radius-full: 9999rpx;
     content: '';
     position: absolute;
     inset: -4rpx;
-    background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-primary-dark) 100%);
+    background: linear-gradient(135deg, #FF8C5A 0%, #E85A2A 100%);
     border-radius: $radius-xl;
     z-index: -1;
     opacity: 0.5;
@@ -1003,10 +1003,10 @@ $radius-full: 9999rpx;
   justify-content: center;
   font-size: 36rpx;
   margin-right: 20rpx;
-  box-shadow: 0 4rpx 12rpx rgba(255, 195, 0, 0.3);
+  box-shadow: 0 4rpx 12rpx rgba(255, 107, 53, 0.3);
   
   &.privacy {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(16, 185, 129, 0.24) 100%);
+    background: linear-gradient(135deg, rgba(123, 196, 127, 0.12) 0%, rgba(123, 196, 127, 0.24) 100%);
   }
 }
 
@@ -1055,12 +1055,12 @@ $radius-full: 9999rpx;
 .content-intro {
   text-align: center;
   padding: 32rpx;
-  background: linear-gradient(135deg, rgba(255, 195, 0, 0.08) 0%, rgba(255, 243, 224, 0.5) 100%);
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.08) 0%, rgba(255, 248, 240, 0.5) 100%);
   border-radius: $radius-lg;
   margin-bottom: 40rpx;
   
   &.privacy-intro {
-    background: linear-gradient(135deg, rgba(7, 193, 96, 0.08) 0%, rgba(232, 245, 233, 0.5) 100%);
+    background: linear-gradient(135deg, rgba(123, 196, 127, 0.08) 0%, rgba(232, 245, 233, 0.5) 100%);
   }
 }
 
@@ -1125,7 +1125,7 @@ $radius-full: 9999rpx;
 .item-icon {
   width: 48rpx;
   height: 48rpx;
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(16, 185, 129, 0.24) 100%);
+  background: linear-gradient(135deg, rgba(123, 196, 127, 0.12) 0%, rgba(123, 196, 127, 0.24) 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -1195,12 +1195,12 @@ $radius-full: 9999rpx;
   
   &.confirm {
     background: $primary-gradient;
-    color: #1a1a1a;
-    box-shadow: 0 4rpx 16rpx rgba(255, 195, 0, 0.35);
+    color: #fff;
+    box-shadow: 0 4rpx 16rpx rgba(255, 107, 53, 0.35);
     
     &:active {
       transform: translateY(2rpx);
-      box-shadow: 0 2rpx 8rpx rgba(255, 195, 0, 0.25);
+      box-shadow: 0 2rpx 8rpx rgba(255, 107, 53, 0.25);
     }
   }
 }

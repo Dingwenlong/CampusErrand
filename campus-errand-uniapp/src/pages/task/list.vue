@@ -127,16 +127,21 @@
       </view>
       <text class="btn-text">发布</text>
     </view>
+
+    <!-- 自定义底部导航 -->
+    <custom-tabbar :current="1" />
   </view>
 </template>
 
 <script>
 import taskApi from '@/api/task.js'
 import Skeleton from '@/components/skeleton/index.vue'
+import CustomTabbar from '@/components/custom-tabbar/index.vue'
 
 export default {
   components: {
-    Skeleton
+    Skeleton,
+    CustomTabbar
   },
   data() {
     return {
@@ -151,6 +156,9 @@ export default {
   },
   onLoad() {
     this.loadTaskList()
+  },
+  onShow() {
+    uni.$emit('tabBarChange', 1)
   },
   methods: {
     selectType(type) {
@@ -273,6 +281,7 @@ export default {
   display: flex;
   flex-direction: column;
   background-color: var(--color-bg);
+  padding-bottom: calc(140rpx + env(safe-area-inset-bottom));
 }
 
 .filter-bar {
@@ -443,19 +452,19 @@ export default {
         @include flex-center;
 
         &.avatar-type-1 {
-          background: linear-gradient(135deg, var(--color-brand-coral) 0%, var(--color-brand-coral-light) 100%);
+          background: linear-gradient(135deg, #FF6B35 0%, #FF8C5A 100%);
         }
 
         &.avatar-type-2 {
-          background: linear-gradient(135deg, var(--color-brand-mint) 0%, var(--color-brand-mint-light) 100%);
+          background: linear-gradient(135deg, #7BC47F 0%, #9DD9A0 100%);
         }
 
         &.avatar-type-3 {
-          background: linear-gradient(135deg, var(--color-brand-blue) 0%, var(--color-brand-blue-dark) 100%);
+          background: linear-gradient(135deg, #FFB347 0%, #FFC970 100%);
         }
 
         &.avatar-type-4, &.avatar-type-5 {
-          background: linear-gradient(135deg, var(--color-brand-coral) 0%, var(--color-brand-coral-light) 100%);
+          background: linear-gradient(135deg, #FFB088 0%, #FFC4A8 100%);
         }
 
         .avatar-text {

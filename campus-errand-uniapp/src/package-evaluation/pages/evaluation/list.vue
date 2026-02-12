@@ -242,7 +242,7 @@ export default {
   padding: var(--space-6);
   color: var(--color-white);
   border-radius: var(--radius-2xl);
-  background: linear-gradient(135deg, var(--color-brand-blue) 0%, var(--color-brand-indigo) 100%);
+  background: linear-gradient(135deg, #FF6B35 0%, #FF8C5A 100%);
   box-shadow: var(--shadow-md);
 
   .rating-left {

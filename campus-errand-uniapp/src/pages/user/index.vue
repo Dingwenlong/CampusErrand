@@ -51,7 +51,7 @@
       <view class="menu-grid">
         <view class="menu-item pressable" v-for="(item, index) in menuItems" :key="index" @click="item.action">
           <view class="menu-icon-wrapper" :class="'icon-bg-' + (index + 1)">
-            <text class="iconfont menu-icon" :class="item.icon"></text>
+            <text class="menu-icon">{{ item.icon }}</text>
           </view>
           <text class="menu-text">{{ item.name }}</text>
         </view>
@@ -68,7 +68,7 @@
       >
         <view class="item-left">
           <view class="item-icon-wrapper" :class="'icon-bg-' + (index + 5)">
-            <text class="iconfont item-icon" :class="item.icon"></text>
+            <text class="item-icon">{{ item.icon }}</text>
           </view>
           <text class="item-text">{{ item.name }}</text>
         </view>
@@ -83,14 +83,21 @@
     <view class="version-info">
       <text>校园跑腿 v1.0.0</text>
     </view>
+
+    <!-- 自定义底部导航 -->
+    <custom-tabbar :current="3" />
   </view>
 </template>
 
 <script>
 import userApi from '@/api/user.js'
 import walletApi from '@/api/wallet.js'
+import CustomTabbar from '@/components/custom-tabbar/index.vue'
 
 export default {
+  components: {
+    CustomTabbar
+  },
   data() {
     return {
       userInfo: {
@@ -104,19 +111,20 @@ export default {
         hasPayPassword: false
       },
       menuItems: [
-        { name: '我发布的', icon: 'icon-publish', action: this.goPublishedTasks },
-        { name: '我接单的', icon: 'icon-accept', action: this.goAcceptedTasks },
-        { name: '我的钱包', icon: 'icon-wallet', action: this.goWallet },
-        { name: '我的评价', icon: 'icon-evaluation', action: this.goEvaluations }
+        { name: '我发布的', icon: '📋', action: this.goPublishedTasks },
+        { name: '我接单的', icon: '📝', action: this.goAcceptedTasks },
+        { name: '我的钱包', icon: '💰', action: this.goWallet },
+        { name: '我的评价', icon: '⭐', action: this.goEvaluations }
       ],
       settingItems: [
-        { name: '个人资料', icon: 'icon-profile', action: this.goProfile },
-        { name: '支付密码', icon: 'icon-password', action: this.goPayPassword, extra: '' },
-        { name: '设置', icon: 'icon-setting', action: this.goSettings }
+        { name: '个人资料', icon: '👤', action: this.goProfile },
+        { name: '支付密码', icon: '🔐', action: this.goPayPassword, extra: '' },
+        { name: '设置', icon: '⚙️', action: this.goSettings }
       ]
     }
   },
   onShow() {
+    uni.$emit('tabBarChange', 3)
     this.loadUserInfo()
     this.loadWalletInfo()
   },
@@ -199,7 +207,7 @@ export default {
 .container {
   min-height: 100vh;
   background-color: var(--color-bg);
-  padding-bottom: calc(var(--space-6) + env(safe-area-inset-bottom));
+  padding-bottom: calc(var(--space-6) + 140rpx + env(safe-area-inset-bottom));
 }
 
 /* 顶部黄色区域 */
@@ -406,28 +414,27 @@ export default {
   transition: all var(--duration-fast) var(--ease-out);
 
   &.icon-bg-1 {
-    background: linear-gradient(135deg, var(--color-brand-coral) 0%, var(--color-brand-coral-light) 100%);
-    box-shadow: 0 8rpx 24rpx rgba(255, 107, 107, 0.3);
+    background: linear-gradient(135deg, #FF6B35 0%, #FF8C5A 100%);
+    box-shadow: 0 8rpx 24rpx rgba(255, 107, 53, 0.35);
   }
 
   &.icon-bg-2 {
-    background: linear-gradient(135deg, var(--color-brand-mint) 0%, var(--color-brand-mint-light) 100%);
-    box-shadow: 0 8rpx 24rpx rgba(78, 205, 196, 0.3);
+    background: linear-gradient(135deg, #7BC47F 0%, #9DD9A0 100%);
+    box-shadow: 0 8rpx 24rpx rgba(123, 196, 127, 0.35);
   }
 
   &.icon-bg-3 {
-    background: linear-gradient(135deg, var(--color-brand-blue) 0%, var(--color-brand-blue-dark) 100%);
-    box-shadow: 0 8rpx 24rpx rgba(102, 126, 234, 0.3);
+    background: linear-gradient(135deg, #FFB347 0%, #FFC970 100%);
+    box-shadow: 0 8rpx 24rpx rgba(255, 179, 71, 0.35);
   }
 
   &.icon-bg-4 {
-    background: linear-gradient(135deg, var(--color-brand-coral) 0%, var(--color-brand-coral-light) 100%);
-    box-shadow: 0 8rpx 24rpx rgba(255, 160, 122, 0.3);
+    background: linear-gradient(135deg, #FFB088 0%, #FFC4A8 100%);
+    box-shadow: 0 8rpx 24rpx rgba(255, 176, 136, 0.35);
   }
 
   .menu-icon {
-    font-size: 44rpx;
-    color: var(--color-white);
+    font-size: 40rpx;
   }
 }
 
@@ -476,20 +483,19 @@ export default {
   margin-right: var(--space-4);
 
   &.icon-bg-5 {
-    background: linear-gradient(135deg, var(--color-brand-coral) 0%, var(--color-brand-coral-light) 100%);
+    background: linear-gradient(135deg, #FF6B35 0%, #FF8C5A 100%);
   }
 
   &.icon-bg-6 {
-    background: linear-gradient(135deg, var(--color-brand-mint) 0%, var(--color-brand-mint-light) 100%);
+    background: linear-gradient(135deg, #7BC47F 0%, #9DD9A0 100%);
   }
 
   &.icon-bg-7 {
-    background: linear-gradient(135deg, var(--color-brand-blue) 0%, var(--color-brand-blue-dark) 100%);
+    background: linear-gradient(135deg, #FFB347 0%, #FFC970 100%);
   }
 
   .item-icon {
-    font-size: 32rpx;
-    color: var(--color-white);
+    font-size: 28rpx;
   }
 }
 

@@ -39,7 +39,7 @@
           :style="{ animationDelay: index * 0.05 + 's' }"
         >
           <view class="feature-icon-wrapper scale-in" :class="'icon-bg-' + item.type">
-            <text class="iconfont feature-icon" :class="item.iconClass"></text>
+            <text class="feature-icon">{{ item.icon }}</text>
           </view>
           <text class="feature-text">{{ item.name }}</text>
         </view>
@@ -136,11 +136,15 @@
       <view class="loading-spinner"></view>
       <text>加载中...</text>
     </view>
+
+    <!-- 自定义底部导航 -->
+    <custom-tabbar :current="0" />
   </view>
 </template>
 
 <script>
 import { http } from '@/utils/request.js'
+import CustomTabbar from '@/components/custom-tabbar/index.vue'
 
 const taskTypeMap = {
   1: '取快递',
@@ -151,12 +155,15 @@ const taskTypeMap = {
 }
 
 const bannerColors = [
-  'linear-gradient(135deg, var(--color-brand-coral) 0%, var(--color-brand-coral-light) 100%)',
-  'linear-gradient(135deg, var(--color-brand-mint) 0%, var(--color-brand-mint-light) 100%)',
-  'linear-gradient(135deg, var(--color-brand-blue) 0%, var(--color-brand-blue-dark) 100%)'
+  'linear-gradient(135deg, #FF6B35 0%, #FF8C5A 100%)',
+  'linear-gradient(135deg, #7BC47F 0%, #9DD9A0 100%)',
+  'linear-gradient(135deg, #FFB347 0%, #FFC970 100%)'
 ]
 
 export default {
+  components: {
+    CustomTabbar
+  },
   data() {
     return {
       unreadCount: 2,
@@ -182,11 +189,11 @@ export default {
         '山东艺术学院'
       ],
       features: [
-        { name: '取快递', type: 1, iconClass: 'icon-package', path: '/pages/task/list?type=1' },
-        { name: '代买', type: 2, iconClass: 'icon-cart', path: '/pages/task/list?type=2' },
-        { name: '送件', type: 3, iconClass: 'icon-file', path: '/pages/task/list?type=3' },
-        { name: '外卖', type: 4, iconClass: 'icon-food', path: '/pages/task/list?type=4' },
-        { name: '其他', type: 5, iconClass: 'icon-more', path: '/pages/task/list?type=5' },
+        { name: '取快递', type: 1, icon: '📦', path: '/pages/task/list?type=1' },
+        { name: '代买', type: 2, icon: '🛒', path: '/pages/task/list?type=2' },
+        { name: '送件', type: 3, icon: '📨', path: '/pages/task/list?type=3' },
+        { name: '外卖', type: 4, icon: '🍔', path: '/pages/task/list?type=4' },
+        { name: '其他', type: 5, icon: '✨', path: '/pages/task/list?type=5' },
       ],
       banners: [
         { title: '校园跑腿', desc: '便捷生活，从这里开始', bgColor: '' },
@@ -203,6 +210,9 @@ export default {
     }
     this.fetchRecommendTasks()
     this.fetchBanners()
+  },
+  onShow() {
+    uni.$emit('tabBarChange', 0)
   },
   onPullDownRefresh() {
     this.fetchRecommendTasks()
@@ -342,7 +352,7 @@ export default {
 .container {
   min-height: 100vh;
   background-color: var(--color-bg);
-  padding-bottom: var(--space-8);
+  padding-bottom: calc(var(--space-8) + 140rpx + env(safe-area-inset-bottom));
 }
 
 /* 顶部黄色区域 */
@@ -521,33 +531,33 @@ export default {
   }
 
   &.icon-bg-1 {
-    background: linear-gradient(135deg, var(--color-brand-coral) 0%, var(--color-brand-coral-light) 100%);
-    box-shadow: 0 8rpx 24rpx rgba(255, 107, 107, 0.3);
+    background: linear-gradient(135deg, #FF6B35 0%, #FF8C5A 100%);
+    box-shadow: 0 8rpx 24rpx rgba(255, 107, 53, 0.35);
   }
 
   &.icon-bg-2 {
-    background: linear-gradient(135deg, var(--color-brand-mint) 0%, var(--color-brand-mint-light) 100%);
-    box-shadow: 0 8rpx 24rpx rgba(78, 205, 196, 0.3);
+    background: linear-gradient(135deg, #7BC47F 0%, #9DD9A0 100%);
+    box-shadow: 0 8rpx 24rpx rgba(123, 196, 127, 0.35);
   }
 
   &.icon-bg-3 {
-    background: linear-gradient(135deg, var(--color-brand-blue) 0%, var(--color-brand-blue-dark) 100%);
-    box-shadow: 0 8rpx 24rpx rgba(102, 126, 234, 0.3);
+    background: linear-gradient(135deg, #FFB347 0%, #FFC970 100%);
+    box-shadow: 0 8rpx 24rpx rgba(255, 179, 71, 0.35);
   }
 
   &.icon-bg-4 {
-    background: linear-gradient(135deg, var(--color-brand-coral) 0%, var(--color-brand-coral-light) 100%);
-    box-shadow: 0 8rpx 24rpx rgba(255, 160, 122, 0.3);
+    background: linear-gradient(135deg, #FFB088 0%, #FFC4A8 100%);
+    box-shadow: 0 8rpx 24rpx rgba(255, 176, 136, 0.35);
   }
 
   &.icon-bg-5 {
-    background: linear-gradient(135deg, var(--color-brand-blue) 0%, var(--color-brand-indigo-soft) 100%);
-    box-shadow: 0 8rpx 24rpx rgba(14, 165, 233, 0.3);
+    background: linear-gradient(135deg, #FF8C5A 0%, #FFB088 100%);
+    box-shadow: 0 8rpx 24rpx rgba(255, 140, 90, 0.35);
   }
 }
 
 .feature-icon {
-  font-size: 48rpx;
+  font-size: 44rpx;
 }
 
 .feature-text {
@@ -782,19 +792,19 @@ export default {
   margin-right: var(--space-3);
   
   &.avatar-bg-1 {
-    background: linear-gradient(135deg, var(--color-brand-coral) 0%, var(--color-brand-coral-light) 100%);
+    background: linear-gradient(135deg, #FF6B35 0%, #FF8C5A 100%);
   }
   
   &.avatar-bg-2 {
-    background: linear-gradient(135deg, var(--color-brand-mint) 0%, var(--color-brand-mint-light) 100%);
+    background: linear-gradient(135deg, #7BC47F 0%, #9DD9A0 100%);
   }
   
   &.avatar-bg-3 {
-    background: linear-gradient(135deg, var(--color-brand-blue) 0%, var(--color-brand-blue-dark) 100%);
+    background: linear-gradient(135deg, #FFB347 0%, #FFC970 100%);
   }
   
   &.avatar-bg-4, &.avatar-bg-5 {
-    background: linear-gradient(135deg, var(--color-brand-blue) 0%, var(--color-brand-indigo-soft) 100%);
+    background: linear-gradient(135deg, #FFB088 0%, #FFC4A8 100%);
   }
 }
 

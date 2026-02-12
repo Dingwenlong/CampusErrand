@@ -164,13 +164,20 @@
         <text v-else-if="orderList.length === 0">暂无订单</text>
       </view>
     </scroll-view>
+
+    <!-- 自定义底部导航 -->
+    <custom-tabbar :current="2" />
   </view>
 </template>
 
 <script>
 import taskApi from '@/api/task.js'
+import CustomTabbar from '@/components/custom-tabbar/index.vue'
 
 export default {
+  components: {
+    CustomTabbar
+  },
   data() {
     return {
       currentRole: 1, // 1-发单者 2-接单者
@@ -187,6 +194,7 @@ export default {
     this.refreshList()
   },
   onShow() {
+    uni.$emit('tabBarChange', 2)
     this.refreshList()
   },
   methods: {
@@ -404,6 +412,7 @@ export default {
 .container {
   min-height: 100vh;
   background: radial-gradient(circle at top right, rgba(var(--color-primary-rgb), 0.1) 0%, transparent 45%), var(--color-bg);
+  padding-bottom: calc(140rpx + env(safe-area-inset-bottom));
 }
 
 .role-tabs {

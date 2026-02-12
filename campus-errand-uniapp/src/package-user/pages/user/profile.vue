@@ -210,7 +210,7 @@ export default {
       border-radius: 50%;
 
       &.avatar-gradient {
-        background: linear-gradient(135deg, var(--color-brand-blue) 0%, var(--color-brand-indigo) 100%);
+        background: linear-gradient(135deg, #FF6B35 0%, #FF8C5A 100%);
       }
 
       .avatar-text {

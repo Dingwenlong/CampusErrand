@@ -1,5 +1,8 @@
 <script>
 export default {
+  globalData: {
+    tabBarIndex: 0
+  },
   onLaunch: function() {
     console.log('App Launch')
     this.detectPlatform()
