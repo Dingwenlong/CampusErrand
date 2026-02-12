@@ -4,7 +4,7 @@
     <a-row :gutter="[16, 16]" class="stat-cards">
       <a-col :xs="12" :sm="12" :md="6" :lg="6" :xl="6">
         <a-card class="stat-card">
-          <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #8B5CF6 100%);">
+          <div class="stat-icon" style="background: linear-gradient(135deg, #1d4ed8 0%, #0ea5e9 100%);">
             <TransactionOutlined />
           </div>
           <div class="stat-content">
@@ -37,7 +37,7 @@
       </a-col>
       <a-col :xs="12" :sm="12" :md="6" :lg="6" :xl="6">
         <a-card class="stat-card">
-          <div class="stat-icon" style="background: linear-gradient(135deg, #722ed1 0%, #b37feb 100%);">
+          <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);">
             <CalendarOutlined />
           </div>
           <div class="stat-content">
@@ -296,7 +296,7 @@ const getTypeColor = (type: number) => {
     2: 'orange',
     3: 'red',
     4: 'green',
-    5: 'purple'
+    5: 'gold'
   }
   return colors[type] || 'default'
 }
@@ -320,6 +320,7 @@ onMounted(() => {
 <style scoped>
 .wallet-management {
   padding: 0;
+  animation: fade-up 0.32s ease;
 }
 
 /* 统计卡片 */
@@ -372,7 +373,7 @@ onMounted(() => {
 }
 
 .search-card {
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .search-form :deep(.ant-form-item) {
@@ -380,12 +381,17 @@ onMounted(() => {
 }
 
 .table-card {
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .user-info {
   display: flex;
   flex-direction: column;
+  gap: 2px;
+}
+
+.desktop-table :deep(.ant-table-row) {
+  transition: background-color 0.22s ease;
 }
 
 /* 移动端卡片列表 */
@@ -397,6 +403,13 @@ onMounted(() => {
 
 .transaction-card {
   border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  transition: transform 0.24s ease, box-shadow 0.24s ease;
+}
+
+.transaction-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 30px -24px rgba(15, 23, 42, 0.48);
 }
 
 .transaction-card :deep(.ant-card-body) {
@@ -426,22 +439,23 @@ onMounted(() => {
 
 .info-label {
   font-size: 13px;
-  color: #999;
+  color: #64748b;
   min-width: 50px;
 }
 
 .info-value {
   font-size: 13px;
-  color: #333;
+  color: #1e293b;
 }
 
 .mobile-pagination {
   display: flex;
   justify-content: center;
   margin-top: 16px;
-  padding: 16px;
-  background: #fff;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.84);
   border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
 }
 
 /* 响应式适配 */
@@ -496,6 +510,17 @@ onMounted(() => {
   
   .stat-content {
     text-align: center;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 </style>

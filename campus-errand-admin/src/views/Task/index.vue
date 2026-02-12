@@ -4,7 +4,7 @@
     <a-row :gutter="[16, 16]" class="stat-cards">
       <a-col :xs="12" :sm="12" :md="6" :lg="6" :xl="6">
         <a-card class="stat-card">
-          <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #8B5CF6 100%);">
+          <div class="stat-icon" style="background: linear-gradient(135deg, #1d4ed8 0%, #0ea5e9 100%);">
             <FileTextOutlined />
           </div>
           <div class="stat-content">
@@ -504,7 +504,7 @@ const getTaskTypeColor = (type: number) => {
     1: 'blue',
     2: 'green',
     3: 'orange',
-    4: 'purple'
+    4: 'cyan'
   }
   return colors[type] || 'default'
 }
@@ -538,6 +538,7 @@ onMounted(() => {
 <style scoped>
 .task-management {
   padding: 0;
+  animation: fade-up 0.32s ease;
 }
 
 /* 统计卡片 */
@@ -590,7 +591,7 @@ onMounted(() => {
 }
 
 .search-card {
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .search-form :deep(.ant-form-item) {
@@ -598,13 +599,17 @@ onMounted(() => {
 }
 
 .table-card {
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .user-info {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.desktop-table :deep(.ant-table-row) {
+  transition: background-color 0.22s ease;
 }
 
 /* 移动端卡片列表 */
@@ -616,6 +621,13 @@ onMounted(() => {
 
 .task-card {
   border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  transition: transform 0.24s ease, box-shadow 0.24s ease;
+}
+
+.task-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 30px -24px rgba(15, 23, 42, 0.48);
 }
 
 .task-card :deep(.ant-card-body) {
@@ -644,8 +656,8 @@ onMounted(() => {
 .task-title {
   display: block;
   font-size: 15px;
-  font-weight: 600;
-  color: #333;
+  font-weight: 700;
+  color: #0f172a;
   line-height: 1.4;
 }
 
@@ -667,13 +679,13 @@ onMounted(() => {
 
 .info-label {
   font-size: 13px;
-  color: #999;
+  color: #64748b;
   min-width: 60px;
 }
 
 .info-value {
   font-size: 13px;
-  color: #333;
+  color: #1e293b;
 }
 
 .info-value.price {
@@ -694,9 +706,10 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   margin-top: 16px;
-  padding: 16px;
-  background: #fff;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.84);
   border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
 }
 
 /* 响应式适配 */
@@ -774,6 +787,17 @@ onMounted(() => {
   
   .status-tag {
     align-self: flex-start;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 </style>

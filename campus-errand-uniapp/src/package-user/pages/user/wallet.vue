@@ -154,12 +154,12 @@ export default {
     },
     goTransactions() {
       uni.navigateTo({
-        url: '/pages/user/transactions'
+        url: '/package-user/pages/user/transactions'
       })
     },
     goPayPassword() {
       uni.navigateTo({
-        url: '/pages/user/pay-password'
+        url: '/package-user/pages/user/pay-password'
       })
     }
   }
@@ -167,7 +167,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '@/static/styles/mixins.scss';
+@use '@/static/styles/mixins.scss' as *;
 
 .container {
   padding: var(--space-6);
@@ -305,7 +305,7 @@ export default {
   padding: var(--space-6) var(--space-4);
   margin-bottom: var(--space-6);
 
-  .action-item {
+    .action-item {
     flex: 1;
     @include flex-column;
     align-items: center;
@@ -318,12 +318,12 @@ export default {
       transform: scale(0.98);
     }
 
-    .action-icon-wrapper {
-      width: 96rpx;
-      height: 96rpx;
-      @include flex-center;
-      background: rgba(102, 126, 234, 0.1);
-      border-radius: var(--radius-lg);
+      .action-icon-wrapper {
+        width: 96rpx;
+        height: 96rpx;
+        @include flex-center;
+        background: var(--color-primary-soft);
+        border-radius: var(--radius-lg);
       margin-bottom: var(--space-3);
       transition: all var(--duration-fast) var(--ease-out);
       
@@ -332,10 +332,10 @@ export default {
       }
     }
 
-    .action-icon {
-      font-size: var(--font-size-xl);
-      color: var(--color-primary);
-    }
+      .action-icon {
+        font-size: var(--font-size-xl);
+        color: var(--color-primary-dark);
+      }
 
     .action-text {
       font-size: var(--font-size-sm);
@@ -364,14 +364,14 @@ export default {
       width: 72rpx;
       height: 72rpx;
       @include flex-center;
-      background: rgba(102, 126, 234, 0.1);
+      background: var(--color-primary-soft);
       border-radius: var(--radius-md);
       margin-right: var(--space-4);
     }
 
     .menu-icon {
       font-size: var(--font-size-lg);
-      color: var(--color-primary);
+      color: var(--color-primary-dark);
     }
 
     .menu-text {

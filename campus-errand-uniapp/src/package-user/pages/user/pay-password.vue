@@ -192,7 +192,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '@/static/styles/mixins.scss';
+@use '@/static/styles/mixins.scss' as *;
 
 .container {
   min-height: 100vh;

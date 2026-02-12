@@ -77,8 +77,8 @@
 </template>
 
 <script>
-// 腾讯地图 SDK key - 需要在 manifest.json 中配置
-const MAP_KEY = 'YOUR_TENCENT_MAP_KEY'
+// 腾讯地图 SDK key（可通过 manifest / 环境变量注入）
+const MAP_KEY = (typeof process !== 'undefined' && process.env && process.env.UNI_APP_TENCENT_MAP_KEY) || ''
 
 export default {
   data() {
@@ -101,7 +101,8 @@ export default {
       markers: [],
       mapContext: null,
       fromPage: '', // 来源页面标记
-      addressType: '' // 地址类型：pickup-取件地址, delivery-送达地址
+      addressType: '', // 地址类型：pickup-取件地址, delivery-送达地址
+      hasMapKey: !!MAP_KEY // 是否配置了腾讯地图 key
     }
   },
   onLoad(options) {
@@ -115,6 +116,13 @@ export default {
     
     // 初始化地图上下文
     this.mapContext = uni.createMapContext('locationMap', this)
+
+    if (!this.hasMapKey) {
+      uni.showToast({
+        title: '未配置地图KEY，启用基础定位模式',
+        icon: 'none'
+      })
+    }
     
     // 获取当前位置
     this.getCurrentLocation()
@@ -157,6 +165,14 @@ export default {
 
     // 逆地址解析
     reverseGeocoder(latitude, longitude) {
+      if (!this.hasMapKey) {
+        this.selectedAddress = {
+          name: '当前位置',
+          address: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
+        }
+        return
+      }
+
       // 使用腾讯地图 WebService API
       const url = `https://apis.map.qq.com/ws/geocoder/v1/?location=${latitude},${longitude}&key=${MAP_KEY}&get_poi=1`
       
@@ -179,6 +195,16 @@ export default {
 
     // 搜索附近地点
     searchNearby(latitude, longitude) {
+      if (!this.hasMapKey) {
+        this.nearbyList = [{
+          name: '当前位置',
+          address: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
+          location: { lat: latitude, lng: longitude }
+        }]
+        this.updateMarkers()
+        return
+      }
+
       const url = `https://apis.map.qq.com/ws/place/v1/search?keyword=小区&boundary=nearby(${latitude},${longitude},1000)&page_size=20&key=${MAP_KEY}`
       
       uni.request({
@@ -198,6 +224,27 @@ export default {
 
     // 搜索地点
     searchLocation() {
+      if (!this.hasMapKey) {
+        uni.chooseLocation({
+          success: (res) => {
+            const item = {
+              name: res.name || '选择位置',
+              address: res.address || `${res.latitude.toFixed(6)}, ${res.longitude.toFixed(6)}`,
+              location: { lat: res.latitude, lng: res.longitude }
+            }
+            this.nearbyList = [item]
+            this.selectLocation(item, 0)
+          },
+          fail: () => {
+            uni.showToast({
+              title: '请选择定位',
+              icon: 'none'
+            })
+          }
+        })
+        return
+      }
+
       if (!this.keyword.trim()) {
         uni.showToast({
           title: '请输入搜索关键词',
@@ -215,8 +262,8 @@ export default {
         url,
         success: (res) => {
           if (res.data.status === 0) {
-            this.nearbyList = res.data.data || []
-            this.updateMarkers()
+        this.nearbyList = res.data.data || []
+        this.updateMarkers()
             
             if (this.nearbyList.length > 0) {
               // 移动地图到第一个结果
@@ -382,7 +429,7 @@ export default {
   display: flex;
   align-items: center;
   padding: var(--space-4) var(--space-6);
-  background-color: #fff;
+  background-color: var(--color-surface);
   border-bottom: 2rpx solid var(--color-divider);
 }
 
@@ -461,7 +508,7 @@ export default {
 
 /* 地址卡片 */
 .address-card {
-  background-color: #fff;
+  background-color: var(--color-surface);
   padding: var(--space-5) var(--space-6);
   display: flex;
   align-items: center;
@@ -498,7 +545,7 @@ export default {
   justify-content: center;
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
-  color: #fff;
+  color: var(--color-text-primary);
   border: none;
 }
 
@@ -507,7 +554,7 @@ export default {
   flex: 1;
   display: flex;
   flex-direction: column;
-  background-color: #fff;
+  background-color: var(--color-surface);
   overflow: hidden;
 }
 

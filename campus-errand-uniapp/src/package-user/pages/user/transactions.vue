@@ -209,27 +209,28 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '@/static/styles/mixins.scss';
+@use '@/static/styles/mixins.scss' as *;
 
 .container {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: var(--color-bg);
+  background: radial-gradient(circle at top right, rgba(var(--color-primary-rgb), 0.08) 0%, transparent 45%), var(--color-bg);
 }
 
 // 筛选标签
 .filter-bar {
   @include flex-between;
+  margin: var(--space-4) var(--space-5) var(--space-3);
+  padding: var(--space-1);
   background: var(--color-surface);
-  padding: var(--space-4) var(--space-6);
-  margin-bottom: var(--space-4);
+  border-radius: var(--radius-full);
   box-shadow: var(--shadow-sm);
 
   .filter-item {
     flex: 1;
     text-align: center;
-    font-size: var(--font-size-base);
+    font-size: var(--font-size-sm);
     color: var(--color-text-secondary);
     padding: var(--space-3) 0;
     margin: 0 var(--space-2);
@@ -237,14 +238,11 @@ export default {
     transition: all var(--duration-fast) var(--ease-out);
     position: relative;
 
-    &:active {
-      background: var(--color-bg-secondary);
-    }
-
     &.active {
-      color: var(--color-primary);
+      color: var(--color-text-primary);
       font-weight: var(--font-weight-semibold);
-      background: rgba(102, 126, 234, 0.1);
+      background: var(--color-primary-gradient);
+      box-shadow: var(--shadow-primary);
     }
   }
 }
@@ -252,7 +250,7 @@ export default {
 // 滚动区域
 .transaction-scroll {
   flex: 1;
-  padding: 0 var(--space-6);
+  padding: 0 var(--space-5);
 }
 
 // 空状态
@@ -296,7 +294,7 @@ export default {
 .transaction-item {
   @include flex-vcenter;
   background: var(--color-surface);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   padding: var(--space-5);
   margin-bottom: var(--space-4);
   box-shadow: var(--shadow-sm);
@@ -314,7 +312,7 @@ export default {
     width: 88rpx;
     height: 88rpx;
     @include flex-center;
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-md);
     margin-right: var(--space-5);
     flex-shrink: 0;
 
@@ -439,10 +437,12 @@ export default {
 // 统计摘要
 .summary-bar {
   @include flex-between;
-  background: var(--color-surface);
+  margin: 0 var(--space-5) var(--space-4);
   padding: var(--space-5) var(--space-6);
-  box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
-  border-top: 1rpx solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  border: 2rpx solid var(--color-border-light);
 
   .summary-item {
     flex: 1;

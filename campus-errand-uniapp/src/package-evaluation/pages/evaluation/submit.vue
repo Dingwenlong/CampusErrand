@@ -52,7 +52,7 @@
     <!-- 匿名评价 -->
     <view class="anonymous-section">
       <text class="label">匿名评价</text>
-      <switch :checked="isAnonymous" @change="toggleAnonymous" color="#667eea"/>
+      <switch :checked="isAnonymous" @change="toggleAnonymous" color="var(--color-primary)"/>
     </view>
 
     <!-- 提交按钮 -->
@@ -187,181 +187,181 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@use '@/static/styles/mixins.scss' as *;
+
 .container {
-  padding: 20rpx;
-  background: #f5f5f5;
   min-height: 100vh;
+  padding: var(--space-5);
+  background: radial-gradient(circle at right top, rgba(var(--color-primary-rgb), 0.1) 0%, transparent 40%), var(--color-bg);
+}
+
+.task-info,
+.rating-section,
+.tags-section,
+.content-section,
+.anonymous-section {
+  margin-bottom: var(--space-4);
+  padding: var(--space-5);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
 }
 
 .task-info {
-  background: #fff;
-  border-radius: 16rpx;
-  padding: 30rpx;
-  margin-bottom: 20rpx;
-  
   .label {
     display: block;
-    font-size: 26rpx;
-    color: #999;
-    margin-bottom: 12rpx;
+    margin-bottom: var(--space-2);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-tertiary);
   }
-  
+
   .task-title {
-    font-size: 32rpx;
-    color: #333;
-    font-weight: 500;
+    font-size: var(--font-size-lg);
+    color: var(--color-text-primary);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-snug);
   }
 }
 
 .rating-section {
-  background: #fff;
-  border-radius: 16rpx;
-  padding: 30rpx;
-  margin-bottom: 20rpx;
   text-align: center;
-  
+
   .section-title {
     display: block;
-    font-size: 30rpx;
-    color: #333;
-    margin-bottom: 30rpx;
-    font-weight: 500;
+    margin-bottom: var(--space-5);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
   }
-  
+
   .star-container {
     display: flex;
     justify-content: center;
-    margin-bottom: 20rpx;
-    
+    margin-bottom: var(--space-3);
+
     .star-item {
-      padding: 0 15rpx;
-      
+      padding: 0 var(--space-2);
+
       .star-icon {
-        font-size: 60rpx;
-        color: #ddd;
-        transition: color 0.2s;
-        
+        font-size: 56rpx;
+        color: var(--color-border-dark);
+        transition: all var(--duration-fast) var(--ease-out);
+
         &.active {
-          color: #FFC300;
+          color: var(--color-primary);
+          text-shadow: 0 4rpx 10rpx rgba(var(--color-primary-rgb), 0.28);
         }
       }
     }
   }
-  
+
   .rating-text {
-    font-size: 28rpx;
-    color: #667eea;
-    font-weight: 500;
+    font-size: var(--font-size-sm);
+    color: var(--color-info);
+    font-weight: var(--font-weight-medium);
   }
 }
 
 .tags-section {
-  background: #fff;
-  border-radius: 16rpx;
-  padding: 30rpx;
-  margin-bottom: 20rpx;
-  
   .section-title {
     display: block;
-    font-size: 30rpx;
-    color: #333;
-    margin-bottom: 20rpx;
-    font-weight: 500;
+    margin-bottom: var(--space-3);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
   }
-  
+
   .tags-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 16rpx;
-    
+    gap: var(--space-2);
+
     .tag-item {
-      padding: 12rpx 24rpx;
-      background: #f5f5f5;
-      border-radius: 30rpx;
-      font-size: 26rpx;
-      color: #666;
+      padding: var(--space-2) var(--space-4);
+      border-radius: var(--radius-full);
       border: 2rpx solid transparent;
-      transition: all 0.2s;
-      
+      background: var(--color-bg-secondary);
+      color: var(--color-text-secondary);
+      font-size: var(--font-size-sm);
+      transition: all var(--duration-fast) var(--ease-out);
+
       &.active {
-        background: #f0f0ff;
-        color: #667eea;
-        border-color: #667eea;
+        background: var(--color-task-other-soft);
+        color: var(--color-task-other);
+        border-color: rgba(29, 78, 216, 0.35);
       }
     }
   }
 }
 
 .content-section {
-  background: #fff;
-  border-radius: 16rpx;
-  padding: 30rpx;
-  margin-bottom: 20rpx;
   position: relative;
-  
+
   .section-title {
     display: block;
-    font-size: 30rpx;
-    color: #333;
-    margin-bottom: 20rpx;
-    font-weight: 500;
+    margin-bottom: var(--space-3);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
   }
-  
+
   textarea {
     width: 100%;
-    height: 200rpx;
-    background: #f5f5f5;
-    border-radius: 12rpx;
-    padding: 20rpx;
-    font-size: 28rpx;
-    color: #333;
+    height: 220rpx;
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    background: var(--color-bg-secondary);
+    border: 2rpx solid var(--color-border-light);
+    font-size: var(--font-size-base);
+    color: var(--color-text-primary);
+    line-height: var(--line-height-relaxed);
   }
-  
+
   .word-count {
     position: absolute;
-    right: 40rpx;
-    bottom: 40rpx;
-    font-size: 24rpx;
-    color: #999;
+    right: var(--space-6);
+    bottom: var(--space-5);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-tertiary);
   }
 }
 
 .anonymous-section {
-  background: #fff;
-  border-radius: 16rpx;
-  padding: 30rpx;
-  margin-bottom: 20rpx;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  
+  @include flex-between;
+
   .label {
-    font-size: 30rpx;
-    color: #333;
-    font-weight: 500;
+    font-size: var(--font-size-base);
+    color: var(--color-text-primary);
+    font-weight: var(--font-weight-medium);
   }
 }
 
 .submit-section {
-  padding: 40rpx 0;
-  
+  padding: var(--space-5) 0;
+
   .btn-submit {
     width: 100%;
-    height: 90rpx;
-    line-height: 90rpx;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: #fff;
-    font-size: 32rpx;
-    border-radius: 45rpx;
-    font-weight: 500;
-    
+    height: 88rpx;
+    line-height: 88rpx;
+    border-radius: var(--radius-full);
+    background: var(--color-primary-gradient);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    box-shadow: var(--shadow-primary);
+    border: none;
+    transition: all var(--duration-fast) var(--ease-out);
+
     &:disabled {
-      background: #ccc;
+      background: var(--color-bg-tertiary);
+      color: var(--color-text-disabled);
+      box-shadow: none;
     }
-    
+
     &:active {
-      opacity: 0.9;
+      transform: scale(0.98);
     }
   }
 }
 </style>
+

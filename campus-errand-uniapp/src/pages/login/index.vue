@@ -60,9 +60,7 @@
             </view>
             <template v-else>
               <view class="wechat-icon">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"/>
-                </svg>
+                <text class="wechat-icon-text">微</text>
               </view>
               <text class="btn-text">微信一键登录</text>
             </template>
@@ -430,7 +428,7 @@ export default {
       uni.showModal({
         title: '提示',
         content: '游客模式下部分功能将受到限制，是否继续？',
-        confirmColor: '#FFC300',
+        confirmColor: '#f59e0b',
         success: (res) => {
           if (res.confirm) {
             uni.switchTab({
@@ -448,8 +446,8 @@ export default {
 // ============================================
 // 设计系统变量
 // ============================================
-$primary-gradient: linear-gradient(135deg, #FFC300 0%, #FFB300 100%);
-$primary-gradient-hover: linear-gradient(135deg, #FFD54F 0%, #FFC300 100%);
+$primary-gradient: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+$primary-gradient-hover: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-primary) 100%);
 $wechat-green: #07C160;
 $wechat-green-hover: #06ad56;
 $bg-gradient: linear-gradient(180deg, #FFF9E6 0%, #FFFFFF 50%, #F8F9FA 100%);
@@ -501,7 +499,7 @@ $radius-full: 9999rpx;
 .orb-1 {
   width: 600rpx;
   height: 600rpx;
-  background: linear-gradient(135deg, #FFC300 0%, #FFD54F 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
   top: -200rpx;
   right: -200rpx;
   animation: float 8s ease-in-out infinite;
@@ -510,7 +508,7 @@ $radius-full: 9999rpx;
 .orb-2 {
   width: 400rpx;
   height: 400rpx;
-  background: linear-gradient(135deg, #FFE082 0%, #FFC300 100%);
+  background: linear-gradient(135deg, #FFE082 0%, var(--color-primary) 100%);
   top: 400rpx;
   left: -150rpx;
   animation: float 10s ease-in-out infinite 1s;
@@ -604,7 +602,7 @@ $radius-full: 9999rpx;
     content: '';
     position: absolute;
     inset: -4rpx;
-    background: linear-gradient(135deg, #FFD54F 0%, #FFB300 100%);
+    background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-primary-dark) 100%);
     border-radius: $radius-xl;
     z-index: -1;
     opacity: 0.5;
@@ -634,7 +632,7 @@ $radius-full: 9999rpx;
 
 .brand-slogan {
   font-size: 28rpx;
-  color: #666;
+  color: var(--color-text-secondary);
   font-weight: 400;
   letter-spacing: 2rpx;
 }
@@ -709,11 +707,11 @@ $radius-full: 9999rpx;
   flex: 1;
   font-size: 26rpx;
   line-height: 1.6;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 .text-normal {
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 .text-link {
@@ -781,10 +779,21 @@ $radius-full: 9999rpx;
 }
 
 .wechat-icon {
-  width: 40rpx;
-  height: 40rpx;
+  width: 46rpx;
+  height: 46rpx;
   margin-right: 16rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wechat-icon-text {
   color: #fff;
+  font-size: 26rpx;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .btn-text {
@@ -857,13 +866,13 @@ $radius-full: 9999rpx;
 
 .guest-text {
   font-size: 28rpx;
-  color: #999;
+  color: var(--color-text-tertiary);
   margin-right: 8rpx;
 }
 
 .arrow-icon {
   font-size: 28rpx;
-  color: #bbb;
+  color: #94a3b8;
   transition: transform 0.3s ease;
 
   .guest-btn:active & {
@@ -903,13 +912,13 @@ $radius-full: 9999rpx;
 
 .badge-text {
   font-size: 24rpx;
-  color: #666;
+  color: var(--color-text-secondary);
   font-weight: 500;
 }
 
 .copyright {
   font-size: 22rpx;
-  color: #bbb;
+  color: #94a3b8;
   text-align: center;
 }
 
@@ -980,8 +989,8 @@ $radius-full: 9999rpx;
   display: flex;
   align-items: center;
   padding: 32rpx 40rpx;
-  background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
-  border-bottom: 1rpx solid #f0f0f0;
+  background: linear-gradient(135deg, #fafafa 0%, var(--color-bg-secondary) 100%);
+  border-bottom: 1rpx solid var(--color-border-light);
 }
 
 .header-icon {
@@ -997,7 +1006,7 @@ $radius-full: 9999rpx;
   box-shadow: 0 4rpx 12rpx rgba(255, 195, 0, 0.3);
   
   &.privacy {
-    background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(16, 185, 129, 0.24) 100%);
   }
 }
 
@@ -1015,18 +1024,18 @@ $radius-full: 9999rpx;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: #f0f0f0;
+  background: var(--color-border-light);
   transition: all 0.3s ease;
   
   &:active {
-    background: #e0e0e0;
+    background: var(--color-border);
     transform: rotate(90deg);
   }
 }
 
 .close-icon {
   font-size: 28rpx;
-  color: #999;
+  color: var(--color-text-tertiary);
   font-weight: 300;
 }
 
@@ -1071,7 +1080,7 @@ $radius-full: 9999rpx;
 .intro-desc {
   display: block;
   font-size: 26rpx;
-  color: #666;
+  color: var(--color-text-secondary);
   line-height: 1.6;
 }
 
@@ -1083,7 +1092,7 @@ $radius-full: 9999rpx;
 .content-item {
   margin-bottom: 32rpx;
   padding-bottom: 32rpx;
-  border-bottom: 1rpx solid #f0f0f0;
+  border-bottom: 1rpx solid var(--color-border-light);
   
   &:last-child {
     margin-bottom: 0;
@@ -1116,7 +1125,7 @@ $radius-full: 9999rpx;
 .item-icon {
   width: 48rpx;
   height: 48rpx;
-  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(16, 185, 129, 0.24) 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -1135,7 +1144,7 @@ $radius-full: 9999rpx;
 .item-desc {
   display: block;
   font-size: 26rpx;
-  color: #666;
+  color: var(--color-text-secondary);
   line-height: 1.8;
   padding-left: 64rpx;
 }
@@ -1144,12 +1153,12 @@ $radius-full: 9999rpx;
 .content-footer {
   text-align: center;
   padding-top: 24rpx;
-  border-top: 1rpx solid #f0f0f0;
+  border-top: 1rpx solid var(--color-border-light);
 }
 
 .update-time {
   font-size: 24rpx;
-  color: #bbb;
+  color: #94a3b8;
 }
 
 // ============================================
@@ -1160,7 +1169,7 @@ $radius-full: 9999rpx;
   gap: 24rpx;
   padding: 24rpx 40rpx 40rpx;
   background: #fafafa;
-  border-top: 1rpx solid #f0f0f0;
+  border-top: 1rpx solid var(--color-border-light);
 }
 
 .footer-btn {
@@ -1176,11 +1185,11 @@ $radius-full: 9999rpx;
   transition: all 0.3s ease;
   
   &.cancel {
-    background: #f0f0f0;
-    color: #666;
+    background: var(--color-border-light);
+    color: var(--color-text-secondary);
     
     &:active {
-      background: #e0e0e0;
+      background: var(--color-border);
     }
   }
   
@@ -1232,3 +1241,4 @@ $radius-full: 9999rpx;
   }
 }
 </style>
+

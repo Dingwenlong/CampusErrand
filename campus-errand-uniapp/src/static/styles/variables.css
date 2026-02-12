@@ -8,13 +8,23 @@ page {
      1. 色彩系统 - Color System
      ============================================ */
   
-  /* 主色调 - Primary Colors (美团黄) */
-  --color-primary: #FFC300;
-  --color-primary-light: #FFD54F;
-  --color-primary-dark: #FFB300;
-  --color-primary-rgb: 255, 195, 0;
-  --color-primary-gradient: linear-gradient(135deg, #FFC300 0%, #FFB300 100%);
-  --color-primary-soft: rgba(255, 195, 0, 0.1);
+  /* 主色调 - Primary Colors */
+  --color-primary: #f59e0b;
+  --color-primary-light: #fbbf24;
+  --color-primary-dark: #d97706;
+  --color-primary-rgb: 245, 158, 11;
+  --color-primary-gradient: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  --color-primary-soft: rgba(245, 158, 11, 0.12);
+
+  /* 品牌辅助色 - Brand Colors */
+  --color-brand-blue: #0ea5e9;
+  --color-brand-blue-dark: #2563eb;
+  --color-brand-indigo: #1d4ed8;
+  --color-brand-indigo-soft: #60a5fa;
+  --color-brand-mint: #14b8a6;
+  --color-brand-mint-light: #5eead4;
+  --color-brand-coral: #f97316;
+  --color-brand-coral-light: #fb923c;
   
   /* 辅助色 - Functional Colors */
   --color-success: #07c160;
@@ -46,26 +56,26 @@ page {
   --color-black: #000000;
   
   /* 文字颜色 - 增强对比度 */
-  --color-text-primary: #1a1a1a;
-  --color-text-secondary: #4b5563;
-  --color-text-tertiary: #9ca3af;
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #475569;
+  --color-text-tertiary: #94a3b8;
   --color-text-placeholder: #d1d5db;
   --color-text-disabled: #9ca3af;
   --color-text-inverse: #ffffff;
   
   /* 背景颜色 - 优化层次感 */
-  --color-bg: #f5f5f7;
-  --color-bg-secondary: #fafafa;
-  --color-bg-tertiary: #e5e7eb;
+  --color-bg: #eff3f8;
+  --color-bg-secondary: #f8fafc;
+  --color-bg-tertiary: #e2e8f0;
   --color-bg-elevated: #ffffff;
   --color-surface: #ffffff;
   --color-surface-elevated: #ffffff;
-  --color-surface-pressed: #f3f4f6;
+  --color-surface-pressed: #f1f5f9;
   
   /* 边框颜色 */
-  --color-border: #e5e7eb;
-  --color-border-light: #f3f4f6;
-  --color-border-dark: #d1d5db;
+  --color-border: #dbe2ec;
+  --color-border-light: #e9eef5;
+  --color-border-dark: #cbd5e1;
   
   /* 分割线颜色 */
   --color-divider: #f3f4f6;
@@ -76,14 +86,14 @@ page {
   --color-mask-dark: rgba(0, 0, 0, 0.7);
   
   /* 任务类型颜色 - 优化配色 */
-  --color-task-express: #1677ff;
-  --color-task-express-soft: rgba(22, 119, 255, 0.1);
-  --color-task-shopping: #07c160;
-  --color-task-shopping-soft: rgba(7, 193, 96, 0.1);
-  --color-task-delivery: #faad14;
-  --color-task-delivery-soft: rgba(250, 173, 20, 0.1);
-  --color-task-other: #722ed1;
-  --color-task-other-soft: rgba(114, 46, 209, 0.1);
+  --color-task-express: #0ea5e9;
+  --color-task-express-soft: rgba(14, 165, 233, 0.12);
+  --color-task-shopping: #10b981;
+  --color-task-shopping-soft: rgba(16, 185, 129, 0.12);
+  --color-task-delivery: #f59e0b;
+  --color-task-delivery-soft: rgba(245, 158, 11, 0.12);
+  --color-task-other: #1d4ed8;
+  --color-task-other-soft: rgba(29, 78, 216, 0.12);
   
   /* ============================================
      2. 字体系统 - Typography System

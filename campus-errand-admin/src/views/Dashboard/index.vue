@@ -26,7 +26,7 @@
       </a-col>
       <a-col :xs="12" :sm="12" :md="6" :lg="6" :xl="6">
         <a-card class="stat-card">
-          <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #8B5CF6 100%);">
+          <div class="stat-icon" style="background: linear-gradient(135deg, #1d4ed8 0%, #0ea5e9 100%);">
             <ShoppingCartOutlined />
           </div>
           <div class="stat-content">

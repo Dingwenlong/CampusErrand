@@ -194,7 +194,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '@/static/styles/mixins.scss';
+@use '@/static/styles/mixins.scss' as *;
 
 .container {
   min-height: 100vh;
@@ -406,22 +406,22 @@ export default {
   transition: all var(--duration-fast) var(--ease-out);
 
   &.icon-bg-1 {
-    background: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%);
+    background: linear-gradient(135deg, var(--color-brand-coral) 0%, var(--color-brand-coral-light) 100%);
     box-shadow: 0 8rpx 24rpx rgba(255, 107, 107, 0.3);
   }
 
   &.icon-bg-2 {
-    background: linear-gradient(135deg, #4ECDC4 0%, #7EDDD6 100%);
+    background: linear-gradient(135deg, var(--color-brand-mint) 0%, var(--color-brand-mint-light) 100%);
     box-shadow: 0 8rpx 24rpx rgba(78, 205, 196, 0.3);
   }
 
   &.icon-bg-3 {
-    background: linear-gradient(135deg, #667eea 0%, #8B5CF6 100%);
+    background: linear-gradient(135deg, var(--color-brand-blue) 0%, var(--color-brand-blue-dark) 100%);
     box-shadow: 0 8rpx 24rpx rgba(102, 126, 234, 0.3);
   }
 
   &.icon-bg-4 {
-    background: linear-gradient(135deg, #FFA07A 0%, #FFB347 100%);
+    background: linear-gradient(135deg, var(--color-brand-coral) 0%, var(--color-brand-coral-light) 100%);
     box-shadow: 0 8rpx 24rpx rgba(255, 160, 122, 0.3);
   }
 
@@ -476,15 +476,15 @@ export default {
   margin-right: var(--space-4);
 
   &.icon-bg-5 {
-    background: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%);
+    background: linear-gradient(135deg, var(--color-brand-coral) 0%, var(--color-brand-coral-light) 100%);
   }
 
   &.icon-bg-6 {
-    background: linear-gradient(135deg, #4ECDC4 0%, #7EDDD6 100%);
+    background: linear-gradient(135deg, var(--color-brand-mint) 0%, var(--color-brand-mint-light) 100%);
   }
 
   &.icon-bg-7 {
-    background: linear-gradient(135deg, #667eea 0%, #8B5CF6 100%);
+    background: linear-gradient(135deg, var(--color-brand-blue) 0%, var(--color-brand-blue-dark) 100%);
   }
 
   .item-icon {
@@ -540,3 +540,4 @@ export default {
   }
 }
 </style>
+

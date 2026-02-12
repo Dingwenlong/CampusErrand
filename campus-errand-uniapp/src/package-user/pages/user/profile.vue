@@ -180,7 +180,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '@/static/styles/mixins.scss';
+@use '@/static/styles/mixins.scss' as *;
 
 .container {
   min-height: 100vh;
@@ -210,7 +210,7 @@ export default {
       border-radius: 50%;
 
       &.avatar-gradient {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, var(--color-brand-blue) 0%, var(--color-brand-indigo) 100%);
       }
 
       .avatar-text {
@@ -330,3 +330,4 @@ export default {
   }
 }
 </style>
+

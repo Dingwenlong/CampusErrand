@@ -350,7 +350,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '@/static/styles/mixins.scss';
+@use '@/static/styles/mixins.scss' as *;
 
 .container {
   padding: var(--space-6);
@@ -369,23 +369,23 @@ export default {
   animation: slideIn var(--duration-normal) var(--ease-out) both;
   
   &.status-0 {
-    background: linear-gradient(135deg, #FFC300 0%, #FFB300 100%);
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
   }
   
   &.status-1, &.status-2, &.status-3 {
-    background: linear-gradient(135deg, #1890FF 0%, #36CFC9 100%);
+    background: linear-gradient(135deg, var(--color-brand-blue) 0%, var(--color-brand-mint) 100%);
   }
   
   &.status-4 {
-    background: linear-gradient(135deg, #52C41A 0%, #73D13D 100%);
+    background: linear-gradient(135deg, var(--color-success) 0%, var(--color-success-light) 100%);
   }
   
   &.status-5 {
-    background: linear-gradient(135deg, #52C41A 0%, #95DE64 100%);
+    background: linear-gradient(135deg, var(--color-success) 0%, var(--color-success-light) 100%);
   }
   
   &.status-6 {
-    background: linear-gradient(135deg, #8C8C8C 0%, #BFBFBF 100%);
+    background: linear-gradient(135deg, var(--color-text-tertiary) 0%, var(--color-text-disabled) 100%);
   }
 }
 
@@ -525,7 +525,7 @@ export default {
       }
       
       &.delivery {
-        background-color: rgba(255, 77, 79, 0.1);
+        background-color: var(--color-error-soft);
         color: var(--color-error);
       }
       
@@ -652,7 +652,7 @@ export default {
       }
       
       &.deadline {
-        background-color: rgba(255, 77, 79, 0.1);
+        background-color: var(--color-error-soft);
         color: var(--color-error);
       }
       
@@ -718,23 +718,23 @@ export default {
       @include flex-center;
 
       &.avatar-type-1 {
-        background: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%);
+        background: linear-gradient(135deg, var(--color-brand-coral) 0%, var(--color-brand-coral-light) 100%);
       }
 
       &.avatar-type-2 {
-        background: linear-gradient(135deg, #4ECDC4 0%, #7EDDD6 100%);
+        background: linear-gradient(135deg, var(--color-brand-mint) 0%, var(--color-brand-mint-light) 100%);
       }
 
       &.avatar-type-3 {
-        background: linear-gradient(135deg, #667eea 0%, #8B5CF6 100%);
+        background: linear-gradient(135deg, var(--color-brand-blue) 0%, var(--color-brand-blue-dark) 100%);
       }
 
       &.avatar-type-4, &.avatar-type-5 {
-        background: linear-gradient(135deg, #FFA07A 0%, #FFB347 100%);
+        background: linear-gradient(135deg, var(--color-brand-coral) 0%, var(--color-brand-coral-light) 100%);
       }
 
       &.avatar-gradient {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, var(--color-brand-blue) 0%, var(--color-brand-indigo) 100%);
       }
 
       .avatar-text {
@@ -934,3 +934,4 @@ export default {
   }
 }
 </style>
+

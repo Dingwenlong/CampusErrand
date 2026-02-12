@@ -266,7 +266,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '@/static/styles/mixins.scss';
+@use '@/static/styles/mixins.scss' as *;
 
 .container {
   height: 100vh;
@@ -443,19 +443,19 @@ export default {
         @include flex-center;
 
         &.avatar-type-1 {
-          background: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%);
+          background: linear-gradient(135deg, var(--color-brand-coral) 0%, var(--color-brand-coral-light) 100%);
         }
 
         &.avatar-type-2 {
-          background: linear-gradient(135deg, #4ECDC4 0%, #7EDDD6 100%);
+          background: linear-gradient(135deg, var(--color-brand-mint) 0%, var(--color-brand-mint-light) 100%);
         }
 
         &.avatar-type-3 {
-          background: linear-gradient(135deg, #667eea 0%, #8B5CF6 100%);
+          background: linear-gradient(135deg, var(--color-brand-blue) 0%, var(--color-brand-blue-dark) 100%);
         }
 
         &.avatar-type-4, &.avatar-type-5 {
-          background: linear-gradient(135deg, #FFA07A 0%, #FFB347 100%);
+          background: linear-gradient(135deg, var(--color-brand-coral) 0%, var(--color-brand-coral-light) 100%);
         }
 
         .avatar-text {
@@ -626,3 +626,4 @@ export default {
   }
 }
 </style>
+

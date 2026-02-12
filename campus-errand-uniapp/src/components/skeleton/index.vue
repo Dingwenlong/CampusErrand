@@ -97,7 +97,7 @@ export default {
 .skeleton-card,
 .skeleton-list,
 .skeleton-task-list {
-  background-color: #fff;
+  background-color: var(--color-surface);
   border-radius: var(--radius-lg);
   padding: var(--space-6);
   margin-bottom: var(--space-6);
@@ -251,9 +251,9 @@ export default {
   &.red {
     background: linear-gradient(
       90deg,
-      #ffcccc 25%,
-      #ff9999 50%,
-      #ffcccc 75%
+      rgba(var(--color-error-rgb), 0.18) 25%,
+      rgba(var(--color-error-rgb), 0.28) 50%,
+      rgba(var(--color-error-rgb), 0.18) 75%
     );
     background-size: 200% 100%;
   }

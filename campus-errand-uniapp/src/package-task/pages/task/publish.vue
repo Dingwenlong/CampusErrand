@@ -219,7 +219,7 @@
                 <view class="urgent-tag">⚡ 优先处理</view>
               </view>
             </view>
-            <switch :checked="form.isUrgent === 1" @change="toggleUrgent" color="#FFC300"/>
+            <switch :checked="form.isUrgent === 1" @change="toggleUrgent" color="var(--color-primary)"/>
           </view>
           <view v-if="form.isUrgent === 1" class="fee-item urgent-fee">
             <view class="fee-input-wrapper full">
@@ -478,15 +478,15 @@ export default {
 
 <style lang="scss" scoped>
 // 设计变量
-$primary: #FFC300;
-$primary-light: #FFD54F;
-$primary-dark: #FFB300;
-$text-primary: #1a1a1a;
-$text-secondary: #666;
-$text-tertiary: #999;
-$bg-primary: #f8f9fa;
-$bg-card: #fff;
-$border-color: #f0f0f0;
+$primary: var(--color-primary);
+$primary-light: var(--color-primary-light);
+$primary-dark: var(--color-primary-dark);
+$text-primary: var(--color-text-primary);
+$text-secondary: var(--color-text-secondary);
+$text-tertiary: var(--color-text-tertiary);
+$bg-primary: var(--color-bg-secondary);
+$bg-card: var(--color-surface);
+$border-color: var(--color-border-light);
 $shadow-sm: 0 2rpx 12rpx rgba(0,0,0,0.06);
 $shadow-md: 0 4rpx 20rpx rgba(0,0,0,0.08);
 $shadow-lg: 0 8rpx 32rpx rgba(0,0,0,0.12);
@@ -496,7 +496,7 @@ $radius-lg: 28rpx;
 
 .publish-container {
   min-height: 100vh;
-  background: linear-gradient(180deg, #FFF9E6 0%, #f8f9fa 200rpx);
+  background: linear-gradient(180deg, #FFF9E6 0%, var(--color-bg-secondary) 200rpx);
 }
 
 // 导航栏
@@ -643,7 +643,7 @@ $radius-lg: 28rpx;
     
     .mark-icon {
       font-size: 20rpx;
-      color: #fff;
+      color: var(--color-white);
       font-weight: bold;
     }
   }
@@ -672,7 +672,7 @@ $radius-lg: 28rpx;
     
     &.required::after {
       content: '*';
-      color: #ff4d4f;
+      color: var(--color-error);
       margin-left: 8rpx;
     }
   }
@@ -689,7 +689,7 @@ $radius-lg: 28rpx;
     
     &:focus {
       border-color: $primary;
-      background: #fff;
+      background: var(--color-surface);
     }
   }
   
@@ -741,7 +741,7 @@ $radius-lg: 28rpx;
     
     &.required::after {
       content: '*';
-      color: #ff4d4f;
+      color: var(--color-error);
       margin-left: 8rpx;
     }
   }
@@ -760,7 +760,7 @@ $radius-lg: 28rpx;
   
   &:focus {
     border-color: $primary;
-    background: #fff;
+    background: var(--color-surface);
   }
 }
 
@@ -785,7 +785,7 @@ $radius-lg: 28rpx;
   
   &:focus {
     border-color: $primary;
-    background: #fff;
+    background: var(--color-surface);
   }
 }
 
@@ -892,7 +892,7 @@ $radius-lg: 28rpx;
     
     &.required::after {
       content: '*';
-      color: #ff4d4f;
+      color: var(--color-error);
       margin-left: 8rpx;
     }
   }
@@ -930,7 +930,7 @@ $radius-lg: 28rpx;
   
   &:focus-within {
     border-color: $primary;
-    background: #fff;
+    background: var(--color-surface);
   }
   
   &.full {
@@ -971,7 +971,7 @@ $radius-lg: 28rpx;
   
   &:focus {
     border-color: $primary;
-    background: #fff;
+    background: var(--color-surface);
   }
 }
 
@@ -986,7 +986,7 @@ $radius-lg: 28rpx;
   left: 0;
   right: 0;
   bottom: 0;
-  background: #fff;
+  background: var(--color-surface);
   padding: 24rpx 32rpx;
   padding-bottom: calc(24rpx + constant(safe-area-inset-bottom));
   padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
@@ -1011,14 +1011,14 @@ $radius-lg: 28rpx;
     
     .price-symbol {
       font-size: 28rpx;
-      color: #ff4d4f;
+      color: var(--color-error);
       font-weight: 600;
       margin-right: 4rpx;
     }
     
     .price-value {
       font-size: 48rpx;
-      color: #ff4d4f;
+      color: var(--color-error);
       font-weight: 700;
     }
   }
@@ -1051,3 +1051,4 @@ $radius-lg: 28rpx;
   }
 }
 </style>
+

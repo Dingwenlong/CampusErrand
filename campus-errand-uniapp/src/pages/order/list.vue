@@ -184,28 +184,29 @@ export default {
     }
   },
   onLoad() {
-    this.loadOrderList()
+    this.refreshList()
   },
   onShow() {
-    // 每次显示页面时刷新
-    this.loadOrderList()
+    this.refreshList()
   },
   methods: {
+    refreshList() {
+      this.current = 1
+      this.noMore = false
+      this.loadOrderList()
+    },
+
     switchRole(role) {
       if (this.currentRole === role) return
       this.currentRole = role
-      this.current = 1
       this.orderList = []
-      this.noMore = false
-      this.loadOrderList()
+      this.refreshList()
     },
     
     selectStatus(status) {
       this.currentStatus = status
-      this.current = 1
       this.orderList = []
-      this.noMore = false
-      this.loadOrderList()
+      this.refreshList()
     },
     
     async loadOrderList() {
@@ -256,9 +257,8 @@ export default {
     
     onRefresh() {
       this.refreshing = true
-      this.current = 1
-      this.noMore = false
-      this.loadOrderList()
+      this.orderList = []
+      this.refreshList()
     },
     
     goDetail(item) {
@@ -292,7 +292,8 @@ export default {
                   title: '取消成功',
                   icon: 'success'
                 })
-                this.loadOrderList()
+                this.orderList = []
+                this.refreshList()
               } else {
                 uni.showToast({
                   title: result.message || '取消失败',
@@ -329,7 +330,8 @@ export default {
                   title: '确认成功',
                   icon: 'success'
                 })
-                this.loadOrderList()
+                this.orderList = []
+                this.refreshList()
               } else {
                 uni.showToast({
                   title: result.message || '确认失败',
@@ -366,7 +368,8 @@ export default {
                   title: '确认成功',
                   icon: 'success'
                 })
-                this.loadOrderList()
+                this.orderList = []
+                this.refreshList()
               } else {
                 uni.showToast({
                   title: result.message || '确认失败',
@@ -396,253 +399,289 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@use '@/static/styles/mixins.scss' as *;
+
 .container {
-  background: #f5f5f5;
   min-height: 100vh;
+  background: radial-gradient(circle at top right, rgba(var(--color-primary-rgb), 0.1) 0%, transparent 45%), var(--color-bg);
 }
 
 .role-tabs {
+  position: sticky;
+  top: 0;
+  z-index: 20;
   display: flex;
-  background: #fff;
-  border-bottom: 1rpx solid #f0f0f0;
-  
+  margin: var(--space-4) var(--space-5) 0;
+  padding: var(--space-1);
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+
   .role-tab {
+    position: relative;
     flex: 1;
     text-align: center;
-    padding: 30rpx 0;
-    position: relative;
-    
+    padding: var(--space-3) 0;
+    border-radius: var(--radius-full);
+    transition: all var(--duration-fast) var(--ease-out);
+
     .tab-text {
-      font-size: 30rpx;
-      color: #666;
+      font-size: var(--font-size-base);
+      color: var(--color-text-secondary);
+      transition: all var(--duration-fast) var(--ease-out);
     }
-    
+
+    &:active {
+      transform: scale(0.97);
+    }
+
     &.active {
+      background: var(--color-primary-gradient);
+      box-shadow: var(--shadow-primary);
+
       .tab-text {
-        color: #667eea;
-        font-weight: 500;
+        color: var(--color-text-primary);
+        font-weight: var(--font-weight-semibold);
       }
     }
-    
+
     .tab-line {
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 60rpx;
-      height: 4rpx;
-      background: #667eea;
-      border-radius: 2rpx;
+      display: none;
     }
   }
 }
 
 .status-filter {
-  background: #fff;
-  padding: 20rpx;
-  border-bottom: 1rpx solid #f0f0f0;
-  
+  margin: var(--space-4) var(--space-5) var(--space-3);
+
   .filter-scroll {
     white-space: nowrap;
-    
+
     .filter-item {
-      display: inline-block;
-      padding: 12rpx 32rpx;
-      margin-right: 16rpx;
-      font-size: 28rpx;
-      color: #666;
-      background: #f5f5f5;
-      border-radius: 32rpx;
-      
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-2) var(--space-5);
+      margin-right: var(--space-3);
+      border-radius: var(--radius-full);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+      background: var(--color-surface);
+      border: 2rpx solid var(--color-border-light);
+      transition: all var(--duration-fast) var(--ease-out);
+
       &.active {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: #fff;
+        background: var(--color-primary-gradient);
+        border-color: transparent;
+        color: var(--color-text-primary);
+        font-weight: var(--font-weight-semibold);
+        box-shadow: var(--shadow-primary);
       }
     }
   }
 }
 
 .order-list {
-  height: calc(100vh - 200rpx);
-  padding: 20rpx;
-  
+  height: calc(100vh - 236rpx);
+  padding: 0 var(--space-5) var(--space-6);
+
   .order-item {
-    background: #fff;
-    border-radius: 16rpx;
-    padding: 24rpx;
-    margin-bottom: 20rpx;
-    
+    background: var(--color-surface);
+    border-radius: var(--radius-xl);
+    padding: var(--space-5);
+    margin-bottom: var(--space-4);
+    box-shadow: var(--shadow-sm);
+    border: 2rpx solid transparent;
+    transition: all var(--duration-fast) var(--ease-out);
+
+    &:active {
+      transform: translateY(-2rpx);
+      box-shadow: var(--shadow-md);
+    }
+
     .order-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16rpx;
-      
+      @include flex-between;
+      margin-bottom: var(--space-4);
+
       .task-type {
-        padding: 6rpx 16rpx;
-        border-radius: 8rpx;
-        font-size: 24rpx;
-        
+        padding: var(--space-1) var(--space-3);
+        border-radius: var(--radius-sm);
+        font-size: var(--font-size-xs);
+        font-weight: var(--font-weight-medium);
+
         &.type-1 {
-          background: #e6f7ff;
-          color: #1890ff;
+          background: var(--color-task-express-soft);
+          color: var(--color-task-express);
         }
-        
+
         &.type-2 {
-          background: #f6ffed;
-          color: #52c41a;
+          background: var(--color-task-shopping-soft);
+          color: var(--color-task-shopping);
         }
-        
+
         &.type-3 {
-          background: #fff7e6;
-          color: #fa8c16;
+          background: var(--color-task-delivery-soft);
+          color: var(--color-task-delivery);
         }
-        
-        &.type-4 {
-          background: #f9f0ff;
-          color: #722ed1;
+
+        &.type-4,
+        &.type-5 {
+          background: var(--color-task-other-soft);
+          color: var(--color-task-other);
         }
       }
-      
+
       .order-status {
-        font-size: 26rpx;
-        font-weight: 500;
-        
+        font-size: var(--font-size-sm);
+        font-weight: var(--font-weight-semibold);
+
         &.status-0 {
-          color: #999;
+          color: var(--color-warning);
         }
-        
-        &.status-1, &.status-2, &.status-3 {
-          color: #667eea;
-        }
-        
+
+        &.status-1,
+        &.status-2,
+        &.status-3,
         &.status-4 {
-          color: #fa8c16;
+          color: var(--color-info);
         }
-        
+
         &.status-5 {
-          color: #52c41a;
+          color: var(--color-success);
         }
-        
+
         &.status-6 {
-          color: #999;
+          color: var(--color-text-tertiary);
         }
       }
     }
-    
+
     .order-title {
-      font-size: 30rpx;
-      color: #333;
-      font-weight: 500;
-      margin-bottom: 16rpx;
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-primary);
+      margin-bottom: var(--space-4);
+      line-height: var(--line-height-snug);
     }
-    
+
     .order-address {
-      margin-bottom: 16rpx;
-      
+      margin-bottom: var(--space-4);
+
       .address-item {
         display: flex;
         align-items: center;
-        margin-bottom: 8rpx;
-        
+        margin-bottom: var(--space-2);
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+
         .dot {
-          width: 16rpx;
-          height: 16rpx;
-          border-radius: 50%;
-          margin-right: 12rpx;
-          
+          width: 14rpx;
+          height: 14rpx;
+          margin-right: var(--space-3);
+          border-radius: var(--radius-full);
+
           &.pickup {
-            background: #52c41a;
+            background: var(--color-success);
           }
-          
+
           &.delivery {
-            background: #ff4d4f;
+            background: var(--color-error);
           }
         }
-        
+
         .address-text {
-          font-size: 26rpx;
-          color: #666;
+          font-size: var(--font-size-sm);
+          color: var(--color-text-secondary);
         }
       }
     }
-    
+
     .order-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-top: 16rpx;
-      border-top: 1rpx solid #f0f0f0;
-      margin-bottom: 16rpx;
-      
+      @include flex-between;
+      margin-bottom: var(--space-4);
+      padding-top: var(--space-4);
+      border-top: 2rpx solid var(--color-divider);
+
       .user-info {
         display: flex;
         align-items: center;
-        
+
         .avatar {
-          width: 48rpx;
-          height: 48rpx;
-          border-radius: 50%;
-          margin-right: 12rpx;
+          width: 52rpx;
+          height: 52rpx;
+          margin-right: var(--space-3);
+          border-radius: var(--radius-full);
+          border: 2rpx solid var(--color-border-light);
         }
-        
+
         .username {
-          font-size: 26rpx;
-          color: #333;
+          font-size: var(--font-size-sm);
+          color: var(--color-text-primary);
+          font-weight: var(--font-weight-medium);
         }
       }
-      
+
       .order-amount {
         display: flex;
-        align-items: center;
-        
+        align-items: baseline;
+
         .amount-label {
-          font-size: 24rpx;
-          color: #999;
-          margin-right: 8rpx;
+          margin-right: var(--space-1);
+          font-size: var(--font-size-xs);
+          color: var(--color-text-tertiary);
         }
-        
+
         .amount-value {
-          font-size: 32rpx;
-          font-weight: bold;
-          color: #ff4d4f;
+          font-size: var(--font-size-lg);
+          font-weight: var(--font-weight-bold);
+          color: var(--color-error);
         }
       }
     }
-    
+
     .order-actions {
       display: flex;
       justify-content: flex-end;
-      gap: 16rpx;
-      
+      gap: var(--space-3);
+
       .btn {
-        padding: 12rpx 24rpx;
-        border-radius: 8rpx;
-        font-size: 26rpx;
-        line-height: 1.5;
-        
+        padding: var(--space-2) var(--space-4);
+        border-radius: var(--radius-full);
+        font-size: var(--font-size-sm);
+        line-height: var(--line-height-normal);
+        border: none;
+        transition: all var(--duration-fast) var(--ease-out);
+
         &::after {
           border: none;
         }
-        
-        &.btn-cancel {
-          background: #f5f5f5;
-          color: #666;
+
+        &:active {
+          transform: scale(0.96);
         }
-        
+
+        &.btn-cancel {
+          background: var(--color-bg-secondary);
+          color: var(--color-text-secondary);
+        }
+
         &.btn-primary {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          color: #fff;
+          background: var(--color-primary-gradient);
+          color: var(--color-text-primary);
+          box-shadow: var(--shadow-primary);
         }
       }
     }
   }
-  
+
   .load-more {
+    padding: var(--space-6) 0;
     text-align: center;
-    padding: 30rpx;
-    font-size: 26rpx;
-    color: #999;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-tertiary);
   }
 }
 </style>
+

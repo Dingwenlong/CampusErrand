@@ -32,9 +32,10 @@ public class MD5Util {
     }
 
     public static boolean verify(String password, String encryptedPassword) {
-        if (password == null || encryptedPassword == null) {
+        if (password == null || password.isEmpty() || encryptedPassword == null || encryptedPassword.isEmpty()) {
             return false;
         }
-        return encrypt(password).equals(encryptedPassword);
+        String encrypted = encrypt(password);
+        return encrypted != null && encrypted.equals(encryptedPassword);
     }
 }

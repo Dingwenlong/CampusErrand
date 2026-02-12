@@ -16,7 +16,7 @@
     
     <a-layout>
       <Header :is-mobile="isMobile" @toggle-menu="mobileMenuOpen = !mobileMenuOpen" />
-      <a-layout-content class="content" :class="{ 'mobile': isMobile }">
+      <a-layout-content class="content-shell" :class="{ 'mobile': isMobile }">
         <router-view />
       </a-layout-content>
     </a-layout>
@@ -37,20 +37,26 @@ const mobileMenuOpen = ref(false)
 <style scoped>
 .layout {
   min-height: 100vh;
+  position: relative;
 }
 
-.content {
-  margin: 24px;
-  padding: 24px;
-  background: #fff;
+.content-shell {
+  margin: 18px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(15, 23, 42, 0.1);
   min-height: 280px;
   overflow-y: auto;
-  border-radius: 8px;
+  border-radius: 18px;
+  box-shadow: 0 20px 40px -28px rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  animation: shell-in 0.32s ease;
 }
 
-.content.mobile {
-  margin: 12px;
-  padding: 16px;
+.content-shell.mobile {
+  margin: 10px;
+  padding: 14px;
 }
 
 /* 移动端抽屉样式 */
@@ -59,6 +65,18 @@ const mobileMenuOpen = ref(false)
 }
 
 :deep(.mobile-drawer .ant-drawer-content) {
-  background: #fff;
+  background: transparent;
+  backdrop-filter: blur(8px);
+}
+
+@keyframes shell-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>

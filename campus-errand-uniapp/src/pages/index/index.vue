@@ -53,7 +53,7 @@
       autoplay 
       circular 
       indicator-color="rgba(255,255,255,0.5)" 
-      indicator-active-color="#FFC300"
+      indicator-active-color="var(--color-primary)"
       @change="onBannerChange"
     >
       <swiper-item v-for="(item, index) in banners" :key="index">
@@ -151,9 +151,9 @@ const taskTypeMap = {
 }
 
 const bannerColors = [
-  'linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%)',
-  'linear-gradient(135deg, #4ECDC4 0%, #7EDDD6 100%)',
-  'linear-gradient(135deg, #667eea 0%, #8B5CF6 100%)'
+  'linear-gradient(135deg, var(--color-brand-coral) 0%, var(--color-brand-coral-light) 100%)',
+  'linear-gradient(135deg, var(--color-brand-mint) 0%, var(--color-brand-mint-light) 100%)',
+  'linear-gradient(135deg, var(--color-brand-blue) 0%, var(--color-brand-blue-dark) 100%)'
 ]
 
 export default {
@@ -304,7 +304,7 @@ export default {
       uni.showModal({
         title: '确认接单',
         content: `确定要接这个${task.typeName}任务吗？`,
-        confirmColor: '#FFC300',
+        confirmColor: '#f59e0b',
         success: (res) => {
           if (res.confirm) {
             uni.showToast({
@@ -337,7 +337,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '@/static/styles/mixins.scss';
+@use '@/static/styles/mixins.scss' as *;
 
 .container {
   min-height: 100vh;
@@ -521,28 +521,28 @@ export default {
   }
 
   &.icon-bg-1 {
-    background: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%);
+    background: linear-gradient(135deg, var(--color-brand-coral) 0%, var(--color-brand-coral-light) 100%);
     box-shadow: 0 8rpx 24rpx rgba(255, 107, 107, 0.3);
   }
 
   &.icon-bg-2 {
-    background: linear-gradient(135deg, #4ECDC4 0%, #7EDDD6 100%);
+    background: linear-gradient(135deg, var(--color-brand-mint) 0%, var(--color-brand-mint-light) 100%);
     box-shadow: 0 8rpx 24rpx rgba(78, 205, 196, 0.3);
   }
 
   &.icon-bg-3 {
-    background: linear-gradient(135deg, #667eea 0%, #8B5CF6 100%);
+    background: linear-gradient(135deg, var(--color-brand-blue) 0%, var(--color-brand-blue-dark) 100%);
     box-shadow: 0 8rpx 24rpx rgba(102, 126, 234, 0.3);
   }
 
   &.icon-bg-4 {
-    background: linear-gradient(135deg, #FFA07A 0%, #FFB347 100%);
+    background: linear-gradient(135deg, var(--color-brand-coral) 0%, var(--color-brand-coral-light) 100%);
     box-shadow: 0 8rpx 24rpx rgba(255, 160, 122, 0.3);
   }
 
   &.icon-bg-5 {
-    background: linear-gradient(135deg, #45B7D1 0%, #74C7E3 100%);
-    box-shadow: 0 8rpx 24rpx rgba(69, 183, 209, 0.3);
+    background: linear-gradient(135deg, var(--color-brand-blue) 0%, var(--color-brand-indigo-soft) 100%);
+    box-shadow: 0 8rpx 24rpx rgba(14, 165, 233, 0.3);
   }
 }
 
@@ -782,19 +782,19 @@ export default {
   margin-right: var(--space-3);
   
   &.avatar-bg-1 {
-    background: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%);
+    background: linear-gradient(135deg, var(--color-brand-coral) 0%, var(--color-brand-coral-light) 100%);
   }
   
   &.avatar-bg-2 {
-    background: linear-gradient(135deg, #4ECDC4 0%, #7EDDD6 100%);
+    background: linear-gradient(135deg, var(--color-brand-mint) 0%, var(--color-brand-mint-light) 100%);
   }
   
   &.avatar-bg-3 {
-    background: linear-gradient(135deg, #667eea 0%, #8B5CF6 100%);
+    background: linear-gradient(135deg, var(--color-brand-blue) 0%, var(--color-brand-blue-dark) 100%);
   }
   
   &.avatar-bg-4, &.avatar-bg-5 {
-    background: linear-gradient(135deg, #45B7D1 0%, #74C7E3 100%);
+    background: linear-gradient(135deg, var(--color-brand-blue) 0%, var(--color-brand-indigo-soft) 100%);
   }
 }
 

@@ -113,8 +113,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
         Page<Task> page = new Page<>(current, size);
         LambdaQueryWrapper<Task> wrapper = new LambdaQueryWrapper<>();
 
-        // 只查询待接单的任务
-        wrapper.eq(Task::getStatus, 0);
+        wrapper.eq(Task::getStatus, resolveTaskListStatus(status));
 
         if (taskType != null) {
             wrapper.eq(Task::getTaskType, taskType);
@@ -136,6 +135,10 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
         resultPage.setRecords(voList);
 
         return resultPage;
+    }
+
+    static int resolveTaskListStatus(Integer status) {
+        return status == null ? 0 : status;
     }
 
     @Override

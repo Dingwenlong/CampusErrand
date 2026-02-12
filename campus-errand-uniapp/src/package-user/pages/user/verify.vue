@@ -415,7 +415,7 @@ export default {
 <style lang="scss" scoped>
 .container {
   min-height: 100vh;
-  background-color: var(--color-bg);
+  background: radial-gradient(circle at 100% 0, rgba(var(--color-primary-rgb), 0.09) 0%, transparent 42%), var(--color-bg);
   padding: var(--space-6);
 }
 
@@ -455,7 +455,7 @@ export default {
 .status-card {
   display: flex;
   align-items: center;
-  background-color: #fff;
+  background-color: var(--color-surface);
   border-radius: var(--radius-lg);
   padding: var(--space-6);
   margin-bottom: var(--space-6);
@@ -505,7 +505,7 @@ export default {
 
 /* 表单区域 */
 .form-section {
-  background-color: #fff;
+  background-color: var(--color-surface);
   border-radius: var(--radius-lg);
   padding: var(--space-6);
   margin-bottom: var(--space-6);
@@ -555,7 +555,7 @@ export default {
   transition: all var(--duration-fast);
 
   &:focus {
-    background-color: #fff;
+    background-color: var(--color-surface);
     border-color: var(--color-primary);
   }
 
@@ -653,7 +653,7 @@ export default {
   text {
     font-size: var(--font-size-lg);
     font-weight: var(--font-weight-semibold);
-    color: #fff;
+    color: var(--color-text-primary);
   }
 
   &:active {
@@ -670,7 +670,7 @@ export default {
   width: 36rpx;
   height: 36rpx;
   border: 4rpx solid rgba(255, 255, 255, 0.3);
-  border-top-color: #fff;
+  border-top-color: var(--color-text-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-right: var(--space-3);
@@ -684,7 +684,7 @@ export default {
 
 /* 信息展示区域 */
 .info-section {
-  background-color: #fff;
+  background-color: var(--color-surface);
   border-radius: var(--radius-lg);
   padding: var(--space-6);
   margin-bottom: var(--space-6);
@@ -720,7 +720,7 @@ export default {
   flex-direction: column;
   align-items: center;
   padding: var(--space-12) var(--space-6);
-  background-color: #fff;
+  background-color: var(--color-surface);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
 }

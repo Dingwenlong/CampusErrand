@@ -10,11 +10,15 @@
       >
         <MenuOutlined />
       </a-button>
-      <span class="page-title">后台管理系统</span>
+      <div class="title-group">
+        <span class="page-title">后台管理系统</span>
+        <span v-if="!isMobile" class="page-subtitle">Campus Errand Operations</span>
+      </div>
     </div>
     <div class="header-right">
       <a-dropdown>
         <a class="user-info" @click.prevent>
+          <span class="status-dot"></span>
           <div class="avatar">
             <span class="avatar-text">管</span>
           </div>
@@ -62,12 +66,14 @@ const handleMenuClick = ({ key }: { key: string }) => {
 
 <style scoped>
 .header {
-  background: #fff;
-  padding: 0 24px;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 0 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .header-left {
@@ -76,21 +82,34 @@ const handleMenuClick = ({ key }: { key: string }) => {
   gap: 12px;
 }
 
+.title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 .menu-btn {
   font-size: 18px;
-  color: #333;
+  color: #334155;
   padding: 0 8px;
 }
 
 .menu-btn:hover {
-  color: #FFC300;
-  background: rgba(255, 195, 0, 0.1);
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.14);
 }
 
 .page-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #333;
+  font-size: 17px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.page-subtitle {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: #64748b;
+  text-transform: uppercase;
 }
 
 .header-right {
@@ -102,20 +121,30 @@ const handleMenuClick = ({ key }: { key: string }) => {
   display: flex;
   align-items: center;
   gap: 12px;
-  color: rgba(0, 0, 0, 0.85);
-  padding: 4px 12px;
-  border-radius: 8px;
+  color: #1e293b;
+  padding: 6px 12px;
+  border-radius: 12px;
   transition: all 0.3s;
+  border: 1px solid transparent;
 }
 
 .user-info:hover {
-  background: rgba(255, 195, 0, 0.1);
+  background: rgba(245, 158, 11, 0.08);
+  border-color: rgba(245, 158, 11, 0.22);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #10b981;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.18);
 }
 
 .avatar {
   width: 32px;
   height: 32px;
-  background: linear-gradient(135deg, #FFC300 0%, #FFB300 100%);
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -123,19 +152,19 @@ const handleMenuClick = ({ key }: { key: string }) => {
 }
 
 .avatar-text {
-  color: #333;
+  color: #1f2937;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .username {
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .dropdown-menu :deep(.ant-dropdown-menu-item:hover) {
-  color: #FFC300;
-  background: rgba(255, 195, 0, 0.1);
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.12);
 }
 
 /* 移动端适配 */

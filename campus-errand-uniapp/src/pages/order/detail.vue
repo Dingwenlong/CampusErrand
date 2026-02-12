@@ -339,7 +339,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '@/static/styles/mixins.scss';
+@use '@/static/styles/mixins.scss' as *;
 
 .container {
   min-height: 100vh;
@@ -363,19 +363,19 @@ export default {
   animation: slideIn var(--duration-normal) var(--ease-out) both;
   
   &.status-bg-0 {
-    background: linear-gradient(135deg, #FFC300 0%, #FFB300 100%);
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
   }
   
   &.status-bg-1, &.status-bg-2 {
-    background: linear-gradient(135deg, #1890FF 0%, #36CFC9 100%);
+    background: linear-gradient(135deg, var(--color-brand-blue) 0%, var(--color-brand-mint) 100%);
   }
   
   &.status-bg-3 {
-    background: linear-gradient(135deg, #52C41A 0%, #73D13D 100%);
+    background: linear-gradient(135deg, var(--color-success) 0%, var(--color-success-light) 100%);
   }
   
   &.status-bg-4 {
-    background: linear-gradient(135deg, #8C8C8C 0%, #BFBFBF 100%);
+    background: linear-gradient(135deg, var(--color-text-tertiary) 0%, var(--color-text-disabled) 100%);
   }
 
   .status-icon {
@@ -602,7 +602,7 @@ export default {
       width: 88rpx;
       height: 88rpx;
       border-radius: 50%;
-      background: linear-gradient(135deg, #667eea 0%, #8B5CF6 100%);
+      background: linear-gradient(135deg, var(--color-brand-blue) 0%, var(--color-brand-blue-dark) 100%);
       @include flex-center;
       margin-right: var(--space-4);
       
@@ -768,3 +768,4 @@ export default {
   }
 }
 </style>
+

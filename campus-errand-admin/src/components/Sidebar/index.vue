@@ -10,11 +10,14 @@
   >
     <div class="logo">
       <div class="logo-icon">🏃</div>
-      <span v-if="!collapsed" class="logo-text">校园跑腿</span>
+      <div v-if="!collapsed" class="logo-text-group">
+        <span class="logo-text">校园跑腿</span>
+        <span class="logo-sub">Management</span>
+      </div>
     </div>
     <a-menu
       v-model:selectedKeys="selectedKeys"
-      theme="light"
+      theme="dark"
       mode="inline"
       @click="handleMenuClick"
       class="custom-menu"
@@ -54,11 +57,14 @@
   <div v-else class="mobile-sidebar">
     <div class="logo">
       <div class="logo-icon">🏃</div>
-      <span class="logo-text">校园跑腿</span>
+      <div class="logo-text-group">
+        <span class="logo-text">校园跑腿</span>
+        <span class="logo-sub">Management</span>
+      </div>
     </div>
     <a-menu
       v-model:selectedKeys="selectedKeys"
-      theme="light"
+      theme="dark"
       mode="inline"
       @click="handleMobileMenuClick"
       class="custom-menu mobile-menu"
@@ -96,7 +102,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, defineProps, defineEmits } from 'vue'
+import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   DashboardOutlined,
@@ -138,45 +144,61 @@ const handleMobileMenuClick = ({ key }: { key: string }) => {
 
 <style scoped>
 .sidebar {
-  background: #fff !important;
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+  background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%) !important;
+  box-shadow: 4px 0 20px -14px rgba(15, 23, 42, 0.75);
 }
 
 .mobile-sidebar {
-  background: #fff;
+  background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
   height: 100%;
 }
 
 .logo {
-  height: 64px;
+  height: 72px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 12px;
-  border-bottom: 1px solid #f0f0f0;
-  background: linear-gradient(135deg, #FFC300 0%, #FFB300 100%);
+  padding: 0 18px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.22);
+  background: rgba(15, 23, 42, 0.24);
 }
 
 .logo-icon {
-  width: 36px;
-  height: 36px;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 8px;
+  width: 38px;
+  height: 38px;
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  border-radius: 11px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 20px;
+  box-shadow: 0 10px 20px -12px rgba(245, 158, 11, 0.75);
+}
+
+.logo-text-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .logo-text {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
-  color: #333;
+  color: #f8fafc;
+}
+
+.logo-sub {
+  font-size: 10px;
+  color: rgba(203, 213, 225, 0.85);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 .custom-menu {
-  background: #fff;
+  background: transparent;
   border-right: none;
+  color: #e2e8f0;
 }
 
 .mobile-menu {
@@ -184,23 +206,29 @@ const handleMobileMenuClick = ({ key }: { key: string }) => {
 }
 
 .custom-menu :deep(.ant-menu-item) {
-  margin: 4px 12px;
-  border-radius: 8px;
-  color: #666;
-}
-
-.custom-menu :deep(.ant-menu-item:hover) {
-  color: #FFC300;
-  background: rgba(255, 195, 0, 0.1);
-}
-
-.custom-menu :deep(.ant-menu-item-selected) {
-  background: linear-gradient(135deg, #FFC300 0%, #FFB300 100%) !important;
-  color: #333 !important;
+  margin: 5px 10px;
+  border-radius: 10px;
+  color: #cbd5e1;
   font-weight: 600;
 }
 
+.custom-menu :deep(.ant-menu-item:hover) {
+  color: #fef3c7;
+  background: rgba(245, 158, 11, 0.22);
+}
+
+.custom-menu :deep(.ant-menu-item-selected) {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%) !important;
+  color: #1f2937 !important;
+  font-weight: 600;
+  box-shadow: 0 10px 16px -12px rgba(245, 158, 11, 0.9);
+}
+
 .custom-menu :deep(.ant-menu-item-selected .anticon) {
-  color: #333;
+  color: #1f2937;
+}
+
+.custom-menu :deep(.ant-menu-item .anticon) {
+  font-size: 16px;
 }
 </style>

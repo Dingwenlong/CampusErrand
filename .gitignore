@@ -82,3 +82,6 @@ unpackage/
 *.tmp
 *.temp
 *.cache
+
+# Runtime state
+.run/

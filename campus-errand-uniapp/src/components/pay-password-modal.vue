@@ -125,7 +125,7 @@ export default {
 
 .modal-content {
   width: 100%;
-  background: #fff;
+  background: var(--color-surface);
   border-radius: 24rpx 24rpx 0 0;
   padding: 40rpx 30rpx;
   padding-bottom: constant(safe-area-inset-bottom);
@@ -141,12 +141,12 @@ export default {
   .title {
     font-size: 32rpx;
     font-weight: bold;
-    color: #333;
+    color: var(--color-text-primary);
   }
   
   .close-btn {
     font-size: 48rpx;
-    color: #999;
+    color: var(--color-text-tertiary);
     line-height: 1;
   }
 }
@@ -159,18 +159,18 @@ export default {
   .password-dot {
     width: 80rpx;
     height: 80rpx;
-    border: 2rpx solid #ddd;
+    border: 2rpx solid var(--color-border);
     border-radius: 12rpx;
     margin: 0 10rpx;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 32rpx;
-    color: #333;
+    color: var(--color-text-primary);
     
     &.filled {
-      border-color: #667eea;
-      background: #f8f8ff;
+      border-color: var(--color-primary);
+      background: rgba(var(--color-primary-rgb), 0.08);
     }
   }
 }
@@ -181,7 +181,7 @@ export default {
   
   text {
     font-size: 26rpx;
-    color: #667eea;
+    color: var(--color-primary-dark);
   }
 }
 
@@ -202,22 +202,22 @@ export default {
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #f5f5f5;
+      background: var(--color-bg-secondary);
       border-radius: 12rpx;
       font-size: 36rpx;
-      color: #333;
+      color: var(--color-text-primary);
       
       &.key-number {
         &:active {
-          background: #e0e0e0;
+          background: var(--color-border);
         }
       }
       
       &.key-delete {
-        background: #e0e0e0;
+        background: var(--color-border);
         
         &:active {
-          background: #d0d0d0;
+          background: var(--color-border-dark);
         }
         
         .delete-icon {
@@ -232,3 +232,4 @@ export default {
   }
 }
 </style>
+

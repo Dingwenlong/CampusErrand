@@ -143,15 +143,15 @@
   "globalStyle": {
     "navigationBarTextStyle": "black",
     "navigationBarTitleText": "校园跑腿",
-    "navigationBarBackgroundColor": "#F8F8F8",
-    "backgroundColor": "#F8F8F8"
+    "navigationBarBackgroundColor": "#F8FAFC",
+    "backgroundColor": "#EFF3F8"
   },
   "tabBar": {
-    "color": "#9ca3af",
-    "selectedColor": "#FFC300",
-    "borderStyle": "black",
+    "color": "#64748b",
+    "selectedColor": "#f59e0b",
+    "borderStyle": "white",
     "backgroundColor": "#ffffff",
-    "height": "80rpx",
+    "height": "88rpx",
     "list": [
       {
         "pagePath": "pages/index/index",
