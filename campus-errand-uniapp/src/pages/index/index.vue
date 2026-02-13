@@ -5,25 +5,15 @@
       <!-- 定位栏 -->
       <view class="location-bar">
         <view class="location-left" @click="showLocationPicker">
-          <view class="location-icon-wrapper">
-            <text class="iconfont icon-location-fill location-icon"></text>
-          </view>
+          <text class="iconfont icon-location-fill location-icon"></text>
           <text class="location-text">{{ currentSchool }}</text>
           <text class="iconfont icon-arrow-down location-arrow"></text>
         </view>
         <view class="location-right">
           <view class="icon-btn message-btn" @click="navigateTo('/pages/message/list')">
             <text class="iconfont icon-message message-icon-text"></text>
-            <view v-if="unreadCount > 0" class="badge">{{ unreadCount }}</view>
+            <view v-if="unreadCount > 0" class="badge-full">{{ unreadCount }}</view>
           </view>
-        </view>
-      </view>
-
-      <!-- 搜索栏 -->
-      <view class="search-bar pressable" @click="navigateTo('/pages/task/list')">
-        <view class="search-input">
-          <text class="iconfont icon-search search-icon"></text>
-          <text class="search-placeholder">搜索任务、跑腿服务</text>
         </view>
       </view>
     </view>
@@ -35,7 +25,7 @@
           class="feature-item pressable" 
           v-for="(item, index) in features" 
           :key="index" 
-          @click="navigateTo(item.path)"
+          @click="goToTaskList(item.type)"
           :style="{ animationDelay: index * 0.05 + 's' }"
         >
           <view class="feature-icon-wrapper scale-in" :class="'icon-bg-' + item.type">
@@ -299,6 +289,12 @@ export default {
         })
       }
     },
+    goToTaskList(type) {
+      uni.setStorageSync('taskListType', type)
+      uni.switchTab({
+        url: '/pages/task/list'
+      })
+    },
     goTaskDetail(task) {
       uni.navigateTo({
         url: `/pages/task/detail?id=${task.id}`
@@ -358,7 +354,7 @@ export default {
 /* 顶部黄色区域 */
 .header-section {
   background: var(--color-primary-gradient);
-  padding: var(--space-4) var(--space-6) var(--space-8);
+  padding: var(--space-4) var(--space-6) var(--space-6);
   border-radius: 0 0 var(--radius-3xl) var(--radius-3xl);
   box-shadow: var(--shadow-md);
 }
@@ -368,7 +364,6 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--space-4);
 }
 
 .location-left {
@@ -385,18 +380,10 @@ export default {
   }
 }
 
-.location-icon-wrapper {
-  @include flex-center;
-  width: 48rpx;
-  height: 48rpx;
-  background-color: rgba(255, 255, 255, 0.3);
-  border-radius: var(--radius-full);
-  margin-right: var(--space-2);
-}
-
 .location-icon {
   font-size: 28rpx;
   color: var(--color-text-primary);
+  margin-right: var(--space-2);
 }
 
 .location-text {
@@ -424,8 +411,8 @@ export default {
 .icon-btn {
   position: relative;
   @include flex-center;
-  width: 72rpx;
-  height: 72rpx;
+  width: 48rpx;
+  height: 48rpx;
   background-color: rgba(255, 255, 255, 0.2);
   border-radius: var(--radius-full);
   transition: all var(--duration-fast) var(--ease-out);
@@ -447,51 +434,22 @@ export default {
 }
 
 .message-icon-text {
-  font-size: 36rpx;
+  font-size: 24rpx;
 }
 
-.badge {
+.badge-full {
   position: absolute;
-  top: 4rpx;
-  right: 4rpx;
-  min-width: 32rpx;
-  height: 32rpx;
-  padding: 0 8rpx;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background-color: var(--color-error);
   color: var(--color-white);
-  font-size: var(--font-size-2xs);
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-bold);
   border-radius: var(--radius-full);
   @include flex-center;
-}
-
-/* 搜索栏 */
-.search-bar {
-  background-color: var(--color-white);
-  border-radius: var(--radius-full);
-  padding: var(--space-3) var(--space-5);
-  box-shadow: var(--shadow-sm);
-  transition: all var(--duration-fast) var(--ease-out);
-  
-  &:active {
-    box-shadow: var(--shadow-md);
-  }
-}
-
-.search-input {
-  display: flex;
-  align-items: center;
-}
-
-.search-icon {
-  font-size: 32rpx;
-  color: var(--color-text-tertiary);
-  margin-right: var(--space-3);
-}
-
-.search-placeholder {
-  font-size: var(--font-size-base);
-  color: var(--color-text-placeholder);
+  opacity: 0.95;
 }
 
 /* 功能入口区域 */
@@ -569,7 +527,7 @@ export default {
 /* 轮播图 */
 .banner-swiper {
   height: 280rpx;
-  margin: 0 var(--space-6) var(--space-6);
+  margin: var(--space-6);
   border-radius: var(--radius-xl);
   overflow: hidden;
 
@@ -599,7 +557,7 @@ export default {
 
 /* 任务区域 */
 .task-section {
-  padding: 0 var(--space-6);
+  padding: var(--space-6);
 }
 
 .section-header {

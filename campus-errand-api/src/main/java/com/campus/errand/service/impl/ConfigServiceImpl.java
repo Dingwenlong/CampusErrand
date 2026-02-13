@@ -74,6 +74,10 @@ public class ConfigServiceImpl extends ServiceImpl<ConfigMapper, Config> impleme
             case "verify_enabled" -> "实名认证开关";
             case "maintenance_mode" -> "系统维护开关";
             case "maintenance_message" -> "维护提示信息";
+            case "user_agreement" -> "用户协议内容";
+            case "privacy_policy" -> "隐私政策内容";
+            case "user_agreement_update_time" -> "用户协议更新时间";
+            case "privacy_policy_update_time" -> "隐私政策更新时间";
             default -> "系统配置";
         };
     }
@@ -88,6 +92,8 @@ public class ConfigServiceImpl extends ServiceImpl<ConfigMapper, Config> impleme
             return "task";
         } else if (key.contains("withdraw") || key.contains("fee")) {
             return "wallet";
+        } else if (key.contains("agreement") || key.contains("privacy")) {
+            return "agreement";
         } else {
             return "other";
         }

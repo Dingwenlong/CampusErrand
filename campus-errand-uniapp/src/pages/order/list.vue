@@ -22,7 +22,7 @@
 
     <!-- 状态筛选 -->
     <view class="status-filter">
-      <scroll-view scroll-x class="filter-scroll">
+      <view class="filter-bar">
         <view 
           class="filter-item" 
           :class="{ active: currentStatus === null }"
@@ -58,7 +58,7 @@
         >
           已取消
         </view>
-      </scroll-view>
+      </view>
     </view>
 
     <!-- 订单列表 -->
@@ -411,37 +411,33 @@ export default {
 
 .container {
   min-height: 100vh;
-  background: radial-gradient(circle at top right, rgba(var(--color-primary-rgb), 0.1) 0%, transparent 45%), var(--color-bg);
+  background-color: var(--color-bg);
   padding-bottom: calc(140rpx + env(safe-area-inset-bottom));
 }
 
 .role-tabs {
-  position: sticky;
-  top: 0;
-  z-index: 20;
   display: flex;
-  margin: var(--space-4) var(--space-5) 0;
-  padding: var(--space-1);
-  border-radius: var(--radius-full);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
+  justify-content: space-between;
+  background-color: var(--color-bg);
+  padding: var(--space-4) var(--space-6);
+  gap: var(--space-3);
 
   .role-tab {
-    position: relative;
     flex: 1;
     text-align: center;
     padding: var(--space-3) 0;
     border-radius: var(--radius-full);
     transition: all var(--duration-fast) var(--ease-out);
-
-    .tab-text {
-      font-size: var(--font-size-base);
-      color: var(--color-text-secondary);
-      transition: all var(--duration-fast) var(--ease-out);
-    }
+    background-color: var(--color-surface);
+    box-shadow: var(--shadow-xs);
 
     &:active {
-      transform: scale(0.97);
+      transform: scale(0.95);
+    }
+
+    .tab-text {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
     }
 
     &.active {
@@ -453,54 +449,53 @@ export default {
         font-weight: var(--font-weight-semibold);
       }
     }
-
-    .tab-line {
-      display: none;
-    }
   }
 }
 
 .status-filter {
-  margin: var(--space-4) var(--space-5) var(--space-3);
+  background-color: var(--color-bg);
+  padding: 0 var(--space-6) var(--space-4);
+}
 
-  .filter-scroll {
-    white-space: nowrap;
+.filter-bar {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
 
-    .filter-item {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: var(--space-2) var(--space-5);
-      margin-right: var(--space-3);
-      border-radius: var(--radius-full);
-      font-size: var(--font-size-sm);
-      color: var(--color-text-secondary);
-      background: var(--color-surface);
-      border: 2rpx solid var(--color-border-light);
-      transition: all var(--duration-fast) var(--ease-out);
+  .filter-item {
+    flex: 1;
+    text-align: center;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    padding: var(--space-3) 0;
+    border-radius: var(--radius-full);
+    transition: all var(--duration-fast) var(--ease-out);
+    background-color: var(--color-surface);
+    box-shadow: var(--shadow-xs);
 
-      &.active {
-        background: var(--color-primary-gradient);
-        border-color: transparent;
-        color: var(--color-text-primary);
-        font-weight: var(--font-weight-semibold);
-        box-shadow: var(--shadow-primary);
-      }
+    &:active {
+      transform: scale(0.95);
+    }
+
+    &.active {
+      color: var(--color-text-primary);
+      font-weight: var(--font-weight-semibold);
+      background: var(--color-primary-gradient);
+      box-shadow: var(--shadow-primary);
     }
   }
 }
 
 .order-list {
-  height: calc(100vh - 236rpx);
-  padding: 0 var(--space-5) var(--space-6);
+  flex: 1;
+  padding: 0 var(--space-6);
 
   .order-item {
-    background: var(--color-surface);
+    background-color: var(--color-surface);
     border-radius: var(--radius-xl);
     padding: var(--space-5);
     margin-bottom: var(--space-4);
     box-shadow: var(--shadow-sm);
-    border: 2rpx solid transparent;
     transition: all var(--duration-fast) var(--ease-out);
 
     &:active {
@@ -509,7 +504,9 @@ export default {
     }
 
     .order-header {
-      @include flex-between;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: var(--space-4);
 
       .task-type {
@@ -519,23 +516,23 @@ export default {
         font-weight: var(--font-weight-medium);
 
         &.type-1 {
-          background: var(--color-task-express-soft);
+          background-color: var(--color-task-express-soft);
           color: var(--color-task-express);
         }
 
         &.type-2 {
-          background: var(--color-task-shopping-soft);
+          background-color: var(--color-task-shopping-soft);
           color: var(--color-task-shopping);
         }
 
         &.type-3 {
-          background: var(--color-task-delivery-soft);
+          background-color: var(--color-task-delivery-soft);
           color: var(--color-task-delivery);
         }
 
         &.type-4,
         &.type-5 {
-          background: var(--color-task-other-soft);
+          background-color: var(--color-task-other-soft);
           color: var(--color-task-other);
         }
       }
@@ -586,13 +583,14 @@ export default {
         }
 
         .dot {
-          width: 14rpx;
-          height: 14rpx;
+          width: 16rpx;
+          height: 16rpx;
           margin-right: var(--space-3);
-          border-radius: var(--radius-full);
+          border-radius: 50%;
+          flex-shrink: 0;
 
           &.pickup {
-            background: var(--color-success);
+            background: var(--color-task-shopping);
           }
 
           &.delivery {
@@ -603,25 +601,28 @@ export default {
         .address-text {
           font-size: var(--font-size-sm);
           color: var(--color-text-secondary);
+          line-height: var(--line-height-normal);
         }
       }
     }
 
     .order-footer {
-      @include flex-between;
-      margin-bottom: var(--space-4);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       padding-top: var(--space-4);
       border-top: 2rpx solid var(--color-divider);
+      margin-bottom: var(--space-4);
 
       .user-info {
         display: flex;
         align-items: center;
 
         .avatar {
-          width: 52rpx;
-          height: 52rpx;
+          width: 56rpx;
+          height: 56rpx;
           margin-right: var(--space-3);
-          border-radius: var(--radius-full);
+          border-radius: 50%;
           border: 2rpx solid var(--color-border-light);
         }
 
@@ -686,7 +687,7 @@ export default {
   }
 
   .load-more {
-    padding: var(--space-6) 0;
+    padding: var(--space-8) 0;
     text-align: center;
     font-size: var(--font-size-sm);
     color: var(--color-text-tertiary);

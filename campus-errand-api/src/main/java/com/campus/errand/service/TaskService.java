@@ -11,7 +11,7 @@ public interface TaskService extends IService<Task> {
 
     TaskVO publishTask(Long userId, TaskPublishDTO publishDTO);
 
-    IPage<TaskVO> getTaskList(Integer taskType, Integer status, Long current, Long size);
+    IPage<TaskVO> getTaskList(Integer taskType, Integer status, String keyword, Long current, Long size);
 
     TaskVO getTaskDetail(Long taskId);
 

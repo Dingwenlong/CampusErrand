@@ -1,14 +1,5 @@
 <template>
   <view class="publish-container">
-    <!-- 顶部导航栏 -->
-    <view class="nav-header">
-      <view class="nav-back" @click="goBack">
-        <text class="nav-icon">←</text>
-      </view>
-      <text class="nav-title">发布任务</text>
-      <view class="nav-placeholder"></view>
-    </view>
-
     <!-- 主内容区 -->
     <scroll-view class="content-scroll" scroll-y>
       <!-- 任务类型选择卡片 -->
@@ -242,13 +233,15 @@
           <text class="header-title">备注说明</text>
         </view>
         <view class="form-body">
-          <textarea 
-            v-model="form.remark" 
-            class="remark-textarea"
-            placeholder="请输入其他备注信息（选填）"
-            maxlength="200"
-          />
-          <text class="input-count">{{ form.remark.length }}/200</text>
+          <view class="remark-wrapper">
+            <textarea 
+              v-model="form.remark" 
+              class="remark-textarea"
+              placeholder="请输入其他备注信息（选填）"
+              maxlength="200"
+            />
+            <text class="input-count">{{ form.remark.length }}/200</text>
+          </view>
         </view>
       </view>
 
@@ -287,6 +280,13 @@ import PayPasswordModal from '@/components/pay-password-modal.vue'
 export default {
   components: {
     PayPasswordModal
+  },
+  created() {
+    const savedType = uni.getStorageSync('taskListType')
+    if (savedType) {
+      this.form.taskType = savedType
+      uni.removeStorageSync('taskListType')
+    }
   },
   data() {
     return {
@@ -466,8 +466,10 @@ export default {
         }
       } catch (e) {
         uni.hideLoading()
+        console.error('发布任务失败:', e)
+        const errorMsg = e?.message || e?.data?.message || '发布失败'
         uni.showToast({
-          title: '发布失败',
+          title: errorMsg,
           icon: 'none'
         })
       }
@@ -477,6 +479,34 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+// 强制去除所有输入框聚焦边框 - 使用小程序特定选择器
+::v-deep .uni-input-wrapper,
+::v-deep .uni-textarea-wrapper,
+::v-deep .uni-input,
+::v-deep .uni-textarea,
+::v-deep input,
+::v-deep textarea {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  
+  &:focus,
+  &.uni-input-focus,
+  &.uni-textarea-focus {
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+}
+
+// 针对 input 和 textarea 的宿主元素
+::v-deep .uni-input-input,
+::v-deep .uni-textarea-textarea {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
 // 设计变量
 $primary: #FF6B35;
 $primary-light: #FF8C5A;
@@ -500,50 +530,9 @@ $radius-lg: 28rpx;
   background: linear-gradient(180deg, #FFF8F0 0%, #FFF5EB 200rpx);
 }
 
-// 导航栏
-.nav-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 40rpx 32rpx 20rpx;
-  background: linear-gradient(180deg, #FFF8F0 0%, transparent 100%);
-  
-  .nav-back {
-    width: 64rpx;
-    height: 64rpx;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #fff;
-    border-radius: 50%;
-    box-shadow: $shadow-sm;
-    
-    &:active {
-      transform: scale(0.95);
-      background: rgba(255, 107, 53, 0.1);
-    }
-    
-    .nav-icon {
-      font-size: 36rpx;
-      color: $text-primary;
-      font-weight: bold;
-    }
-  }
-  
-  .nav-title {
-    font-size: 36rpx;
-    font-weight: 700;
-    color: $text-primary;
-  }
-  
-  .nav-placeholder {
-    width: 64rpx;
-  }
-}
-
 // 内容滚动区
 .content-scroll {
-  height: calc(100vh - 200rpx);
+  height: 100vh;
   padding: 0 24rpx;
 }
 
@@ -660,6 +649,9 @@ $radius-lg: 28rpx;
 .input-group {
   margin-bottom: 28rpx;
   position: relative;
+  background: $bg-primary;
+  border-radius: $radius-md;
+  padding: 24rpx;
   
   &:last-child {
     margin-bottom: 0;
@@ -681,21 +673,14 @@ $radius-lg: 28rpx;
   
   .group-input, .group-textarea {
     width: 100%;
-    background: $bg-primary;
+    background: transparent;
     border-radius: $radius-md;
-    padding: 24rpx;
+    padding: 0;
     font-size: 28rpx;
     color: $text-primary;
-    border: 2rpx solid transparent;
+    border: none;
     transition: all 0.3s ease;
     box-sizing: border-box;
-    
-    &:focus {
-      border-color: $primary;
-      background: var(--color-surface);
-      box-shadow: $shadow-focus;
-      transform: translateY(-2rpx);
-    }
     
     &::placeholder {
       color: $text-tertiary;
@@ -709,7 +694,6 @@ $radius-lg: 28rpx;
   
   .group-textarea {
     height: 200rpx;
-    padding-bottom: 48rpx;
   }
   
   .input-count {
@@ -727,10 +711,27 @@ $radius-lg: 28rpx;
 // 地址区域
 .address-section {
   margin-bottom: 28rpx;
+  background: $bg-primary;
+  border-radius: $radius-md;
+  padding: 24rpx;
   
   &:last-child {
     margin-bottom: 0;
   }
+}
+
+// 地址输入框容器
+.address-input-wrapper {
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+}
+
+// 联系人输入框容器
+.contact-input-wrapper {
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
 }
 
 .address-label {
@@ -764,22 +765,15 @@ $radius-lg: 28rpx;
 .address-input {
   width: 100%;
   height: 96rpx;
-  background: $bg-primary;
-  border-radius: $radius-md;
-  padding: 0 24rpx;
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
   font-size: 28rpx;
   color: $text-primary;
   margin-bottom: 16rpx;
-  border: 2rpx solid transparent;
+  border: none;
   transition: all 0.3s ease;
   box-sizing: border-box;
-  
-  &:focus {
-    border-color: $primary;
-    background: var(--color-surface);
-    box-shadow: $shadow-focus;
-    transform: translateY(-2rpx);
-  }
   
   &::placeholder {
     color: $text-tertiary;
@@ -794,24 +788,17 @@ $radius-lg: 28rpx;
 .contact-input {
   flex: 1;
   height: 88rpx;
-  background: $bg-primary;
-  border-radius: $radius-md;
-  padding: 0 24rpx;
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
   font-size: 28rpx;
   color: $text-primary;
-  border: 2rpx solid transparent;
+  border: none;
   transition: all 0.3s ease;
   box-sizing: border-box;
   
   &.phone {
     flex: 1.5;
-  }
-  
-  &:focus {
-    border-color: $primary;
-    background: var(--color-surface);
-    box-shadow: $shadow-focus;
-    transform: translateY(-2rpx);
   }
   
   &::placeholder {
@@ -958,13 +945,6 @@ $radius-lg: 28rpx;
   border: 2rpx solid transparent;
   transition: all 0.3s ease;
   
-  &:focus-within {
-    border-color: $primary;
-    background: var(--color-surface);
-    box-shadow: $shadow-focus;
-    transform: translateY(-2rpx);
-  }
-  
   &.full {
     width: 100%;
     margin-top: 16rpx;
@@ -995,26 +975,24 @@ $radius-lg: 28rpx;
 }
 
 // 备注
-.remark-textarea {
-  width: 100%;
-  height: 180rpx;
+.remark-wrapper {
   background: $bg-primary;
   border-radius: $radius-md;
   padding: 24rpx;
-  padding-bottom: 48rpx;
+  position: relative;
+}
+
+.remark-textarea {
+  width: 100%;
+  height: 180rpx;
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
   font-size: 28rpx;
   color: $text-primary;
-  border: 2rpx solid transparent;
-  margin-bottom: 16rpx;
+  border: none;
   transition: all 0.3s ease;
   box-sizing: border-box;
-  
-  &:focus {
-    border-color: $primary;
-    background: var(--color-surface);
-    box-shadow: $shadow-focus;
-    transform: translateY(-2rpx);
-  }
   
   &::placeholder {
     color: $text-tertiary;

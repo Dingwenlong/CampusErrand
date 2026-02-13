@@ -124,6 +124,33 @@ input, textarea {
   background: none;
 }
 
+input:focus, textarea:focus {
+  outline: none;
+  border: none;
+  box-shadow: none;
+}
+
+/* 微信小程序 input/textarea 聚焦样式重置 */
+/* #ifdef MP-WEIXIN */
+.uni-input-wrapper,
+.uni-textarea-wrapper,
+.uni-input,
+.uni-textarea {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.uni-input-focus,
+.uni-textarea-focus,
+.uni-input-wrapper:focus,
+.uni-textarea-wrapper:focus {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+/* #endif */
+
 /* 图片默认样式 */
 image {
   display: block;

@@ -1,5 +1,27 @@
 <template>
   <view class="container">
+    <!-- 搜索栏 -->
+    <view class="search-section">
+      <view class="search-bar">
+        <view class="search-input">
+          <text class="iconfont icon-search search-icon"></text>
+          <input 
+            class="search-text" 
+            type="text" 
+            v-model="keyword" 
+            placeholder="搜索任务标题" 
+            placeholder-class="search-placeholder-class"
+            @confirm="doSearch"
+            confirm-type="search"
+          />
+          <text v-if="keyword" class="iconfont icon-close clear-icon" @click="clearKeyword"></text>
+        </view>
+        <view class="search-btn pressable" @click="doSearch">
+          <text>搜索</text>
+        </view>
+      </view>
+    </view>
+
     <!-- 筛选栏 -->
     <view class="filter-bar">
       <view 
@@ -145,6 +167,7 @@ export default {
   },
   data() {
     return {
+      keyword: '',
       currentType: 0,
       taskList: [],
       current: 1,
@@ -154,10 +177,25 @@ export default {
       refreshing: false
     }
   },
-  onLoad() {
+  onLoad(options) {
+    if (options.keyword) {
+      this.keyword = decodeURIComponent(options.keyword)
+    }
+    if (options.type) {
+      this.currentType = parseInt(options.type)
+    }
     this.loadTaskList()
   },
   onShow() {
+    const savedType = uni.getStorageSync('taskListType')
+    if (savedType) {
+      this.currentType = savedType
+      uni.removeStorageSync('taskListType')
+      this.current = 1
+      this.taskList = []
+      this.noMore = false
+      this.loadTaskList()
+    }
     uni.$emit('tabBarChange', 1)
   },
   methods: {
@@ -191,6 +229,10 @@ export default {
         
         if (this.currentType !== 0) {
           params.taskType = this.currentType
+        }
+        
+        if (this.keyword.trim()) {
+          params.keyword = this.keyword.trim()
         }
         
         const res = await taskApi.getList(params)
@@ -268,6 +310,18 @@ export default {
       } else {
         return Math.floor(diff / 86400000) + '天前'
       }
+    },
+    
+    doSearch() {
+      this.current = 1
+      this.taskList = []
+      this.noMore = false
+      this.loadTaskList()
+    },
+    
+    clearKeyword() {
+      this.keyword = ''
+      this.doSearch()
     }
   }
 }
@@ -282,6 +336,58 @@ export default {
   flex-direction: column;
   background-color: var(--color-bg);
   padding-bottom: calc(140rpx + env(safe-area-inset-bottom));
+}
+
+.search-section {
+  background-color: var(--color-bg);
+  padding: var(--space-4) var(--space-6);
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  background-color: var(--color-surface);
+  border-radius: var(--radius-full);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-5);
+  box-shadow: var(--shadow-sm);
+}
+
+.search-input {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  font-size: 32rpx;
+  color: var(--color-text-tertiary);
+  margin-right: var(--space-3);
+}
+
+.search-text {
+  flex: 1;
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+}
+
+.search-placeholder-class {
+  color: var(--color-text-placeholder);
+}
+
+.clear-icon {
+  font-size: 28rpx;
+  color: var(--color-text-tertiary);
+  padding: var(--space-2);
+}
+
+.search-btn {
+  padding: var(--space-2) var(--space-5);
+  background: var(--color-primary-gradient);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-primary);
 }
 
 .filter-bar {
@@ -574,7 +680,7 @@ export default {
 
 .publish-btn {
   position: fixed;
-  right: var(--space-6);
+  right: var(--space-2);
   bottom: calc(150rpx + env(safe-area-inset-bottom));
   @include flex-center;
   flex-direction: column;

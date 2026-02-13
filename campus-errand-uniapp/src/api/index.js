@@ -10,6 +10,7 @@ import order from './order.js'
 import wallet from './wallet.js'
 import evaluation from './evaluation.js'
 import message from './message.js'
+import config from './config.js'
 
 // 统一导出所有API
 export const api = {
@@ -19,11 +20,12 @@ export const api = {
   order,
   wallet,
   evaluation,
-  message
+  message,
+  config
 }
 
 // 默认导出
 export default api
 
 // 单独导出各模块（便于按需导入）
-export { auth, user, task, order, wallet, evaluation, message }
+export { auth, user, task, order, wallet, evaluation, message, config }

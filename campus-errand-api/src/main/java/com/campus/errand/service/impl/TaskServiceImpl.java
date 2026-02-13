@@ -109,7 +109,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
     }
 
     @Override
-    public IPage<TaskVO> getTaskList(Integer taskType, Integer status, Long current, Long size) {
+    public IPage<TaskVO> getTaskList(Integer taskType, Integer status, String keyword, Long current, Long size) {
         Page<Task> page = new Page<>(current, size);
         LambdaQueryWrapper<Task> wrapper = new LambdaQueryWrapper<>();
 
@@ -117,6 +117,10 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
 
         if (taskType != null) {
             wrapper.eq(Task::getTaskType, taskType);
+        }
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            wrapper.like(Task::getTitle, keyword.trim());
         }
 
         wrapper.orderByDesc(Task::getCreateTime);

@@ -41,3 +41,11 @@ INSERT INTO tb_config (config_key, config_value, description, category) VALUES
 ('maintenance_mode', 'false', '系统维护开关', 'other'),
 ('maintenance_message', '系统维护中，请稍后再试', '维护提示信息', 'other')
 ON DUPLICATE KEY UPDATE config_value = VALUES(config_value), description = VALUES(description), category = VALUES(category);
+
+-- 协议配置
+INSERT INTO tb_config (config_key, config_value, description, category) VALUES
+('user_agreement', '', '用户协议内容', 'agreement'),
+('privacy_policy', '', '隐私政策内容', 'agreement'),
+('user_agreement_update_time', '', '用户协议更新时间', 'agreement'),
+('privacy_policy_update_time', '', '隐私政策更新时间', 'agreement')
+ON DUPLICATE KEY UPDATE config_value = VALUES(config_value), description = VALUES(description), category = VALUES(category);
