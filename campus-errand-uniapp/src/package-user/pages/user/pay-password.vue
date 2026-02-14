@@ -22,10 +22,10 @@
         class="password-item" 
         v-for="(item, index) in 6" 
         :key="index"
-        :class="{ active: password.length === index, filled: password.length > index }"
+        :class="{ active: (step === 1 ? password : confirmPassword).length === index, filled: (step === 1 ? password : confirmPassword).length > index }"
       >
-        <text v-if="password.length > index" class="password-dot"></text>
-        <text v-else-if="password.length === index" class="cursor"></text>
+        <text v-if="(step === 1 ? password : confirmPassword).length > index" class="password-dot"></text>
+        <text v-else-if="(step === 1 ? password : confirmPassword).length === index" class="cursor"></text>
       </view>
     </view>
 
@@ -95,6 +95,7 @@ export default {
         this.password += key
         if (this.password.length === 6) {
           setTimeout(() => {
+            this.confirmPassword = ''
             this.step = 2
           }, 200)
         }

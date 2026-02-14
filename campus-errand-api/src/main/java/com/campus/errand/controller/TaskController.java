@@ -5,6 +5,7 @@ import com.campus.errand.common.PageResult;
 import com.campus.errand.common.Result;
 import com.campus.errand.dto.TaskCancelDTO;
 import com.campus.errand.dto.TaskPublishDTO;
+import com.campus.errand.entity.Task;
 import com.campus.errand.service.TaskService;
 import com.campus.errand.util.UserContext;
 import com.campus.errand.vo.TaskVO;
@@ -64,6 +65,10 @@ public class TaskController {
         Long runnerId = UserContext.getUserId();
         boolean success = taskService.acceptTask(id, runnerId);
         if (!success) {
+            TaskVO taskVO = taskService.getTaskDetail(id);
+            if (taskVO != null && taskVO.getUserId().equals(runnerId)) {
+                return Result.error("不能接取自己发布的任务");
+            }
             return Result.error("抢单失败，任务可能已被接单");
         }
         return Result.success(true);

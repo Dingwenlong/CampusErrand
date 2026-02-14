@@ -233,15 +233,13 @@
           <text class="header-title">备注说明</text>
         </view>
         <view class="form-body">
-          <view class="remark-wrapper">
-            <textarea 
-              v-model="form.remark" 
-              class="remark-textarea"
-              placeholder="请输入其他备注信息（选填）"
-              maxlength="200"
-            />
-            <text class="input-count">{{ form.remark.length }}/200</text>
-          </view>
+          <textarea 
+            v-model="form.remark" 
+            class="remark-textarea"
+            placeholder="请输入其他备注信息（选填）"
+            maxlength="200"
+          />
+          <text class="input-count">{{ form.remark.length }}/200</text>
         </view>
       </view>
 
@@ -296,6 +294,7 @@ export default {
         { name: '送件', value: 3, emoji: '📄', icon: 'icon-delivery' },
         { name: '其他', value: 4, emoji: '✨', icon: 'icon-other' }
       ],
+      timeBufferMinutes: 15,
       form: {
         taskType: 1,
         title: '',
@@ -425,6 +424,46 @@ export default {
         uni.showToast({ title: '请输入基础赏金', icon: 'none' })
         return false
       }
+      if (!this.validateTime()) {
+        return false
+      }
+      return true
+    },
+    
+    validateTime() {
+      const now = new Date()
+      const publishTime = now.getTime()
+      
+      if (this.form.expectTime) {
+        const expectTime = new Date(this.form.expectTime.replace(' ', 'T')).getTime()
+        
+        if (expectTime <= publishTime) {
+          uni.showToast({ title: '期望送达时间必须晚于当前时间', icon: 'none' })
+          return false
+        }
+        
+        if (this.form.deadlineTime) {
+          const deadlineTime = new Date(this.form.deadlineTime.replace(' ', 'T')).getTime()
+          
+          if (deadlineTime <= publishTime) {
+            uni.showToast({ title: '截止时间必须晚于当前时间', icon: 'none' })
+            return false
+          }
+          
+          if (deadlineTime >= expectTime) {
+            uni.showToast({ title: '截止时间必须早于期望送达时间', icon: 'none' })
+            return false
+          }
+          
+          const bufferMillis = this.timeBufferMinutes * 60 * 1000
+          const diff = expectTime - deadlineTime
+          if (diff < bufferMillis) {
+            uni.showToast({ title: `截止时间与期望送达时间至少间隔${this.timeBufferMinutes}分钟`, icon: 'none' })
+            return false
+          }
+        }
+      }
+      
       return true
     },
     
@@ -479,32 +518,13 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-// 强制去除所有输入框聚焦边框 - 使用小程序特定选择器
-::v-deep .uni-input-wrapper,
-::v-deep .uni-textarea-wrapper,
-::v-deep .uni-input,
-::v-deep .uni-textarea,
-::v-deep input,
-::v-deep textarea {
-  outline: none !important;
-  border: none !important;
-  box-shadow: none !important;
+// 去除 input/textarea focus 时的 outline
+input, textarea {
+  outline: none;
   
-  &:focus,
-  &.uni-input-focus,
-  &.uni-textarea-focus {
-    outline: none !important;
-    border: none !important;
-    box-shadow: none !important;
+  &:focus {
+    outline: none;
   }
-}
-
-// 针对 input 和 textarea 的宿主元素
-::v-deep .uni-input-input,
-::v-deep .uni-textarea-textarea {
-  outline: none !important;
-  border: none !important;
-  box-shadow: none !important;
 }
 
 // 设计变量
@@ -649,9 +669,6 @@ $radius-lg: 28rpx;
 .input-group {
   margin-bottom: 28rpx;
   position: relative;
-  background: $bg-primary;
-  border-radius: $radius-md;
-  padding: 24rpx;
   
   &:last-child {
     margin-bottom: 0;
@@ -673,14 +690,21 @@ $radius-lg: 28rpx;
   
   .group-input, .group-textarea {
     width: 100%;
-    background: transparent;
+    background: $bg-primary;
     border-radius: $radius-md;
-    padding: 0;
+    padding: 24rpx;
     font-size: 28rpx;
     color: $text-primary;
-    border: none;
+    border: 2rpx solid transparent;
     transition: all 0.3s ease;
     box-sizing: border-box;
+    
+    &:focus {
+      border-color: $primary;
+      background: var(--color-surface);
+      box-shadow: $shadow-focus;
+      transform: translateY(-2rpx);
+    }
     
     &::placeholder {
       color: $text-tertiary;
@@ -694,6 +718,7 @@ $radius-lg: 28rpx;
   
   .group-textarea {
     height: 200rpx;
+    padding-bottom: 48rpx;
   }
   
   .input-count {
@@ -711,27 +736,10 @@ $radius-lg: 28rpx;
 // 地址区域
 .address-section {
   margin-bottom: 28rpx;
-  background: $bg-primary;
-  border-radius: $radius-md;
-  padding: 24rpx;
   
   &:last-child {
     margin-bottom: 0;
   }
-}
-
-// 地址输入框容器
-.address-input-wrapper {
-  background: transparent;
-  border-radius: 0;
-  padding: 0;
-}
-
-// 联系人输入框容器
-.contact-input-wrapper {
-  background: transparent;
-  border-radius: 0;
-  padding: 0;
 }
 
 .address-label {
@@ -765,15 +773,22 @@ $radius-lg: 28rpx;
 .address-input {
   width: 100%;
   height: 96rpx;
-  background: transparent;
-  border-radius: 0;
-  padding: 0;
+  background: $bg-primary;
+  border-radius: $radius-md;
+  padding: 0 24rpx;
   font-size: 28rpx;
   color: $text-primary;
   margin-bottom: 16rpx;
-  border: none;
+  border: 2rpx solid transparent;
   transition: all 0.3s ease;
   box-sizing: border-box;
+  
+  &:focus {
+    border-color: $primary;
+    background: var(--color-surface);
+    box-shadow: $shadow-focus;
+    transform: translateY(-2rpx);
+  }
   
   &::placeholder {
     color: $text-tertiary;
@@ -788,17 +803,24 @@ $radius-lg: 28rpx;
 .contact-input {
   flex: 1;
   height: 88rpx;
-  background: transparent;
-  border-radius: 0;
-  padding: 0;
+  background: $bg-primary;
+  border-radius: $radius-md;
+  padding: 0 24rpx;
   font-size: 28rpx;
   color: $text-primary;
-  border: none;
+  border: 2rpx solid transparent;
   transition: all 0.3s ease;
   box-sizing: border-box;
   
   &.phone {
     flex: 1.5;
+  }
+  
+  &:focus {
+    border-color: $primary;
+    background: var(--color-surface);
+    box-shadow: $shadow-focus;
+    transform: translateY(-2rpx);
   }
   
   &::placeholder {
@@ -945,6 +967,13 @@ $radius-lg: 28rpx;
   border: 2rpx solid transparent;
   transition: all 0.3s ease;
   
+  &:focus-within {
+    border-color: $primary;
+    background: var(--color-surface);
+    box-shadow: $shadow-focus;
+    transform: translateY(-2rpx);
+  }
+  
   &.full {
     width: 100%;
     margin-top: 16rpx;
@@ -975,24 +1004,26 @@ $radius-lg: 28rpx;
 }
 
 // 备注
-.remark-wrapper {
-  background: $bg-primary;
-  border-radius: $radius-md;
-  padding: 24rpx;
-  position: relative;
-}
-
 .remark-textarea {
   width: 100%;
   height: 180rpx;
-  background: transparent;
-  border-radius: 0;
-  padding: 0;
+  background: $bg-primary;
+  border-radius: $radius-md;
+  padding: 24rpx;
+  padding-bottom: 48rpx;
   font-size: 28rpx;
   color: $text-primary;
-  border: none;
+  border: 2rpx solid transparent;
+  margin-bottom: 16rpx;
   transition: all 0.3s ease;
   box-sizing: border-box;
+  
+  &:focus {
+    border-color: $primary;
+    background: var(--color-surface);
+    box-shadow: $shadow-focus;
+    transform: translateY(-2rpx);
+  }
   
   &::placeholder {
     color: $text-tertiary;

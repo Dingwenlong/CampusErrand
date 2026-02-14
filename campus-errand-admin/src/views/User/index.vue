@@ -202,6 +202,11 @@
             <a-descriptions-item label="累计支出">
               <span class="amount expense">¥{{ formatAmount(currentUser.totalExpense) }}</span>
             </a-descriptions-item>
+            <a-descriptions-item label="操作" :span="2">
+              <a-button type="primary" size="small" @click="handleRecharge">
+                充值
+              </a-button>
+            </a-descriptions-item>
           </a-descriptions>
 
           <a-divider>其他信息</a-divider>
@@ -215,6 +220,33 @@
         </template>
       </a-spin>
     </a-modal>
+
+    <!-- 充值弹窗 -->
+    <a-modal
+      v-model:visible="rechargeVisible"
+      title="管理员充值"
+      :confirm-loading="rechargeLoading"
+      @ok="submitRecharge"
+    >
+      <a-form :model="rechargeForm" layout="vertical">
+        <a-form-item label="充值金额" required>
+          <a-input-number
+            v-model:value="rechargeForm.amount"
+            :min="0.01"
+            :precision="2"
+            style="width: 100%"
+            placeholder="请输入充值金额"
+          />
+        </a-form-item>
+        <a-form-item label="备注">
+          <a-textarea
+            v-model:value="rechargeForm.remark"
+            :rows="2"
+            placeholder="请输入备注（选填）"
+          />
+        </a-form-item>
+      </a-form>
+    </a-modal>
   </div>
 </template>
 
@@ -223,6 +255,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { message, Modal } from 'ant-design-vue'
 import { SearchOutlined } from '@ant-design/icons-vue'
 import { getUserList, getUserDetail, updateUserStatus } from '@/api/user'
+import { adminRecharge } from '@/api/wallet'
 import { useResponsive } from '@/composables/useResponsive'
 import type { User, UserDetail } from '@/types'
 
@@ -256,6 +289,13 @@ const columns = [
 const detailVisible = ref(false)
 const detailLoading = ref(false)
 const currentUser = ref<UserDetail | null>(null)
+
+const rechargeVisible = ref(false)
+const rechargeLoading = ref(false)
+const rechargeForm = reactive({
+  amount: '',
+  remark: ''
+})
 
 const getCreditColor = (score: number) => {
   if (score >= 90) return 'green'
@@ -359,6 +399,42 @@ const formatUserType = (userType: number) => {
 const formatAmount = (amount: number | undefined) => {
   if (amount === undefined || amount === null) return '0.00'
   return amount.toFixed(2)
+}
+
+const handleRecharge = () => {
+  rechargeForm.amount = ''
+  rechargeForm.remark = ''
+  rechargeVisible.value = true
+}
+
+const submitRecharge = async () => {
+  const amount = parseFloat(rechargeForm.amount)
+  if (!amount || amount <= 0) {
+    message.error('请输入正确的充值金额')
+    return
+  }
+
+  rechargeLoading.value = true
+  try {
+    const res = await adminRecharge({
+      userId: currentUser.value!.id,
+      amount: amount,
+      remark: rechargeForm.remark || '管理员充值'
+    })
+    if (res.code === 200) {
+      message.success('充值成功')
+      rechargeVisible.value = false
+      handleView(currentUser.value!)
+      loadData()
+    } else {
+      message.error(res.message || '充值失败')
+    }
+  } catch (error) {
+    console.error(error)
+    message.error('充值失败')
+  } finally {
+    rechargeLoading.value = false
+  }
 }
 
 onMounted(() => {

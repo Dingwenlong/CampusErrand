@@ -1,4 +1,19 @@
 @echo off
+REM ============================================================================
+REM 一键启动脚本
+REM
+REM 功能说明：
+REM   本脚本整合了以下三个独立脚本的功能：
+REM   - 客户端编译: compile-client.bat / compile-client.ps1
+REM   - API服务启动: start-api.bat / start-api.ps1
+REM   - 后台服务启动: start-admin.bat / start-admin.ps1
+REM
+REM 如需单独运行某个功能，请直接运行对应的脚本文件：
+REM   - compile-client.bat  : 仅编译客户端（Uniapp + 后台管理）
+REM   - start-api.bat       : 仅启动API服务
+REM   - start-admin.bat     : 仅启动后台管理服务
+REM ============================================================================
+
 setlocal
 
 set "SCRIPT_DIR=%~dp0"

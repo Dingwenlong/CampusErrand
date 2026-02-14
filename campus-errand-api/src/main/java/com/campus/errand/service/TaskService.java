@@ -54,4 +54,10 @@ public interface TaskService extends IService<Task> {
      * @return 任务列表
      */
     IPage<TaskVO> getMyTasks(Long userId, Integer role, Integer status, Long current, Long size);
+
+    /**
+     * 处理超时任务
+     * @return 处理的任务数量
+     */
+    int processExpiredTasks();
 }

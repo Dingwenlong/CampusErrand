@@ -68,9 +68,6 @@ build/
 ehthumbs.db
 Thumbs.db
 
-# Trae AI
-.trae/
-
 # Uni-app
 unpackage/
 

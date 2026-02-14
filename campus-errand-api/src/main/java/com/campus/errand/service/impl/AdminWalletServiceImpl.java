@@ -5,13 +5,16 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.campus.errand.entity.Transaction;
 import com.campus.errand.entity.User;
+import com.campus.errand.entity.UserWallet;
 import com.campus.errand.mapper.TransactionMapper;
 import com.campus.errand.mapper.UserMapper;
+import com.campus.errand.mapper.UserWalletMapper;
 import com.campus.errand.service.AdminWalletService;
 import com.campus.errand.vo.TransactionVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -20,6 +23,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,11 +31,13 @@ public class AdminWalletServiceImpl implements AdminWalletService {
 
     private final TransactionMapper transactionMapper;
     private final UserMapper userMapper;
+    private final UserWalletMapper userWalletMapper;
 
     @Autowired
-    public AdminWalletServiceImpl(TransactionMapper transactionMapper, UserMapper userMapper) {
+    public AdminWalletServiceImpl(TransactionMapper transactionMapper, UserMapper userMapper, UserWalletMapper userWalletMapper) {
         this.transactionMapper = transactionMapper;
         this.userMapper = userMapper;
+        this.userWalletMapper = userWalletMapper;
     }
 
     @Override
@@ -167,6 +173,41 @@ public class AdminWalletServiceImpl implements AdminWalletService {
         result.put("todayExpense", todayExpense);
 
         return result;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean adminRecharge(Long userId, BigDecimal amount, String remark) {
+        // 查询用户钱包
+        UserWallet wallet = userWalletMapper.selectOne(
+                new LambdaQueryWrapper<UserWallet>().eq(UserWallet::getUserId, userId)
+        );
+
+        if (wallet == null) {
+            return false;
+        }
+
+        // 更新钱包余额
+        wallet.setBalance(wallet.getBalance().add(amount));
+        wallet.setTotalIncome(wallet.getTotalIncome().add(amount));
+        userWalletMapper.updateById(wallet);
+
+        // 记录交易流水
+        Transaction transaction = new Transaction();
+        transaction.setTransactionNo("ADMIN" + UUID.randomUUID().toString().replace("-", "").substring(0, 16));
+        transaction.setUserId(userId);
+        transaction.setTransactionType(1); // 充值
+        transaction.setDirection(1); // 收入
+        transaction.setAmount(amount);
+        transaction.setBalance(wallet.getBalance());
+        transaction.setStatus(1); // 成功
+        transaction.setRemark(remark != null ? remark : "管理员充值");
+        transaction.setCreateTime(LocalDateTime.now());
+        transaction.setUpdateTime(LocalDateTime.now());
+
+        transactionMapper.insert(transaction);
+
+        return true;
     }
 
     private TransactionVO convertToVO(Transaction transaction) {

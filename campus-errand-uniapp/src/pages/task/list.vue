@@ -197,8 +197,19 @@ export default {
       this.loadTaskList()
     }
     uni.$emit('tabBarChange', 1)
+    uni.$on('taskPublished', this.onTaskPublished)
+  },
+  onUnload() {
+    uni.$off('taskPublished', this.onTaskPublished)
   },
   methods: {
+    onTaskPublished() {
+      this.current = 1
+      this.taskList = []
+      this.noMore = false
+      this.loadTaskList()
+    },
+    
     selectType(type) {
       if (this.currentType === type) return
       
@@ -680,8 +691,8 @@ export default {
 
 .publish-btn {
   position: fixed;
-  right: var(--space-2);
-  bottom: calc(150rpx + env(safe-area-inset-bottom));
+  right: 47rpx;
+  bottom: calc(175rpx + env(safe-area-inset-bottom));
   @include flex-center;
   flex-direction: column;
   width: 120rpx;

@@ -576,4 +576,90 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
 
         return resultPage;
     }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int processExpiredTasks() {
+        LocalDateTime now = LocalDateTime.now();
+        
+        // 查询超时任务：截止时间 < 当前时间 且 状态在 (1-已接单, 2-待取件, 3-配送中)
+        LambdaQueryWrapper<Task> wrapper = new LambdaQueryWrapper<>();
+        wrapper.lt(Task::getDeadlineTime, now)
+               .in(Task::getStatus, 1, 2, 3)
+               .isNull(Task::getRunnerId);
+        
+        List<Task> expiredTasks = list(wrapper);
+        
+        int count = 0;
+        for (Task task : expiredTasks) {
+            try {
+                // 解冻金额
+                BigDecimal totalAmount = task.getTotalAmount();
+                userWalletService.unfreezeAmount(task.getUserId(), totalAmount);
+                
+                // 更新任务状态为已取消
+                task.setStatus(6);
+                task.setCancelReason("任务超时自动取消");
+                task.setCancelTime(now);
+                updateById(task);
+                
+                // 记录交易流水（退款）
+                transactionService.refund(task.getUserId(), totalAmount, "任务超时退款");
+                
+                // 发送消息通知
+                messageService.sendMessage(task.getUserId(), 2, "任务超时取消", "您的任务已超时取消，金额已退还", null);
+                
+                count++;
+            } catch (Exception e) {
+                // 记录日志但继续处理其他任务
+                org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(TaskServiceImpl.class);
+                logger.error("处理超时任务失败，taskId: {}", task.getId(), e);
+            }
+        }
+        
+        // 查询有跑腿员接单但超时的任务
+        LambdaQueryWrapper<Task> wrapper2 = new LambdaQueryWrapper<>();
+        wrapper2.lt(Task::getDeadlineTime, now)
+                .in(Task::getStatus, 1, 2, 3)
+                .isNotNull(Task::getRunnerId);
+        
+        List<Task> expiredTasks2 = list(wrapper2);
+        
+        for (Task task : expiredTasks2) {
+            try {
+                // 解冻金额
+                BigDecimal totalAmount = task.getTotalAmount();
+                userWalletService.unfreezeAmount(task.getUserId(), totalAmount);
+                
+                // 更新任务状态为已取消
+                task.setStatus(6);
+                task.setCancelReason("任务超时自动取消");
+                task.setCancelTime(now);
+                updateById(task);
+                
+                // 记录交易流水（退款）
+                transactionService.refund(task.getUserId(), totalAmount, "任务超时退款");
+                
+                // 扣减跑腿员信用分
+                User runner = userMapper.selectById(task.getRunnerId());
+                if (runner != null && runner.getCreditScore() != null) {
+                    runner.setCreditScore(Math.max(0, runner.getCreditScore() - 5));
+                    userMapper.updateById(runner);
+                }
+                
+                // 发送消息通知
+                messageService.sendMessage(task.getUserId(), 2, "任务超时取消", "您的任务已超时取消，金额已退还", task.getId());
+                if (task.getRunnerId() != null) {
+                    messageService.sendMessage(task.getRunnerId(), 2, "任务超时取消", "您超时未完成任务，任务已取消，信用分已扣减", task.getId());
+                }
+                
+                count++;
+            } catch (Exception e) {
+                org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(TaskServiceImpl.class);
+                logger.error("处理超时任务失败，taskId: {}", task.getId(), e);
+            }
+        }
+        
+        return count;
+    }
 }
