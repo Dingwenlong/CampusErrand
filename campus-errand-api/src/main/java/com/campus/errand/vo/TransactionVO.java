@@ -1,5 +1,6 @@
 package com.campus.errand.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -23,6 +24,8 @@ public class TransactionVO {
     private Integer status;
     private String statusName;
     private String remark;
+    
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
     
     // 扩展字段

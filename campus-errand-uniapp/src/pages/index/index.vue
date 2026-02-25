@@ -5,25 +5,15 @@
       <!-- 定位栏 -->
       <view class="location-bar">
         <view class="location-left" @click="showLocationPicker">
-          <view class="location-icon-wrapper">
-            <text class="iconfont icon-location-fill location-icon"></text>
-          </view>
+          <text class="iconfont icon-location-fill location-icon"></text>
           <text class="location-text">{{ currentSchool }}</text>
           <text class="iconfont icon-arrow-down location-arrow"></text>
         </view>
         <view class="location-right">
           <view class="icon-btn message-btn" @click="navigateTo('/pages/message/list')">
             <text class="iconfont icon-message message-icon-text"></text>
-            <view v-if="unreadCount > 0" class="badge">{{ unreadCount }}</view>
+            <view v-if="unreadCount > 0" class="badge-full">{{ unreadCount }}</view>
           </view>
-        </view>
-      </view>
-
-      <!-- 搜索栏 -->
-      <view class="search-bar pressable" @click="navigateTo('/pages/task/list')">
-        <view class="search-input">
-          <text class="iconfont icon-search search-icon"></text>
-          <text class="search-placeholder">搜索任务、跑腿服务</text>
         </view>
       </view>
     </view>
@@ -35,11 +25,11 @@
           class="feature-item pressable" 
           v-for="(item, index) in features" 
           :key="index" 
-          @click="navigateTo(item.path)"
+          @click="goToTaskList(item.type)"
           :style="{ animationDelay: index * 0.05 + 's' }"
         >
           <view class="feature-icon-wrapper scale-in" :class="'icon-bg-' + item.type">
-            <text class="iconfont feature-icon" :class="item.iconClass"></text>
+            <text class="feature-icon">{{ item.icon }}</text>
           </view>
           <text class="feature-text">{{ item.name }}</text>
         </view>
@@ -136,11 +126,15 @@
       <view class="loading-spinner"></view>
       <text>加载中...</text>
     </view>
+
+    <!-- 自定义底部导航 -->
+    <custom-tabbar :current="0" />
   </view>
 </template>
 
 <script>
 import { http } from '@/utils/request.js'
+import CustomTabbar from '@/components/custom-tabbar/index.vue'
 
 const taskTypeMap = {
   1: '取快递',
@@ -151,12 +145,15 @@ const taskTypeMap = {
 }
 
 const bannerColors = [
-  'linear-gradient(135deg, var(--color-brand-coral) 0%, var(--color-brand-coral-light) 100%)',
-  'linear-gradient(135deg, var(--color-brand-mint) 0%, var(--color-brand-mint-light) 100%)',
-  'linear-gradient(135deg, var(--color-brand-blue) 0%, var(--color-brand-blue-dark) 100%)'
+  'linear-gradient(135deg, #FF6B35 0%, #FF8C5A 100%)',
+  'linear-gradient(135deg, #7BC47F 0%, #9DD9A0 100%)',
+  'linear-gradient(135deg, #FFB347 0%, #FFC970 100%)'
 ]
 
 export default {
+  components: {
+    CustomTabbar
+  },
   data() {
     return {
       unreadCount: 2,
@@ -182,11 +179,11 @@ export default {
         '山东艺术学院'
       ],
       features: [
-        { name: '取快递', type: 1, iconClass: 'icon-package', path: '/pages/task/list?type=1' },
-        { name: '代买', type: 2, iconClass: 'icon-cart', path: '/pages/task/list?type=2' },
-        { name: '送件', type: 3, iconClass: 'icon-file', path: '/pages/task/list?type=3' },
-        { name: '外卖', type: 4, iconClass: 'icon-food', path: '/pages/task/list?type=4' },
-        { name: '其他', type: 5, iconClass: 'icon-more', path: '/pages/task/list?type=5' },
+        { name: '取快递', type: 1, icon: '📦', path: '/pages/task/list?type=1' },
+        { name: '代买', type: 2, icon: '🛒', path: '/pages/task/list?type=2' },
+        { name: '送件', type: 3, icon: '📨', path: '/pages/task/list?type=3' },
+        { name: '外卖', type: 4, icon: '🍔', path: '/pages/task/list?type=4' },
+        { name: '其他', type: 5, icon: '✨', path: '/pages/task/list?type=5' },
       ],
       banners: [
         { title: '校园跑腿', desc: '便捷生活，从这里开始', bgColor: '' },
@@ -203,6 +200,9 @@ export default {
     }
     this.fetchRecommendTasks()
     this.fetchBanners()
+  },
+  onShow() {
+    uni.$emit('tabBarChange', 0)
   },
   onPullDownRefresh() {
     this.fetchRecommendTasks()
@@ -289,6 +289,12 @@ export default {
         })
       }
     },
+    goToTaskList(type) {
+      uni.setStorageSync('taskListType', type)
+      uni.switchTab({
+        url: '/pages/task/list'
+      })
+    },
     goTaskDetail(task) {
       uni.navigateTo({
         url: `/pages/task/detail?id=${task.id}`
@@ -342,13 +348,13 @@ export default {
 .container {
   min-height: 100vh;
   background-color: var(--color-bg);
-  padding-bottom: var(--space-8);
+  padding-bottom: calc(var(--space-8) + 140rpx + env(safe-area-inset-bottom));
 }
 
 /* 顶部黄色区域 */
 .header-section {
   background: var(--color-primary-gradient);
-  padding: var(--space-4) var(--space-6) var(--space-8);
+  padding: var(--space-4) var(--space-6) var(--space-6);
   border-radius: 0 0 var(--radius-3xl) var(--radius-3xl);
   box-shadow: var(--shadow-md);
 }
@@ -358,7 +364,6 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--space-4);
 }
 
 .location-left {
@@ -375,18 +380,10 @@ export default {
   }
 }
 
-.location-icon-wrapper {
-  @include flex-center;
-  width: 48rpx;
-  height: 48rpx;
-  background-color: rgba(255, 255, 255, 0.3);
-  border-radius: var(--radius-full);
-  margin-right: var(--space-2);
-}
-
 .location-icon {
   font-size: 28rpx;
   color: var(--color-text-primary);
+  margin-right: var(--space-2);
 }
 
 .location-text {
@@ -414,8 +411,8 @@ export default {
 .icon-btn {
   position: relative;
   @include flex-center;
-  width: 72rpx;
-  height: 72rpx;
+  width: 48rpx;
+  height: 48rpx;
   background-color: rgba(255, 255, 255, 0.2);
   border-radius: var(--radius-full);
   transition: all var(--duration-fast) var(--ease-out);
@@ -437,51 +434,22 @@ export default {
 }
 
 .message-icon-text {
-  font-size: 36rpx;
+  font-size: 24rpx;
 }
 
-.badge {
+.badge-full {
   position: absolute;
-  top: 4rpx;
-  right: 4rpx;
-  min-width: 32rpx;
-  height: 32rpx;
-  padding: 0 8rpx;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background-color: var(--color-error);
   color: var(--color-white);
-  font-size: var(--font-size-2xs);
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-bold);
   border-radius: var(--radius-full);
   @include flex-center;
-}
-
-/* 搜索栏 */
-.search-bar {
-  background-color: var(--color-white);
-  border-radius: var(--radius-full);
-  padding: var(--space-3) var(--space-5);
-  box-shadow: var(--shadow-sm);
-  transition: all var(--duration-fast) var(--ease-out);
-  
-  &:active {
-    box-shadow: var(--shadow-md);
-  }
-}
-
-.search-input {
-  display: flex;
-  align-items: center;
-}
-
-.search-icon {
-  font-size: 32rpx;
-  color: var(--color-text-tertiary);
-  margin-right: var(--space-3);
-}
-
-.search-placeholder {
-  font-size: var(--font-size-base);
-  color: var(--color-text-placeholder);
+  opacity: 0.95;
 }
 
 /* 功能入口区域 */
@@ -521,33 +489,33 @@ export default {
   }
 
   &.icon-bg-1 {
-    background: linear-gradient(135deg, var(--color-brand-coral) 0%, var(--color-brand-coral-light) 100%);
-    box-shadow: 0 8rpx 24rpx rgba(255, 107, 107, 0.3);
+    background: linear-gradient(135deg, #FF6B35 0%, #FF8C5A 100%);
+    box-shadow: 0 8rpx 24rpx rgba(255, 107, 53, 0.35);
   }
 
   &.icon-bg-2 {
-    background: linear-gradient(135deg, var(--color-brand-mint) 0%, var(--color-brand-mint-light) 100%);
-    box-shadow: 0 8rpx 24rpx rgba(78, 205, 196, 0.3);
+    background: linear-gradient(135deg, #7BC47F 0%, #9DD9A0 100%);
+    box-shadow: 0 8rpx 24rpx rgba(123, 196, 127, 0.35);
   }
 
   &.icon-bg-3 {
-    background: linear-gradient(135deg, var(--color-brand-blue) 0%, var(--color-brand-blue-dark) 100%);
-    box-shadow: 0 8rpx 24rpx rgba(102, 126, 234, 0.3);
+    background: linear-gradient(135deg, #FFB347 0%, #FFC970 100%);
+    box-shadow: 0 8rpx 24rpx rgba(255, 179, 71, 0.35);
   }
 
   &.icon-bg-4 {
-    background: linear-gradient(135deg, var(--color-brand-coral) 0%, var(--color-brand-coral-light) 100%);
-    box-shadow: 0 8rpx 24rpx rgba(255, 160, 122, 0.3);
+    background: linear-gradient(135deg, #FFB088 0%, #FFC4A8 100%);
+    box-shadow: 0 8rpx 24rpx rgba(255, 176, 136, 0.35);
   }
 
   &.icon-bg-5 {
-    background: linear-gradient(135deg, var(--color-brand-blue) 0%, var(--color-brand-indigo-soft) 100%);
-    box-shadow: 0 8rpx 24rpx rgba(14, 165, 233, 0.3);
+    background: linear-gradient(135deg, #FF8C5A 0%, #FFB088 100%);
+    box-shadow: 0 8rpx 24rpx rgba(255, 140, 90, 0.35);
   }
 }
 
 .feature-icon {
-  font-size: 48rpx;
+  font-size: 44rpx;
 }
 
 .feature-text {
@@ -559,7 +527,7 @@ export default {
 /* 轮播图 */
 .banner-swiper {
   height: 280rpx;
-  margin: 0 var(--space-6) var(--space-6);
+  margin: var(--space-6);
   border-radius: var(--radius-xl);
   overflow: hidden;
 
@@ -589,7 +557,7 @@ export default {
 
 /* 任务区域 */
 .task-section {
-  padding: 0 var(--space-6);
+  padding: var(--space-6);
 }
 
 .section-header {
@@ -782,19 +750,19 @@ export default {
   margin-right: var(--space-3);
   
   &.avatar-bg-1 {
-    background: linear-gradient(135deg, var(--color-brand-coral) 0%, var(--color-brand-coral-light) 100%);
+    background: linear-gradient(135deg, #FF6B35 0%, #FF8C5A 100%);
   }
   
   &.avatar-bg-2 {
-    background: linear-gradient(135deg, var(--color-brand-mint) 0%, var(--color-brand-mint-light) 100%);
+    background: linear-gradient(135deg, #7BC47F 0%, #9DD9A0 100%);
   }
   
   &.avatar-bg-3 {
-    background: linear-gradient(135deg, var(--color-brand-blue) 0%, var(--color-brand-blue-dark) 100%);
+    background: linear-gradient(135deg, #FFB347 0%, #FFC970 100%);
   }
   
   &.avatar-bg-4, &.avatar-bg-5 {
-    background: linear-gradient(135deg, var(--color-brand-blue) 0%, var(--color-brand-indigo-soft) 100%);
+    background: linear-gradient(135deg, #FFB088 0%, #FFC4A8 100%);
   }
 }
 

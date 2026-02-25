@@ -130,6 +130,123 @@
         />
       </div>
     </div>
+
+    <!-- 用户详情弹窗 -->
+    <a-modal
+      v-model:visible="detailVisible"
+      title="用户详情"
+      width="800px"
+      :footer="null"
+      class="user-detail-modal"
+    >
+      <a-spin :spinning="detailLoading">
+        <template v-if="currentUser">
+          <a-descriptions :column="isMobile ? 1 : 2" bordered>
+            <a-descriptions-item label="用户ID">{{ currentUser.id }}</a-descriptions-item>
+            <a-descriptions-item label="状态">
+              <a-tag :color="currentUser.status === 1 ? 'green' : 'red'">
+                {{ currentUser.status === 1 ? '正常' : '禁用' }}
+              </a-tag>
+            </a-descriptions-item>
+            <a-descriptions-item label="头像" :span="isMobile ? 1 : 2">
+              <a-avatar :src="currentUser.avatar" :size="64" />
+            </a-descriptions-item>
+            <a-descriptions-item label="昵称">{{ currentUser.nickname || '未设置' }}</a-descriptions-item>
+            <a-descriptions-item label="手机号">{{ currentUser.phone || '未绑定' }}</a-descriptions-item>
+            <a-descriptions-item label="性别">{{ formatGender(currentUser.gender) }}</a-descriptions-item>
+            <a-descriptions-item label="用户类型">{{ formatUserType(currentUser.userType) }}</a-descriptions-item>
+            <a-descriptions-item label="信用分">
+              <a-tag :color="getCreditColor(currentUser.creditScore)">
+                {{ currentUser.creditScore }}
+              </a-tag>
+            </a-descriptions-item>
+            <a-descriptions-item label="实名认证">
+              <a-tag :color="currentUser.isVerified === 1 ? 'green' : 'default'">
+                {{ currentUser.isVerified === 1 ? '已认证' : '未认证' }}
+              </a-tag>
+            </a-descriptions-item>
+          </a-descriptions>
+
+          <a-divider>认证信息</a-divider>
+          <a-descriptions :column="isMobile ? 1 : 2" bordered>
+            <a-descriptions-item label="真实姓名">{{ currentUser.realName || '-' }}</a-descriptions-item>
+            <a-descriptions-item label="身份证号">{{ currentUser.idCard || '-' }}</a-descriptions-item>
+            <a-descriptions-item label="学号">{{ currentUser.studentId || '-' }}</a-descriptions-item>
+            <a-descriptions-item label="学校">{{ currentUser.schoolName || '-' }}</a-descriptions-item>
+          </a-descriptions>
+
+          <a-divider>订单统计</a-divider>
+          <a-descriptions :column="isMobile ? 1 : 3" bordered>
+            <a-descriptions-item label="总订单数">
+              <span class="stat-number">{{ currentUser.totalOrders || 0 }}</span>
+            </a-descriptions-item>
+            <a-descriptions-item label="完成订单">
+              <span class="stat-number success">{{ currentUser.completedOrders || 0 }}</span>
+            </a-descriptions-item>
+            <a-descriptions-item label="取消订单">
+              <span class="stat-number danger">{{ currentUser.cancelledOrders || 0 }}</span>
+            </a-descriptions-item>
+          </a-descriptions>
+
+          <a-divider>钱包信息</a-divider>
+          <a-descriptions :column="isMobile ? 1 : 2" bordered>
+            <a-descriptions-item label="账户余额">
+              <span class="amount">¥{{ formatAmount(currentUser.balance) }}</span>
+            </a-descriptions-item>
+            <a-descriptions-item label="冻结金额">
+              <span class="amount frozen">¥{{ formatAmount(currentUser.frozenAmount) }}</span>
+            </a-descriptions-item>
+            <a-descriptions-item label="累计收入">
+              <span class="amount income">¥{{ formatAmount(currentUser.totalIncome) }}</span>
+            </a-descriptions-item>
+            <a-descriptions-item label="累计支出">
+              <span class="amount expense">¥{{ formatAmount(currentUser.totalExpense) }}</span>
+            </a-descriptions-item>
+            <a-descriptions-item label="操作" :span="2">
+              <a-button type="primary" size="small" @click="handleRecharge">
+                充值
+              </a-button>
+            </a-descriptions-item>
+          </a-descriptions>
+
+          <a-divider>其他信息</a-divider>
+          <a-descriptions :column="isMobile ? 1 : 2" bordered>
+            <a-descriptions-item label="注册时间">{{ currentUser.createTime || '-' }}</a-descriptions-item>
+            <a-descriptions-item label="更新时间">{{ currentUser.updateTime || '-' }}</a-descriptions-item>
+            <a-descriptions-item label="OpenID" :span="isMobile ? 1 : 2">
+              <span class="openid-text">{{ currentUser.openid || '-' }}</span>
+            </a-descriptions-item>
+          </a-descriptions>
+        </template>
+      </a-spin>
+    </a-modal>
+
+    <!-- 充值弹窗 -->
+    <a-modal
+      v-model:visible="rechargeVisible"
+      title="管理员充值"
+      :confirm-loading="rechargeLoading"
+      @ok="submitRecharge"
+    >
+      <a-form :model="rechargeForm" layout="vertical">
+        <a-form-item label="充值金额" required>
+          <a-input-number
+            v-model:value="rechargeForm.amount"
+            :min="0.01"
+            :precision="2"
+            style="width: 100%"
+            placeholder="请输入充值金额"
+          />
+        </a-form-item>
+        <a-form-item label="备注">
+          <a-textarea
+            v-model:value="rechargeForm.remark"
+            :rows="2"
+            placeholder="请输入备注（选填）"
+          />
+        </a-form-item>
+      </a-form>
+    </a-modal>
   </div>
 </template>
 
@@ -137,9 +254,10 @@
 import { ref, reactive, onMounted } from 'vue'
 import { message, Modal } from 'ant-design-vue'
 import { SearchOutlined } from '@ant-design/icons-vue'
-import { getUserList, updateUserStatus } from '@/api/user'
+import { getUserList, getUserDetail, updateUserStatus } from '@/api/user'
+import { adminRecharge } from '@/api/wallet'
 import { useResponsive } from '@/composables/useResponsive'
-import type { User } from '@/types'
+import type { User, UserDetail } from '@/types'
 
 const { isMobile } = useResponsive()
 const loading = ref(false)
@@ -167,6 +285,17 @@ const columns = [
   { title: '注册时间', dataIndex: 'createTime', key: 'createTime' },
   { title: '操作', key: 'action', width: 150, fixed: 'right' }
 ]
+
+const detailVisible = ref(false)
+const detailLoading = ref(false)
+const currentUser = ref<UserDetail | null>(null)
+
+const rechargeVisible = ref(false)
+const rechargeLoading = ref(false)
+const rechargeForm = reactive({
+  amount: '',
+  remark: ''
+})
 
 const getCreditColor = (score: number) => {
   if (score >= 90) return 'green'
@@ -216,8 +345,22 @@ const handlePageChange = (page: number) => {
   loadData()
 }
 
-const handleView = (record: User) => {
-  message.info(`查看用户: ${record.nickname}`)
+const handleView = async (record: User) => {
+  detailLoading.value = true
+  detailVisible.value = true
+  try {
+    const res = await getUserDetail(record.id)
+    if (res.code === 200) {
+      currentUser.value = res.data
+    } else {
+      message.error(res.message || '获取用户详情失败')
+    }
+  } catch (error) {
+    console.error(error)
+    message.error('获取用户详情失败')
+  } finally {
+    detailLoading.value = false
+  }
 }
 
 const handleToggleStatus = (record: User) => {
@@ -239,6 +382,59 @@ const handleToggleStatus = (record: User) => {
       }
     }
   })
+}
+
+const formatGender = (gender: number) => {
+  if (gender === 1) return '男'
+  if (gender === 2) return '女'
+  return '未知'
+}
+
+const formatUserType = (userType: number) => {
+  if (userType === 1) return '普通用户'
+  if (userType === 2) return '跑腿员'
+  return '未知'
+}
+
+const formatAmount = (amount: number | undefined) => {
+  if (amount === undefined || amount === null) return '0.00'
+  return amount.toFixed(2)
+}
+
+const handleRecharge = () => {
+  rechargeForm.amount = ''
+  rechargeForm.remark = ''
+  rechargeVisible.value = true
+}
+
+const submitRecharge = async () => {
+  const amount = parseFloat(rechargeForm.amount)
+  if (!amount || amount <= 0) {
+    message.error('请输入正确的充值金额')
+    return
+  }
+
+  rechargeLoading.value = true
+  try {
+    const res = await adminRecharge({
+      userId: currentUser.value!.id,
+      amount: amount,
+      remark: rechargeForm.remark || '管理员充值'
+    })
+    if (res.code === 200) {
+      message.success('充值成功')
+      rechargeVisible.value = false
+      handleView(currentUser.value!)
+      loadData()
+    } else {
+      message.error(res.message || '充值失败')
+    }
+  } catch (error) {
+    console.error(error)
+    message.error('充值失败')
+  } finally {
+    rechargeLoading.value = false
+  }
 }
 
 onMounted(() => {
@@ -409,5 +605,53 @@ onMounted(() => {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* 用户详情弹窗样式 */
+.user-detail-modal :deep(.ant-descriptions) {
+  margin-bottom: 0;
+}
+
+.user-detail-modal :deep(.ant-divider) {
+  margin: 16px 0;
+}
+
+.stat-number {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1890ff;
+}
+
+.stat-number.success {
+  color: #52c41a;
+}
+
+.stat-number.danger {
+  color: #ff4d4f;
+}
+
+.amount {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1890ff;
+}
+
+.amount.frozen {
+  color: #faad14;
+}
+
+.amount.income {
+  color: #52c41a;
+}
+
+.amount.expense {
+  color: #ff4d4f;
+}
+
+.openid-text {
+  font-family: monospace;
+  font-size: 12px;
+  color: #64748b;
+  word-break: break-all;
 }
 </style>

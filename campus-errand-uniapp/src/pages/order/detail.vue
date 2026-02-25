@@ -363,19 +363,19 @@ export default {
   animation: slideIn var(--duration-normal) var(--ease-out) both;
   
   &.status-bg-0 {
-    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+    background: linear-gradient(135deg, #FF6B35 0%, #FF8C5A 100%);
   }
   
   &.status-bg-1, &.status-bg-2 {
-    background: linear-gradient(135deg, var(--color-brand-blue) 0%, var(--color-brand-mint) 100%);
+    background: linear-gradient(135deg, #FFB088 0%, #7BC47F 100%);
   }
   
   &.status-bg-3 {
-    background: linear-gradient(135deg, var(--color-success) 0%, var(--color-success-light) 100%);
+    background: linear-gradient(135deg, #7BC47F 0%, #9DD9A0 100%);
   }
   
   &.status-bg-4 {
-    background: linear-gradient(135deg, var(--color-text-tertiary) 0%, var(--color-text-disabled) 100%);
+    background: linear-gradient(135deg, #A89888 0%, #B8A898 100%);
   }
 
   .status-icon {
@@ -602,7 +602,7 @@ export default {
       width: 88rpx;
       height: 88rpx;
       border-radius: 50%;
-      background: linear-gradient(135deg, var(--color-brand-blue) 0%, var(--color-brand-blue-dark) 100%);
+      background: linear-gradient(135deg, #FFB088 0%, #FF8C5A 100%);
       @include flex-center;
       margin-right: var(--space-4);
       

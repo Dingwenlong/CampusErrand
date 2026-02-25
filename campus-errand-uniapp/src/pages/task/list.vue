@@ -1,5 +1,27 @@
 <template>
   <view class="container">
+    <!-- 搜索栏 -->
+    <view class="search-section">
+      <view class="search-bar">
+        <view class="search-input">
+          <text class="iconfont icon-search search-icon"></text>
+          <input 
+            class="search-text" 
+            type="text" 
+            v-model="keyword" 
+            placeholder="搜索任务标题" 
+            placeholder-class="search-placeholder-class"
+            @confirm="doSearch"
+            confirm-type="search"
+          />
+          <text v-if="keyword" class="iconfont icon-close clear-icon" @click="clearKeyword"></text>
+        </view>
+        <view class="search-btn pressable" @click="doSearch">
+          <text>搜索</text>
+        </view>
+      </view>
+    </view>
+
     <!-- 筛选栏 -->
     <view class="filter-bar">
       <view 
@@ -127,19 +149,25 @@
       </view>
       <text class="btn-text">发布</text>
     </view>
+
+    <!-- 自定义底部导航 -->
+    <custom-tabbar :current="1" />
   </view>
 </template>
 
 <script>
 import taskApi from '@/api/task.js'
 import Skeleton from '@/components/skeleton/index.vue'
+import CustomTabbar from '@/components/custom-tabbar/index.vue'
 
 export default {
   components: {
-    Skeleton
+    Skeleton,
+    CustomTabbar
   },
   data() {
     return {
+      keyword: '',
       currentType: 0,
       taskList: [],
       current: 1,
@@ -149,10 +177,39 @@ export default {
       refreshing: false
     }
   },
-  onLoad() {
+  onLoad(options) {
+    if (options.keyword) {
+      this.keyword = decodeURIComponent(options.keyword)
+    }
+    if (options.type) {
+      this.currentType = parseInt(options.type)
+    }
     this.loadTaskList()
   },
+  onShow() {
+    const savedType = uni.getStorageSync('taskListType')
+    if (savedType) {
+      this.currentType = savedType
+      uni.removeStorageSync('taskListType')
+      this.current = 1
+      this.taskList = []
+      this.noMore = false
+      this.loadTaskList()
+    }
+    uni.$emit('tabBarChange', 1)
+    uni.$on('taskPublished', this.onTaskPublished)
+  },
+  onUnload() {
+    uni.$off('taskPublished', this.onTaskPublished)
+  },
   methods: {
+    onTaskPublished() {
+      this.current = 1
+      this.taskList = []
+      this.noMore = false
+      this.loadTaskList()
+    },
+    
     selectType(type) {
       if (this.currentType === type) return
       
@@ -183,6 +240,10 @@ export default {
         
         if (this.currentType !== 0) {
           params.taskType = this.currentType
+        }
+        
+        if (this.keyword.trim()) {
+          params.keyword = this.keyword.trim()
         }
         
         const res = await taskApi.getList(params)
@@ -260,6 +321,18 @@ export default {
       } else {
         return Math.floor(diff / 86400000) + '天前'
       }
+    },
+    
+    doSearch() {
+      this.current = 1
+      this.taskList = []
+      this.noMore = false
+      this.loadTaskList()
+    },
+    
+    clearKeyword() {
+      this.keyword = ''
+      this.doSearch()
     }
   }
 }
@@ -273,6 +346,59 @@ export default {
   display: flex;
   flex-direction: column;
   background-color: var(--color-bg);
+  padding-bottom: calc(140rpx + env(safe-area-inset-bottom));
+}
+
+.search-section {
+  background-color: var(--color-bg);
+  padding: var(--space-4) var(--space-6);
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  background-color: var(--color-surface);
+  border-radius: var(--radius-full);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-5);
+  box-shadow: var(--shadow-sm);
+}
+
+.search-input {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  font-size: 32rpx;
+  color: var(--color-text-tertiary);
+  margin-right: var(--space-3);
+}
+
+.search-text {
+  flex: 1;
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+}
+
+.search-placeholder-class {
+  color: var(--color-text-placeholder);
+}
+
+.clear-icon {
+  font-size: 28rpx;
+  color: var(--color-text-tertiary);
+  padding: var(--space-2);
+}
+
+.search-btn {
+  padding: var(--space-2) var(--space-5);
+  background: var(--color-primary-gradient);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-primary);
 }
 
 .filter-bar {
@@ -443,19 +569,19 @@ export default {
         @include flex-center;
 
         &.avatar-type-1 {
-          background: linear-gradient(135deg, var(--color-brand-coral) 0%, var(--color-brand-coral-light) 100%);
+          background: linear-gradient(135deg, #FF6B35 0%, #FF8C5A 100%);
         }
 
         &.avatar-type-2 {
-          background: linear-gradient(135deg, var(--color-brand-mint) 0%, var(--color-brand-mint-light) 100%);
+          background: linear-gradient(135deg, #7BC47F 0%, #9DD9A0 100%);
         }
 
         &.avatar-type-3 {
-          background: linear-gradient(135deg, var(--color-brand-blue) 0%, var(--color-brand-blue-dark) 100%);
+          background: linear-gradient(135deg, #FFB347 0%, #FFC970 100%);
         }
 
         &.avatar-type-4, &.avatar-type-5 {
-          background: linear-gradient(135deg, var(--color-brand-coral) 0%, var(--color-brand-coral-light) 100%);
+          background: linear-gradient(135deg, #FFB088 0%, #FFC4A8 100%);
         }
 
         .avatar-text {
@@ -565,8 +691,8 @@ export default {
 
 .publish-btn {
   position: fixed;
-  right: var(--space-6);
-  bottom: calc(150rpx + env(safe-area-inset-bottom));
+  right: 47rpx;
+  bottom: calc(175rpx + env(safe-area-inset-bottom));
   @include flex-center;
   flex-direction: column;
   width: 120rpx;

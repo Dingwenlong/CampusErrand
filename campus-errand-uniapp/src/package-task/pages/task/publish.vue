@@ -1,14 +1,5 @@
 <template>
   <view class="publish-container">
-    <!-- 顶部导航栏 -->
-    <view class="nav-header">
-      <view class="nav-back" @click="goBack">
-        <text class="nav-icon">←</text>
-      </view>
-      <text class="nav-title">发布任务</text>
-      <view class="nav-placeholder"></view>
-    </view>
-
     <!-- 主内容区 -->
     <scroll-view class="content-scroll" scroll-y>
       <!-- 任务类型选择卡片 -->
@@ -288,6 +279,13 @@ export default {
   components: {
     PayPasswordModal
   },
+  created() {
+    const savedType = uni.getStorageSync('taskListType')
+    if (savedType) {
+      this.form.taskType = savedType
+      uni.removeStorageSync('taskListType')
+    }
+  },
   data() {
     return {
       taskTypes: [
@@ -296,6 +294,7 @@ export default {
         { name: '送件', value: 3, emoji: '📄', icon: 'icon-delivery' },
         { name: '其他', value: 4, emoji: '✨', icon: 'icon-other' }
       ],
+      timeBufferMinutes: 15,
       form: {
         taskType: 1,
         title: '',
@@ -425,6 +424,46 @@ export default {
         uni.showToast({ title: '请输入基础赏金', icon: 'none' })
         return false
       }
+      if (!this.validateTime()) {
+        return false
+      }
+      return true
+    },
+    
+    validateTime() {
+      const now = new Date()
+      const publishTime = now.getTime()
+      
+      if (this.form.expectTime) {
+        const expectTime = new Date(this.form.expectTime.replace(' ', 'T')).getTime()
+        
+        if (expectTime <= publishTime) {
+          uni.showToast({ title: '期望送达时间必须晚于当前时间', icon: 'none' })
+          return false
+        }
+        
+        if (this.form.deadlineTime) {
+          const deadlineTime = new Date(this.form.deadlineTime.replace(' ', 'T')).getTime()
+          
+          if (deadlineTime <= publishTime) {
+            uni.showToast({ title: '截止时间必须晚于当前时间', icon: 'none' })
+            return false
+          }
+          
+          if (deadlineTime >= expectTime) {
+            uni.showToast({ title: '截止时间必须早于期望送达时间', icon: 'none' })
+            return false
+          }
+          
+          const bufferMillis = this.timeBufferMinutes * 60 * 1000
+          const diff = expectTime - deadlineTime
+          if (diff < bufferMillis) {
+            uni.showToast({ title: `截止时间与期望送达时间至少间隔${this.timeBufferMinutes}分钟`, icon: 'none' })
+            return false
+          }
+        }
+      }
+      
       return true
     },
     
@@ -466,8 +505,10 @@ export default {
         }
       } catch (e) {
         uni.hideLoading()
+        console.error('发布任务失败:', e)
+        const errorMsg = e?.message || e?.data?.message || '发布失败'
         uni.showToast({
-          title: '发布失败',
+          title: errorMsg,
           icon: 'none'
         })
       }
@@ -477,71 +518,41 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+// 去除 input/textarea focus 时的 outline
+input, textarea {
+  outline: none;
+  
+  &:focus {
+    outline: none;
+  }
+}
+
 // 设计变量
-$primary: var(--color-primary);
-$primary-light: var(--color-primary-light);
-$primary-dark: var(--color-primary-dark);
-$text-primary: var(--color-text-primary);
-$text-secondary: var(--color-text-secondary);
-$text-tertiary: var(--color-text-tertiary);
-$bg-primary: var(--color-bg-secondary);
+$primary: #FF6B35;
+$primary-light: #FF8C5A;
+$primary-dark: #E85A2A;
+$text-primary: #4A3728;
+$text-secondary: #7A6B5E;
+$text-tertiary: #A89888;
+$bg-primary: #FFF5EB;
 $bg-card: var(--color-surface);
-$border-color: var(--color-border-light);
-$shadow-sm: 0 2rpx 12rpx rgba(0,0,0,0.06);
-$shadow-md: 0 4rpx 20rpx rgba(0,0,0,0.08);
-$shadow-lg: 0 8rpx 32rpx rgba(0,0,0,0.12);
+$border-color: #F0E0D0;
+$shadow-sm: 0 2rpx 12rpx rgba(74, 55, 40, 0.06);
+$shadow-md: 0 4rpx 20rpx rgba(74, 55, 40, 0.08);
+$shadow-lg: 0 8rpx 32rpx rgba(74, 55, 40, 0.12);
+$shadow-focus: 0 4rpx 16rpx rgba(255, 107, 53, 0.2);
 $radius-sm: 12rpx;
 $radius-md: 20rpx;
 $radius-lg: 28rpx;
 
 .publish-container {
   min-height: 100vh;
-  background: linear-gradient(180deg, #FFF9E6 0%, var(--color-bg-secondary) 200rpx);
-}
-
-// 导航栏
-.nav-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 40rpx 32rpx 20rpx;
-  background: linear-gradient(180deg, #FFF9E6 0%, transparent 100%);
-  
-  .nav-back {
-    width: 64rpx;
-    height: 64rpx;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #fff;
-    border-radius: 50%;
-    box-shadow: $shadow-sm;
-    
-    &:active {
-      transform: scale(0.95);
-    }
-    
-    .nav-icon {
-      font-size: 36rpx;
-      color: $text-primary;
-      font-weight: bold;
-    }
-  }
-  
-  .nav-title {
-    font-size: 36rpx;
-    font-weight: 700;
-    color: $text-primary;
-  }
-  
-  .nav-placeholder {
-    width: 64rpx;
-  }
+  background: linear-gradient(180deg, #FFF8F0 0%, #FFF5EB 200rpx);
 }
 
 // 内容滚动区
 .content-scroll {
-  height: calc(100vh - 200rpx);
+  height: 100vh;
   padding: 0 24rpx;
 }
 
@@ -596,7 +607,7 @@ $radius-lg: 28rpx;
   }
   
   &.active {
-    background: linear-gradient(135deg, rgba(255,195,0,0.1) 0%, rgba(255,213,79,0.1) 100%);
+    background: linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(255, 140, 90, 0.1) 100%);
     border-color: $primary;
     
     .type-name {
@@ -614,10 +625,10 @@ $radius-lg: 28rpx;
     justify-content: center;
     margin-bottom: 16rpx;
     
-    &.bg-1 { background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%); }
-    &.bg-2 { background: linear-gradient(135deg, #F3E5F5 0%, #E1BEE7 100%); }
-    &.bg-3 { background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%); }
-    &.bg-4 { background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%); }
+    &.bg-1 { background: linear-gradient(135deg, #FF6B35 0%, #FF8C5A 100%); }
+    &.bg-2 { background: linear-gradient(135deg, #7BC47F 0%, #9DD9A0 100%); }
+    &.bg-3 { background: linear-gradient(135deg, #FFB347 0%, #FFC970 100%); }
+    &.bg-4 { background: linear-gradient(135deg, #FFB088 0%, #FFC4A8 100%); }
   }
   
   .type-icon {
@@ -680,33 +691,45 @@ $radius-lg: 28rpx;
   .group-input, .group-textarea {
     width: 100%;
     background: $bg-primary;
-    border-radius: $radius-sm;
+    border-radius: $radius-md;
     padding: 24rpx;
     font-size: 28rpx;
     color: $text-primary;
     border: 2rpx solid transparent;
     transition: all 0.3s ease;
+    box-sizing: border-box;
     
     &:focus {
       border-color: $primary;
       background: var(--color-surface);
+      box-shadow: $shadow-focus;
+      transform: translateY(-2rpx);
+    }
+    
+    &::placeholder {
+      color: $text-tertiary;
     }
   }
   
   .group-input {
-    height: 88rpx;
+    height: 96rpx;
+    line-height: 48rpx;
   }
   
   .group-textarea {
-    height: 180rpx;
+    height: 200rpx;
+    padding-bottom: 48rpx;
   }
   
   .input-count {
     position: absolute;
-    bottom: 16rpx;
-    right: 16rpx;
+    bottom: 20rpx;
+    right: 20rpx;
     font-size: 22rpx;
     color: $text-tertiary;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 4rpx 12rpx;
+    border-radius: 8rpx;
   }
 }
 
@@ -749,18 +772,26 @@ $radius-lg: 28rpx;
 
 .address-input {
   width: 100%;
-  height: 88rpx;
+  height: 96rpx;
   background: $bg-primary;
-  border-radius: $radius-sm;
+  border-radius: $radius-md;
   padding: 0 24rpx;
   font-size: 28rpx;
   color: $text-primary;
   margin-bottom: 16rpx;
   border: 2rpx solid transparent;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
   
   &:focus {
     border-color: $primary;
     background: var(--color-surface);
+    box-shadow: $shadow-focus;
+    transform: translateY(-2rpx);
+  }
+  
+  &::placeholder {
+    color: $text-tertiary;
   }
 }
 
@@ -771,13 +802,15 @@ $radius-lg: 28rpx;
 
 .contact-input {
   flex: 1;
-  height: 80rpx;
+  height: 88rpx;
   background: $bg-primary;
-  border-radius: $radius-sm;
+  border-radius: $radius-md;
   padding: 0 24rpx;
   font-size: 28rpx;
   color: $text-primary;
   border: 2rpx solid transparent;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
   
   &.phone {
     flex: 1.5;
@@ -786,6 +819,12 @@ $radius-lg: 28rpx;
   &:focus {
     border-color: $primary;
     background: var(--color-surface);
+    box-shadow: $shadow-focus;
+    transform: translateY(-2rpx);
+  }
+  
+  &::placeholder {
+    color: $text-tertiary;
   }
 }
 
@@ -922,7 +961,7 @@ $radius-lg: 28rpx;
   display: flex;
   align-items: center;
   background: $bg-primary;
-  border-radius: $radius-sm;
+  border-radius: $radius-md;
   padding: 16rpx 24rpx;
   min-width: 180rpx;
   border: 2rpx solid transparent;
@@ -931,6 +970,8 @@ $radius-lg: 28rpx;
   &:focus-within {
     border-color: $primary;
     background: var(--color-surface);
+    box-shadow: $shadow-focus;
+    transform: translateY(-2rpx);
   }
   
   &.full {
@@ -940,7 +981,7 @@ $radius-lg: 28rpx;
   
   .fee-symbol {
     font-size: 28rpx;
-    color: $text-secondary;
+    color: $primary;
     margin-right: 8rpx;
     font-weight: 600;
   }
@@ -954,24 +995,38 @@ $radius-lg: 28rpx;
     background: transparent;
     border: none;
     padding: 0;
+    
+    &::placeholder {
+      color: $text-tertiary;
+      font-weight: 400;
+    }
   }
 }
 
 // 备注
 .remark-textarea {
   width: 100%;
-  height: 160rpx;
+  height: 180rpx;
   background: $bg-primary;
-  border-radius: $radius-sm;
+  border-radius: $radius-md;
   padding: 24rpx;
+  padding-bottom: 48rpx;
   font-size: 28rpx;
   color: $text-primary;
   border: 2rpx solid transparent;
   margin-bottom: 16rpx;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
   
   &:focus {
     border-color: $primary;
     background: var(--color-surface);
+    box-shadow: $shadow-focus;
+    transform: translateY(-2rpx);
+  }
+  
+  &::placeholder {
+    color: $text-tertiary;
   }
 }
 
@@ -993,7 +1048,7 @@ $radius-lg: 28rpx;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 -4rpx 24rpx rgba(0,0,0,0.08);
+  box-shadow: 0 -4rpx 24rpx rgba(74, 55, 40, 0.08);
   z-index: 100;
 }
 
@@ -1030,24 +1085,24 @@ $radius-lg: 28rpx;
   padding: 24rpx 48rpx;
   background: linear-gradient(135deg, $primary 0%, $primary-light 100%);
   border-radius: 44rpx;
-  box-shadow: 0 8rpx 24rpx rgba(255,195,0,0.35);
+  box-shadow: 0 8rpx 24rpx rgba(255, 107, 53, 0.35);
   border: none;
   
   &:active {
     transform: scale(0.96);
-    box-shadow: 0 4rpx 16rpx rgba(255,195,0,0.25);
+    box-shadow: 0 4rpx 16rpx rgba(255, 107, 53, 0.25);
   }
   
   .btn-text {
     font-size: 30rpx;
-    color: $text-primary;
+    color: #fff;
     font-weight: 600;
     margin-right: 12rpx;
   }
   
   .btn-icon {
     font-size: 28rpx;
-    color: $text-primary;
+    color: #fff;
   }
 }
 </style>

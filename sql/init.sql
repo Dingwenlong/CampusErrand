@@ -1,3 +1,5 @@
+SET NAMES utf8mb4;
+
 -- 创建数据库
 CREATE DATABASE IF NOT EXISTS campus_errand DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -198,4 +200,15 @@ INSERT INTO tb_config (config_key, config_value, description) VALUES
 ('min_withdraw_amount', '10.00', '最小提现金额'),
 ('max_task_amount', '500.00', '单笔任务最大金额'),
 ('auto_cancel_time', '30', '任务自动取消时间（分钟）'),
-('auto_complete_time', '24', '自动确认完成时间（小时）');
+('auto_complete_time', '24', '自动确认完成时间（小时）'),
+('user2_login_enabled', 'true', '用户二登录开关');
+
+-- 插入用户二数据（用于测试登录）
+INSERT INTO tb_user (id, openid, nickname, phone, gender, status, is_verified, student_id, credit_score) VALUES
+(2, 'mock_user2_openid', '用户二', '13800000002', 1, 1, 1, '20240002', 100)
+ON DUPLICATE KEY UPDATE openid = 'mock_user2_openid', nickname = '用户二', status = 1;
+
+-- 插入用户二钱包数据
+INSERT INTO tb_user_wallet (user_id, balance, frozen_amount, total_income, total_expense) VALUES
+(2, 100.00, 0.00, 0.00, 0.00)
+ON DUPLICATE KEY UPDATE balance = 100.00;

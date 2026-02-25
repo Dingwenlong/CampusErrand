@@ -237,4 +237,29 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
 
         return true;
     }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean refund(Long userId, BigDecimal amount, String remark) {
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            return false;
+        }
+
+        UserWallet wallet = userWalletService.getByUserId(userId);
+        if (wallet == null) {
+            return false;
+        }
+
+        boolean success = userWalletService.addBalance(userId, amount);
+        if (!success) {
+            return false;
+        }
+
+        wallet = userWalletService.getByUserId(userId);
+
+        createTransaction(userId, 5, 1, amount, wallet.getBalance(),
+                null, null, remark != null ? remark : "退款");
+
+        return true;
+    }
 }

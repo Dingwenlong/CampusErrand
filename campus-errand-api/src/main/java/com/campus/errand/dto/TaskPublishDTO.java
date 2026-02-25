@@ -1,11 +1,14 @@
 package com.campus.errand.dto;
 
+import com.campus.errand.validator.ValidTaskTime;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+@ValidTaskTime
 public class TaskPublishDTO {
 
     @NotNull(message = "任务类型不能为空")
@@ -37,7 +40,11 @@ public class TaskPublishDTO {
 
     private BigDecimal weightFee;
     private BigDecimal urgencyFee;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime expectTime;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime deadlineTime;
     private String remark;
     private String images;

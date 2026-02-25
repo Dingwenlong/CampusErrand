@@ -70,4 +70,13 @@ public interface TransactionService extends IService<Transaction> {
      * @return 是否成功
      */
     boolean taskRefund(Long userId, Long taskId, BigDecimal amount);
+
+    /**
+     * 通用退款（不需要关联任务ID）
+     * @param userId 用户ID
+     * @param amount 退款金额
+     * @param remark 备注
+     * @return 是否成功
+     */
+    boolean refund(Long userId, BigDecimal amount, String remark);
 }

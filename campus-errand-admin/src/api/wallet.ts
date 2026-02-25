@@ -7,3 +7,7 @@ export const getTransactions = (params: any) => {
 export const getWalletStats = () => {
   return request.get('/admin/wallet/stats')
 }
+
+export const adminRecharge = (data: { userId: number; amount: number; remark?: string }) => {
+  return request.post('/admin/wallet/recharge', data)
+}

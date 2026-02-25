@@ -48,7 +48,7 @@ public class WalletController {
         result.put("frozenAmount", wallet.getFrozenAmount());
         result.put("totalIncome", wallet.getTotalIncome());
         result.put("totalExpense", wallet.getTotalExpense());
-        result.put("hasPayPassword", wallet.getPayPassword() != null && !wallet.getPayPassword().isEmpty());
+        result.put("hasPayPassword", wallet.getPayPassword() != null && !wallet.getPayPassword().isEmpty() ? 1 : 0);
 
         return Result.success(result);
     }

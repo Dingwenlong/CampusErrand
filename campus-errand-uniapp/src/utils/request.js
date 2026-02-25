@@ -56,6 +56,9 @@ const requestInterceptor = (options) => {
     console.log(`[Request] ${options.method || 'GET'} ${options.url}`, options.data)
   }
   
+  // 打印完整请求配置用于调试
+  console.log('[Request Config] url:', options.url, 'method:', options.method, 'data:', options.data)
+  
   return options
 }
 
@@ -65,6 +68,9 @@ const responseInterceptor = (response) => {
   if (process.env.NODE_ENV === 'development') {
     console.log(`[Response]`, response.data)
   }
+  
+  // 打印完整响应用于调试
+  console.log('[Response Config] statusCode:', response.statusCode, 'data:', response.data)
   
   return response
 }
@@ -136,11 +142,13 @@ const request = (options, retryCount = 0) => {
             resolve(data)
           } else if (data.code === 401 || data.code === 401001) {
             // Token过期或未登录
-            handleAuthError()
+            const isMockToken = uni.getStorageSync('isMockToken') || false
+            handleAuthError(undefined, isMockToken)
             reject({ ...data, type: 'auth' })
           } else if (data.code === 401002) {
             // Token无效
-            handleAuthError('登录状态无效，请重新登录')
+            const isMockToken = uni.getStorageSync('isMockToken') || false
+            handleAuthError('登录状态无效，请重新登录', isMockToken)
             reject({ ...data, type: 'auth' })
           } else {
             // 其他业务错误
@@ -153,7 +161,8 @@ const request = (options, retryCount = 0) => {
             reject({ ...data, type: 'business' })
           }
         } else if (response.statusCode === 401) {
-          handleAuthError()
+          const isMockToken = uni.getStorageSync('isMockToken') || false
+          handleAuthError(undefined, isMockToken)
           reject({ statusCode: 401, type: 'auth' })
         } else if (response.statusCode >= 500) {
           // 服务器错误，尝试重试
@@ -195,7 +204,11 @@ const request = (options, retryCount = 0) => {
 }
 
 // 处理认证错误
-const handleAuthError = (msg) => {
+const handleAuthError = (msg, isMockToken = false) => {
+  if (isMockToken) {
+    return
+  }
+  
   removeToken()
   uni.removeStorageSync('userInfo')
   

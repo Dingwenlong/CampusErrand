@@ -3,11 +3,13 @@ package com.campus.errand.controller;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.campus.errand.common.PageResult;
 import com.campus.errand.common.Result;
+import com.campus.errand.dto.AdminRechargeDTO;
 import com.campus.errand.service.AdminWalletService;
 import com.campus.errand.vo.TransactionVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,5 +48,15 @@ public class AdminWalletController {
     public Result<Map<String, Object>> getStats() {
         Map<String, Object> data = adminWalletService.getWalletStats();
         return Result.success(data);
+    }
+
+    @Operation(summary = "管理员充值")
+    @PostMapping("/recharge")
+    public Result<Boolean> adminRecharge(@Valid @RequestBody AdminRechargeDTO dto) {
+        boolean success = adminWalletService.adminRecharge(dto.getUserId(), dto.getAmount(), dto.getRemark());
+        if (!success) {
+            return Result.error("充值失败，用户钱包不存在");
+        }
+        return Result.success(true);
     }
 }

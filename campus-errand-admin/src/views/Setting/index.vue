@@ -150,6 +150,12 @@
                       un-checked-children="关闭" />
                   </a-form-item>
                 </a-col>
+                <a-col :xs="24" :sm="12" :md="8" :lg="6" :xl="6">
+                  <a-form-item label="用户二登录开关">
+                    <a-switch v-model:checked="otherForm.user2LoginEnabled" checked-children="开启"
+                      un-checked-children="关闭" />
+                  </a-form-item>
+                </a-col>
               </a-row>
               <a-form-item label="维护提示信息" v-if="otherForm.maintenanceMode">
                 <a-textarea v-model:value="otherForm.maintenanceMessage" :rows="3" placeholder="请输入维护提示信息"
@@ -167,6 +173,43 @@
             </a-form>
           </a-spin>
         </a-tab-pane>
+
+        <!-- 协议配置 -->
+        <a-tab-pane key="agreement" tab="协议配置">
+          <a-spin :spinning="loading.agreement">
+            <a-form :model="agreementForm" layout="vertical" class="setting-form" ref="agreementFormRef">
+              <a-row :gutter="[16, 0]">
+                <a-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                  <a-form-item label="用户协议更新时间">
+                    <a-date-picker v-model:value="agreementForm.userAgreementUpdateTime" style="width: 100%" placeholder="选择更新时间" />
+                  </a-form-item>
+                </a-col>
+                <a-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                  <a-form-item label="隐私政策更新时间">
+                    <a-date-picker v-model:value="agreementForm.privacyPolicyUpdateTime" style="width: 100%" placeholder="选择更新时间" />
+                  </a-form-item>
+                </a-col>
+              </a-row>
+              <a-form-item label="用户协议">
+                <a-textarea v-model:value="agreementForm.userAgreement" :rows="10" placeholder="请输入用户协议内容，支持HTML格式"
+                  maxlength="10000" show-count />
+              </a-form-item>
+              <a-form-item label="隐私政策">
+                <a-textarea v-model:value="agreementForm.privacyPolicy" :rows="10" placeholder="请输入隐私政策内容，支持HTML格式"
+                  maxlength="10000" show-count />
+              </a-form-item>
+              <a-form-item>
+                <a-space>
+                  <a-button type="primary" @click="saveAgreementConfig" :loading="saving.agreement">
+                    <SaveOutlined />
+                    保存配置
+                  </a-button>
+                  <a-button @click="resetAgreementForm">重置</a-button>
+                </a-space>
+              </a-form-item>
+            </a-form>
+          </a-spin>
+        </a-tab-pane>
       </a-tabs>
     </a-card>
   </div>
@@ -178,6 +221,7 @@ import { message } from 'ant-design-vue'
 import { SaveOutlined } from '@ant-design/icons-vue'
 import { getConfigByCategory, saveConfigs } from '@/api/config'
 import type { FormInstance, Rule } from 'ant-design-vue/es/form'
+import dayjs from 'dayjs'
 
 const activeKey = ref('basic')
 
@@ -186,7 +230,8 @@ const loading = reactive({
   basic: false,
   task: false,
   wallet: false,
-  other: false
+  other: false,
+  agreement: false
 })
 
 // 保存状态
@@ -194,7 +239,8 @@ const saving = reactive({
   basic: false,
   task: false,
   wallet: false,
-  other: false
+  other: false,
+  agreement: false
 })
 
 // 表单引用
@@ -202,6 +248,7 @@ const basicFormRef = ref<FormInstance>()
 const taskFormRef = ref<FormInstance>()
 const walletFormRef = ref<FormInstance>()
 const otherFormRef = ref<FormInstance>()
+const agreementFormRef = ref<FormInstance>()
 
 // 基础配置表单
 const basicForm = reactive({
@@ -279,7 +326,16 @@ const otherForm = reactive({
   taskPublishEnabled: true,
   verifyEnabled: false,
   maintenanceMode: false,
-  maintenanceMessage: ''
+  maintenanceMessage: '',
+  user2LoginEnabled: false
+})
+
+// 协议配置表单
+const agreementForm = reactive({
+  userAgreement: '',
+  privacyPolicy: '',
+  userAgreementUpdateTime: null as any,
+  privacyPolicyUpdateTime: null as any
 })
 
 // 原始数据备份，用于重置
@@ -287,7 +343,8 @@ const originalData = {
   basic: { ...basicForm },
   task: { ...taskForm },
   wallet: { ...walletForm },
-  other: { ...otherForm }
+  other: { ...otherForm },
+  agreement: { ...agreementForm }
 }
 
 // 处理Tab切换
@@ -295,16 +352,19 @@ const handleTabChange = (key: string) => {
   // 切换到某个tab时加载对应数据
   switch (key) {
     case 'basic':
-      if (!originalData.basic.siteName) loadBasicConfigs()
+      loadBasicConfigs()
       break
     case 'task':
-      if (!originalData.task.minReward) loadTaskConfigs()
+      loadTaskConfigs()
       break
     case 'wallet':
-      if (!originalData.wallet.minWithdraw) loadWalletConfigs()
+      loadWalletConfigs()
       break
     case 'other':
       loadOtherConfigs()
+      break
+    case 'agreement':
+      loadAgreementConfigs()
       break
   }
 }
@@ -398,6 +458,7 @@ const loadOtherConfigs = async () => {
         if (key === 'verify_enabled') otherForm.verifyEnabled = value === 'true'
         if (key === 'maintenance_mode') otherForm.maintenanceMode = value === 'true'
         if (key === 'maintenance_message') otherForm.maintenanceMessage = value || ''
+        if (key === 'user2_login_enabled') otherForm.user2LoginEnabled = value === 'true'
       })
       originalData.other = { ...otherForm }
     }
@@ -535,7 +596,8 @@ const saveOtherConfig = async () => {
       task_publish_enabled: otherForm.taskPublishEnabled.toString(),
       verify_enabled: otherForm.verifyEnabled.toString(),
       maintenance_mode: otherForm.maintenanceMode.toString(),
-      maintenance_message: otherForm.maintenanceMessage
+      maintenance_message: otherForm.maintenanceMessage,
+      user2_login_enabled: otherForm.user2LoginEnabled.toString()
     }
 
     const res = await saveConfigs(configMap)
@@ -557,6 +619,68 @@ const saveOtherConfig = async () => {
 const resetOtherForm = () => {
   Object.assign(otherForm, originalData.other)
   message.info('已重置为其他配置')
+}
+
+// 加载协议配置
+const loadAgreementConfigs = async () => {
+  loading.agreement = true
+  try {
+    const res = await getConfigByCategory('agreement')
+    if (res.code === 200) {
+      const configs = res.data || []
+      configs.forEach((config: any) => {
+        const key = config.configKey
+        const value = config.configValue
+        if (key === 'user_agreement') agreementForm.userAgreement = value || ''
+        if (key === 'privacy_policy') agreementForm.privacyPolicy = value || ''
+        if (key === 'user_agreement_update_time' && value) {
+          agreementForm.userAgreementUpdateTime = dayjs(value)
+        }
+        if (key === 'privacy_policy_update_time' && value) {
+          agreementForm.privacyPolicyUpdateTime = dayjs(value)
+        }
+      })
+      originalData.agreement = { ...agreementForm }
+    }
+  } catch (error) {
+    console.error('加载协议配置失败', error)
+    message.error('加载协议配置失败')
+  } finally {
+    loading.agreement = false
+  }
+}
+
+// 保存协议配置
+const saveAgreementConfig = async () => {
+  try {
+    saving.agreement = true
+
+    const configMap: Record<string, string> = {
+      user_agreement: agreementForm.userAgreement,
+      privacy_policy: agreementForm.privacyPolicy,
+      user_agreement_update_time: agreementForm.userAgreementUpdateTime ? agreementForm.userAgreementUpdateTime.format('YYYY-MM-DD') : '',
+      privacy_policy_update_time: agreementForm.privacyPolicyUpdateTime ? agreementForm.privacyPolicyUpdateTime.format('YYYY-MM-DD') : ''
+    }
+
+    const res = await saveConfigs(configMap)
+    if (res.code === 200) {
+      message.success('协议配置保存成功')
+      originalData.agreement = { ...agreementForm }
+    } else {
+      message.error(res.message || '保存失败')
+    }
+  } catch (error) {
+    console.error('保存配置失败', error)
+    message.error('保存配置失败')
+  } finally {
+    saving.agreement = false
+  }
+}
+
+// 重置协议表单
+const resetAgreementForm = () => {
+  Object.assign(agreementForm, originalData.agreement)
+  message.info('已重置为协议配置')
 }
 
 onMounted(() => {

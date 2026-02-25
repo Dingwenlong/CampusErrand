@@ -5,6 +5,7 @@ import com.campus.errand.common.PageResult;
 import com.campus.errand.common.Result;
 import com.campus.errand.dto.TaskCancelDTO;
 import com.campus.errand.dto.TaskPublishDTO;
+import com.campus.errand.entity.Task;
 import com.campus.errand.service.TaskService;
 import com.campus.errand.util.UserContext;
 import com.campus.errand.vo.TaskVO;
@@ -40,9 +41,10 @@ public class TaskController {
     public Result<PageResult<TaskVO>> list(
             @Parameter(description = "任务类型：1-取快递 2-代买 3-送件 4-其他") @RequestParam(required = false) Integer taskType,
             @Parameter(description = "任务状态：0-待接单 1-已接单 2-待取件 3-配送中 4-待确认 5-已完成 6-已取消") @RequestParam(required = false) Integer status,
+            @Parameter(description = "搜索关键词") @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "1") Long current,
             @RequestParam(defaultValue = "10") Long size) {
-        IPage<TaskVO> page = taskService.getTaskList(taskType, status, current, size);
+        IPage<TaskVO> page = taskService.getTaskList(taskType, status, keyword, current, size);
         PageResult<TaskVO> result = new PageResult<>(page.getTotal(), page.getCurrent(), page.getSize(), page.getRecords());
         return Result.success(result);
     }
@@ -63,6 +65,10 @@ public class TaskController {
         Long runnerId = UserContext.getUserId();
         boolean success = taskService.acceptTask(id, runnerId);
         if (!success) {
+            TaskVO taskVO = taskService.getTaskDetail(id);
+            if (taskVO != null && taskVO.getUserId().equals(runnerId)) {
+                return Result.error("不能接取自己发布的任务");
+            }
             return Result.error("抢单失败，任务可能已被接单");
         }
         return Result.success(true);

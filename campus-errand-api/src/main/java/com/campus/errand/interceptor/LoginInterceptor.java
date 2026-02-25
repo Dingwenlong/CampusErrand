@@ -37,6 +37,14 @@ public class LoginInterceptor implements HandlerInterceptor {
 
         token = token.substring(7);
 
+        // 处理 mock token（用户二登录）
+        if (token.startsWith("mock_user2_token_")) {
+            log.info("Mock token detected, user2 login");
+            UserContext.setUserId(2L);
+            UserContext.setOpenid("mock_user2_openid");
+            return true;
+        }
+
         try {
             Long userId = jwtUtil.getUserId(token);
             String openid = jwtUtil.getOpenid(token);

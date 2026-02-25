@@ -37,16 +37,25 @@
       </a-col>
     </a-row>
 
-    <!-- 图表区域 - 响应式堆叠 -->
+    <!-- 虚拟数据提示 -->
+    <a-alert
+      v-if="showMockBadge"
+      message="当前显示为演示数据"
+      description="系统暂无真实数据，图表展示的是虚拟演示数据。可在 mockData.ts 中修改配置。"
+      type="info"
+      show-icon
+      closable
+      class="mock-alert"
+    />
     <a-row :gutter="[16, 16]" class="charts">
       <a-col :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
         <a-card title="📈 任务状态分布" :loading="chartLoading" class="chart-card">
-          <div ref="taskStatusChart" class="chart-container"></div>
+          <div ref="taskStatusChartRef" class="chart-container" style="height: 300px;"></div>
         </a-card>
       </a-col>
       <a-col :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
         <a-card title="💹 近7天交易趋势" :loading="chartLoading" class="chart-card">
-          <div ref="amountTrendChart" class="chart-container"></div>
+          <div ref="amountTrendChartRef" class="chart-container" style="height: 300px;"></div>
         </a-card>
       </a-col>
     </a-row>
@@ -55,7 +64,7 @@
     <a-row :gutter="[16, 16]" class="charts">
       <a-col :span="24">
         <a-card title="📊 用户增长趋势" :loading="chartLoading" class="chart-card">
-          <div ref="userGrowthChart" class="chart-container" style="height: 300px;"></div>
+          <div ref="userGrowthChartRef" class="chart-container" style="height: 350px;"></div>
         </a-card>
       </a-col>
     </a-row>
@@ -63,15 +72,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import {
   UserOutlined,
   FileTextOutlined,
-  DollarOutlined
+  DollarOutlined,
+  InfoCircleOutlined
 } from '@ant-design/icons-vue'
 import * as echarts from 'echarts'
 import type { EChartsType } from 'echarts'
 import { getDashboardData, getTaskStatusStats, getAmountTrend, getUserGrowth } from '@/api/dashboard'
+import { mockDataConfig, mockStats } from './mockData'
 
 interface DashboardStats {
   userCount: number
@@ -85,22 +96,22 @@ const stats = ref<DashboardStats>({
   totalAmount: 0
 })
 const chartLoading = ref(false)
-const taskStatusChart = ref<HTMLElement>()
-const amountTrendChart = ref<HTMLElement>()
-const userGrowthChart = ref<HTMLElement>()
+const showMockBadge = ref(false)
+const taskStatusChartRef = ref<HTMLElement | null>(null)
+const amountTrendChartRef = ref<HTMLElement | null>(null)
+const userGrowthChartRef = ref<HTMLElement | null>(null)
 const taskStatusChartInstance = ref<EChartsType | null>(null)
 const amountTrendChartInstance = ref<EChartsType | null>(null)
 const userGrowthChartInstance = ref<EChartsType | null>(null)
 
-// 任务状态颜色映射 - 美团风格
 const statusColors: Record<number, string> = {
-  0: '#FFC300', // 待接单 - 黄色
-  1: '#4ECDC4', // 已接单 - 青色
-  2: '#52c41a', // 待取件 - 绿色
-  3: '#667eea', // 配送中 - 紫色
-  4: '#FF6B6B', // 待确认 - 红色
-  5: '#52c41a', // 已完成 - 绿色
-  6: '#999999'  // 已取消 - 灰色
+  0: '#FFC300',
+  1: '#4ECDC4',
+  2: '#52c41a',
+  3: '#667eea',
+  4: '#FF6B6B',
+  5: '#52c41a',
+  6: '#999999'
 }
 
 const formatAmount = (value: number | string | undefined) => Number(value || 0).toFixed(2)
@@ -108,198 +119,297 @@ const formatAmount = (value: number | string | undefined) => Number(value || 0).
 const loadData = async () => {
   try {
     const res = await getDashboardData()
-    if (res.code === 200) {
-      stats.value = {
-        userCount: Number(res.data?.userCount || 0),
-        taskCount: Number(res.data?.taskCount || 0),
-        totalAmount: res.data?.totalAmount || 0
+    console.log('Dashboard API response:', res)
+    
+    if (res.code === 200 && res.data) {
+      const userCount = Number(res.data.userCount || 0)
+      const taskCount = Number(res.data.taskCount || 0)
+      const totalAmount = Number(res.data.totalAmount || 0)
+      
+      console.log('Data values:', userCount, taskCount, totalAmount)
+      
+      if (userCount > 0 || taskCount > 0 || totalAmount > 0) {
+        stats.value = {
+          userCount,
+          taskCount,
+          totalAmount
+        }
+      } else if (mockDataConfig.enabled) {
+        stats.value = { ...mockStats }
+        showMockBadge.value = true
       }
+    } else if (mockDataConfig.enabled) {
+      stats.value = { ...mockStats }
+      showMockBadge.value = true
     }
   } catch (error) {
     console.error('加载仪表盘数据失败', error)
+    if (mockDataConfig.enabled) {
+      stats.value = { ...mockStats }
+      showMockBadge.value = true
+    }
   }
+}
+
+const initTaskStatusChart = async (data: any[]) => {
+  if (!taskStatusChartRef.value) {
+    console.error('任务状态图表容器未找到')
+    return
+  }
+  
+  console.log('初始化任务状态图表，容器:', taskStatusChartRef.value)
+  
+  taskStatusChartInstance.value?.dispose()
+  taskStatusChartInstance.value = echarts.init(taskStatusChartRef.value)
+  
+  const chart = taskStatusChartInstance.value
+  chart.setOption({
+    tooltip: { 
+      trigger: 'item',
+      formatter: '{b}: {c} ({d}%)'
+    },
+    legend: { 
+      bottom: '5%',
+      type: 'scroll',
+      textStyle: {
+        fontSize: 12
+      }
+    },
+    series: [{
+      type: 'pie',
+      radius: ['40%', '70%'],
+      center: ['50%', '45%'],
+      avoidLabelOverlap: false,
+      itemStyle: {
+        borderRadius: 10,
+        borderColor: '#fff',
+        borderWidth: 2
+      },
+      label: { 
+        show: true,
+        formatter: '{b}\n{c}',
+        fontSize: 11
+      },
+      emphasis: {
+        label: {
+          show: true,
+          fontSize: 14,
+          fontWeight: 'bold'
+        }
+      },
+      data: data.map((item: any) => ({
+        name: item.name,
+        value: item.value,
+        itemStyle: { color: statusColors[item.status] }
+      }))
+    }]
+  })
+  
+  console.log('任务状态图表初始化完成')
+}
+
+const initAmountTrendChart = async (dates: string[], amounts: number[]) => {
+  if (!amountTrendChartRef.value) {
+    console.error('交易趋势图表容器未找到')
+    return
+  }
+  
+  console.log('初始化交易趋势图表，容器:', amountTrendChartRef.value)
+  
+  amountTrendChartInstance.value?.dispose()
+  amountTrendChartInstance.value = echarts.init(amountTrendChartRef.value)
+  
+  const chart = amountTrendChartInstance.value
+  chart.setOption({
+    tooltip: { 
+      trigger: 'axis',
+      formatter: '{b}<br/>交易额: ¥{c}'
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '3%',
+      top: '10%',
+      containLabel: true
+    },
+    xAxis: {
+      type: 'category',
+      data: dates,
+      boundaryGap: false,
+      axisLabel: {
+        fontSize: 11
+      }
+    },
+    yAxis: { 
+      type: 'value',
+      axisLabel: {
+        formatter: '¥{value}',
+        fontSize: 11
+      }
+    },
+    series: [{
+      data: amounts,
+      type: 'line',
+      smooth: true,
+      areaStyle: {
+        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+          { offset: 0, color: 'rgba(255, 195, 0, 0.5)' },
+          { offset: 1, color: 'rgba(255, 195, 0, 0.1)' }
+        ])
+      },
+      itemStyle: { color: '#FFC300' },
+      lineStyle: {
+        width: 3
+      }
+    }]
+  })
+  
+  console.log('交易趋势图表初始化完成')
+}
+
+const initUserGrowthChart = async (dates: string[], newUsers: number[], totalUsers: number[]) => {
+  if (!userGrowthChartRef.value) {
+    console.error('用户增长图表容器未找到')
+    return
+  }
+  
+  console.log('初始化用户增长图表，容器:', userGrowthChartRef.value)
+  
+  userGrowthChartInstance.value?.dispose()
+  userGrowthChartInstance.value = echarts.init(userGrowthChartRef.value)
+  
+  const chart = userGrowthChartInstance.value
+  chart.setOption({
+    tooltip: {
+      trigger: 'axis'
+    },
+    legend: {
+      data: ['新增用户', '总用户数'],
+      top: '5%'
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '3%',
+      top: '15%',
+      containLabel: true
+    },
+    xAxis: {
+      type: 'category',
+      data: dates,
+      axisLabel: {
+        fontSize: 11
+      }
+    },
+    yAxis: [
+      {
+        type: 'value',
+        name: '新增用户',
+        position: 'left',
+        axisLabel: {
+          fontSize: 11
+        }
+      },
+      {
+        type: 'value',
+        name: '总用户数',
+        position: 'right',
+        axisLabel: {
+          fontSize: 11
+        }
+      }
+    ],
+    series: [
+      {
+        name: '新增用户',
+        type: 'bar',
+        data: newUsers,
+        itemStyle: { color: '#FFC300' }
+      },
+      {
+        name: '总用户数',
+        type: 'line',
+        yAxisIndex: 1,
+        data: totalUsers,
+        itemStyle: { color: '#4ECDC4' },
+        smooth: true
+      }
+    ]
+  })
+  
+  console.log('用户增长图表初始化完成')
 }
 
 const initCharts = async () => {
   chartLoading.value = true
+  let usedMockData = false
   
   try {
-    // 加载任务状态分布数据
+    await nextTick()
+    await new Promise(resolve => setTimeout(resolve, 200))
+    
+    console.log('开始初始化图表，refs:', {
+      taskStatusChartRef: taskStatusChartRef.value,
+      amountTrendChartRef: amountTrendChartRef.value,
+      userGrowthChartRef: userGrowthChartRef.value
+    })
+    
     const statusRes = await getTaskStatusStats()
-    if (statusRes.code === 200 && taskStatusChart.value) {
-      taskStatusChartInstance.value?.dispose()
-      taskStatusChartInstance.value = echarts.init(taskStatusChart.value)
-      const chart = taskStatusChartInstance.value
-      const statusData = statusRes.data.data || []
-      
-      chart.setOption({
-        tooltip: { 
-          trigger: 'item',
-          formatter: '{b}: {c} ({d}%)'
-        },
-        legend: { 
-          bottom: '5%',
-          type: 'scroll',
-          textStyle: {
-            fontSize: 12
-          }
-        },
-        series: [{
-          type: 'pie',
-          radius: ['40%', '70%'],
-          center: ['50%', '45%'],
-          avoidLabelOverlap: false,
-          itemStyle: {
-            borderRadius: 10,
-            borderColor: '#fff',
-            borderWidth: 2
-          },
-          label: { 
-            show: true,
-            formatter: '{b}\n{c}',
-            fontSize: 11
-          },
-          emphasis: {
-            label: {
-              show: true,
-              fontSize: 14,
-              fontWeight: 'bold'
-            }
-          },
-          data: statusData.map((item: any) => ({
-            name: item.name,
-            value: item.value,
-            itemStyle: { color: statusColors[item.status] }
-          }))
-        }]
-      })
+    let statusData: any[] = []
+    if (statusRes.code === 200 && statusRes.data?.data?.length > 0) {
+      statusData = statusRes.data.data
+    } else if (mockDataConfig.enabled) {
+      statusData = mockDataConfig.taskStatus.data
+      usedMockData = true
+    }
+    console.log('任务状态数据:', statusData)
+    
+    if (statusData.length > 0) {
+      await initTaskStatusChart(statusData)
     }
 
-    // 加载交易趋势数据
     const trendRes = await getAmountTrend()
-    if (trendRes.code === 200 && amountTrendChart.value) {
-      amountTrendChartInstance.value?.dispose()
-      amountTrendChartInstance.value = echarts.init(amountTrendChart.value)
-      const chart = amountTrendChartInstance.value
-      const dates = trendRes.data.dates || []
-      const amounts = trendRes.data.amounts || []
-      
-      chart.setOption({
-        tooltip: { 
-          trigger: 'axis',
-          formatter: '{b}<br/>交易额: ¥{c}'
-        },
-        grid: {
-          left: '3%',
-          right: '4%',
-          bottom: '3%',
-          top: '10%',
-          containLabel: true
-        },
-        xAxis: {
-          type: 'category',
-          data: dates,
-          boundaryGap: false,
-          axisLabel: {
-            fontSize: 11
-          }
-        },
-        yAxis: { 
-          type: 'value',
-          axisLabel: {
-            formatter: '¥{value}',
-            fontSize: 11
-          }
-        },
-        series: [{
-          data: amounts,
-          type: 'line',
-          smooth: true,
-          areaStyle: {
-            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-              { offset: 0, color: 'rgba(255, 195, 0, 0.5)' },
-              { offset: 1, color: 'rgba(255, 195, 0, 0.1)' }
-            ])
-          },
-          itemStyle: { color: '#FFC300' },
-          lineStyle: {
-            width: 3
-          }
-        }]
-      })
+    let trendDates: string[] = []
+    let trendAmounts: number[] = []
+    if (trendRes.code === 200 && trendRes.data?.dates?.length > 0) {
+      trendDates = trendRes.data.dates
+      trendAmounts = trendRes.data.amounts
+    } else if (mockDataConfig.enabled) {
+      trendDates = mockDataConfig.amountTrend.dates
+      trendAmounts = mockDataConfig.amountTrend.amounts
+      usedMockData = true
+    }
+    console.log('交易趋势数据:', { trendDates, trendAmounts })
+    
+    if (trendDates.length > 0) {
+      await initAmountTrendChart(trendDates, trendAmounts)
     }
 
-    // 加载用户增长趋势数据
     const growthRes = await getUserGrowth()
-    if (growthRes.code === 200 && userGrowthChart.value) {
-      userGrowthChartInstance.value?.dispose()
-      userGrowthChartInstance.value = echarts.init(userGrowthChart.value)
-      const chart = userGrowthChartInstance.value
-      const dates = growthRes.data.dates || []
-      const newUsers = growthRes.data.newUsers || []
-      const totalUsers = growthRes.data.totalUsers || []
-      
-      chart.setOption({
-        tooltip: {
-          trigger: 'axis'
-        },
-        legend: {
-          data: ['新增用户', '总用户数'],
-          top: '5%'
-        },
-        grid: {
-          left: '3%',
-          right: '4%',
-          bottom: '3%',
-          top: '15%',
-          containLabel: true
-        },
-        xAxis: {
-          type: 'category',
-          data: dates,
-          axisLabel: {
-            fontSize: 11
-          }
-        },
-        yAxis: [
-          {
-            type: 'value',
-            name: '新增用户',
-            position: 'left',
-            axisLabel: {
-              fontSize: 11
-            }
-          },
-          {
-            type: 'value',
-            name: '总用户数',
-            position: 'right',
-            axisLabel: {
-              fontSize: 11
-            }
-          }
-        ],
-        series: [
-          {
-            name: '新增用户',
-            type: 'bar',
-            data: newUsers,
-            itemStyle: { color: '#FFC300' }
-          },
-          {
-            name: '总用户数',
-            type: 'line',
-            yAxisIndex: 1,
-            data: totalUsers,
-            itemStyle: { color: '#4ECDC4' },
-            smooth: true
-          }
-        ]
-      })
+    let growthDates: string[] = []
+    let growthNewUsers: number[] = []
+    let growthTotalUsers: number[] = []
+    if (growthRes.code === 200 && growthRes.data?.dates?.length > 0) {
+      growthDates = growthRes.data.dates
+      growthNewUsers = growthRes.data.newUsers
+      growthTotalUsers = growthRes.data.totalUsers
+    } else if (mockDataConfig.enabled) {
+      growthDates = mockDataConfig.userGrowth.dates
+      growthNewUsers = mockDataConfig.userGrowth.newUsers
+      growthTotalUsers = mockDataConfig.userGrowth.totalUsers
+      usedMockData = true
+    }
+    console.log('用户增长数据:', { growthDates, growthNewUsers, growthTotalUsers })
+    
+    if (growthDates.length > 0) {
+      await initUserGrowthChart(growthDates, growthNewUsers, growthTotalUsers)
     }
   } catch (error) {
     console.error('加载图表数据失败', error)
   } finally {
+    if (usedMockData) {
+      showMockBadge.value = true
+    }
     chartLoading.value = false
   }
 }
@@ -319,9 +429,12 @@ const disposeCharts = () => {
   userGrowthChartInstance.value = null
 }
 
-onMounted(() => {
-  loadData()
-  initCharts()
+onMounted(async () => {
+  console.log('Dashboard 组件挂载')
+  await nextTick()
+  await loadData()
+  await nextTick()
+  await initCharts()
   window.addEventListener('resize', resizeCharts)
 })
 
@@ -336,7 +449,10 @@ onUnmounted(() => {
   padding: 0;
 }
 
-/* 统计卡片 */
+.mock-alert {
+  margin-bottom: 16px;
+}
+
 .stat-cards {
   margin-bottom: 16px;
 }
@@ -385,7 +501,6 @@ onUnmounted(() => {
   text-overflow: ellipsis;
 }
 
-/* 图表 */
 .charts {
   margin-bottom: 16px;
 }
@@ -404,7 +519,6 @@ onUnmounted(() => {
   height: 250px;
 }
 
-/* 移动端适配 */
 @media (max-width: 768px) {
   .stat-card :deep(.ant-card-body) {
     padding: 12px;
@@ -445,6 +559,5 @@ onUnmounted(() => {
   .stat-content {
     text-align: center;
   }
-  
 }
 </style>

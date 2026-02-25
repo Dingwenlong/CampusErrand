@@ -68,8 +68,16 @@
           <view class="btn-shine"></view>
         </button>
 
+        <!-- 用户二登录入口 -->
+        <view class="guest-section" v-if="user2LoginEnabled">
+          <button class="guest-btn" @click="loginAsUser2">
+            <text class="guest-text">用户二登录</text>
+            <view class="arrow-icon">→</view>
+          </button>
+        </view>
+
         <!-- 游客入口 -->
-        <view class="guest-section">
+        <view class="guest-section" v-else>
           <button class="guest-btn" @click="enterAsGuest">
             <text class="guest-text">暂不登录，先看看</text>
             <view class="arrow-icon">→</view>
@@ -101,49 +109,54 @@
         </view>
         <scroll-view class="modal-body" scroll-y>
           <view class="agreement-content">
-            <view class="content-intro">
-              <text class="intro-title">欢迎使用校园跑腿</text>
-              <text class="intro-desc">请您仔细阅读以下条款，确保您充分理解并同意后再开始使用我们的服务。</text>
+            <view v-if="userAgreementContent" class="dynamic-content">
+              <rich-text :nodes="userAgreementContent"></rich-text>
             </view>
-            <view class="content-sections">
-              <view class="content-item">
-                <view class="item-header">
-                  <view class="item-number">01</view>
-                  <text class="item-title">服务条款</text>
-                </view>
-                <text class="item-desc">本协议是您与校园跑腿平台之间关于使用本平台服务所订立的协议。通过使用我们的服务，您同意接受本协议的所有条款和条件。</text>
+            <template v-else>
+              <view class="content-intro">
+                <text class="intro-title">欢迎使用校园跑腿</text>
+                <text class="intro-desc">请您仔细阅读以下条款，确保您充分理解并同意后再开始使用我们的服务。</text>
               </view>
-              <view class="content-item">
-                <view class="item-header">
-                  <view class="item-number">02</view>
-                  <text class="item-title">账号安全</text>
+              <view class="content-sections">
+                <view class="content-item">
+                  <view class="item-header">
+                    <view class="item-number">01</view>
+                    <text class="item-title">服务条款</text>
+                  </view>
+                  <text class="item-desc">本协议是您与校园跑腿平台之间关于使用本平台服务所订立的协议。通过使用我们的服务，您同意接受本协议的所有条款和条件。</text>
                 </view>
-                <text class="item-desc">您在使用微信登录时，我们仅获取您的公开信息（昵称、头像），用于创建账号。我们承诺保护您的账号安全，不会将您的信息用于未经授权的用途。</text>
-              </view>
-              <view class="content-item">
-                <view class="item-header">
-                  <view class="item-number">03</view>
-                  <text class="item-title">用户行为规范</text>
+                <view class="content-item">
+                  <view class="item-header">
+                    <view class="item-number">02</view>
+                    <text class="item-title">账号安全</text>
+                  </view>
+                  <text class="item-desc">您在使用微信登录时，我们仅获取您的公开信息（昵称、头像），用于创建账号。我们承诺保护您的账号安全，不会将您的信息用于未经授权的用途。</text>
                 </view>
-                <text class="item-desc">您承诺遵守国家法律法规，不得利用本平台从事违法活动。您应当对自己的行为负责，不得发布违法违规内容。</text>
-              </view>
-              <view class="content-item">
-                <view class="item-header">
-                  <view class="item-number">04</view>
-                  <text class="item-title">免责声明</text>
+                <view class="content-item">
+                  <view class="item-header">
+                    <view class="item-number">03</view>
+                    <text class="item-title">用户行为规范</text>
+                  </view>
+                  <text class="item-desc">您承诺遵守国家法律法规，不得利用本平台从事违法活动。您应当对自己的行为负责，不得发布违法违规内容。</text>
                 </view>
-                <text class="item-desc">平台将尽力保障服务的稳定性，但不保证服务不会中断。对于因不可抗力或第三方原因导致的服务中断，平台不承担责任。</text>
-              </view>
-              <view class="content-item">
-                <view class="item-header">
-                  <view class="item-number">05</view>
-                  <text class="item-title">协议修改</text>
+                <view class="content-item">
+                  <view class="item-header">
+                    <view class="item-number">04</view>
+                    <text class="item-title">免责声明</text>
+                  </view>
+                  <text class="item-desc">平台将尽力保障服务的稳定性，但不保证服务不会中断。对于因不可抗力或第三方原因导致的服务中断，平台不承担责任。</text>
                 </view>
-                <text class="item-desc">平台有权在必要时修改本协议，修改后会通过适当方式通知用户。继续使用服务即视为接受修改后的协议。</text>
+                <view class="content-item">
+                  <view class="item-header">
+                    <view class="item-number">05</view>
+                    <text class="item-title">协议修改</text>
+                  </view>
+                  <text class="item-desc">平台有权在必要时修改本协议，修改后会通过适当方式通知用户。继续使用服务即视为接受修改后的协议。</text>
+                </view>
               </view>
-            </view>
+            </template>
             <view class="content-footer">
-              <text class="update-time">最后更新时间：2024年1月</text>
+              <text class="update-time">最后更新时间：{{ userAgreementUpdateTime || '2024年1月' }}</text>
             </view>
           </view>
         </scroll-view>
@@ -168,50 +181,55 @@
         </view>
         <scroll-view class="modal-body" scroll-y>
           <view class="agreement-content">
-            <view class="content-intro privacy-intro">
-              <view class="privacy-lock">🔐</view>
-              <text class="intro-title">您的隐私对我们很重要</text>
-              <text class="intro-desc">我们高度重视您的隐私保护，承诺仅收集必要信息并采用严格的安全措施保护您的数据。</text>
+            <view v-if="privacyPolicyContent" class="dynamic-content">
+              <rich-text :nodes="privacyPolicyContent"></rich-text>
             </view>
-            <view class="content-sections">
-              <view class="content-item">
-                <view class="item-header">
-                  <view class="item-icon">📊</view>
-                  <text class="item-title">信息收集</text>
-                </view>
-                <text class="item-desc">我们仅收集必要的用户信息：微信昵称、头像、手机号（实名认证时）。我们不会收集与提供服务无关的个人信息。</text>
+            <template v-else>
+              <view class="content-intro privacy-intro">
+                <view class="privacy-lock">🔐</view>
+                <text class="intro-title">您的隐私对我们很重要</text>
+                <text class="intro-desc">我们高度重视您的隐私保护，承诺仅收集必要信息并采用严格的安全措施保护您的数据。</text>
               </view>
-              <view class="content-item">
-                <view class="item-header">
-                  <view class="item-icon">🎯</view>
-                  <text class="item-title">信息使用</text>
+              <view class="content-sections">
+                <view class="content-item">
+                  <view class="item-header">
+                    <view class="item-icon">📊</view>
+                    <text class="item-title">信息收集</text>
+                  </view>
+                  <text class="item-desc">我们仅收集必要的用户信息：微信昵称、头像、手机号（实名认证时）。我们不会收集与提供服务无关的个人信息。</text>
                 </view>
-                <text class="item-desc">您的信息仅用于提供服务，包括：身份验证、订单处理、客户服务。我们不会向第三方出售或共享您的个人信息。</text>
-              </view>
-              <view class="content-item">
-                <view class="item-header">
-                  <view class="item-icon">🔒</view>
-                  <text class="item-title">信息保护</text>
+                <view class="content-item">
+                  <view class="item-header">
+                    <view class="item-icon">🎯</view>
+                    <text class="item-title">信息使用</text>
+                  </view>
+                  <text class="item-desc">您的信息仅用于提供服务，包括：身份验证、订单处理、客户服务。我们不会向第三方出售或共享您的个人信息。</text>
                 </view>
-                <text class="item-desc">我们采用业界标准的加密技术保护您的数据安全。所有数据传输均通过HTTPS加密，存储数据经过脱敏处理。</text>
-              </view>
-              <view class="content-item">
-                <view class="item-header">
-                  <view class="item-icon">✅</view>
-                  <text class="item-title">用户权利</text>
+                <view class="content-item">
+                  <view class="item-header">
+                    <view class="item-icon">🔒</view>
+                    <text class="item-title">信息保护</text>
+                  </view>
+                  <text class="item-desc">我们采用业界标准的加密技术保护您的数据安全。所有数据传输均通过HTTPS加密，存储数据经过脱敏处理。</text>
                 </view>
-                <text class="item-desc">您有权查看、修改或删除您的个人信息。如需行使这些权利，请联系我们的客服团队。</text>
-              </view>
-              <view class="content-item">
-                <view class="item-header">
-                  <view class="item-icon">📞</view>
-                  <text class="item-title">联系我们</text>
+                <view class="content-item">
+                  <view class="item-header">
+                    <view class="item-icon">✅</view>
+                    <text class="item-title">用户权利</text>
+                  </view>
+                  <text class="item-desc">您有权查看、修改或删除您的个人信息。如需行使这些权利，请联系我们的客服团队。</text>
                 </view>
-                <text class="item-desc">如有隐私相关问题，请联系客服：privacy@campuserrand.com 或拨打客服热线 400-XXX-XXXX。</text>
+                <view class="content-item">
+                  <view class="item-header">
+                    <view class="item-icon">📞</view>
+                    <text class="item-title">联系我们</text>
+                  </view>
+                  <text class="item-desc">如有隐私相关问题，请联系客服：privacy@campuserrand.com 或拨打客服热线 400-XXX-XXXX。</text>
+                </view>
               </view>
-            </view>
+            </template>
             <view class="content-footer">
-              <text class="update-time">最后更新时间：2024年1月</text>
+              <text class="update-time">最后更新时间：{{ privacyPolicyUpdateTime || '2024年1月' }}</text>
             </view>
           </view>
         </scroll-view>
@@ -228,6 +246,7 @@
 
 <script>
 import authApi from '@/api/auth.js'
+import configApi from '@/api/config.js'
 import { setToken } from '@/utils/auth.js'
 
 export default {
@@ -237,15 +256,59 @@ export default {
       loading: false,
       redirectUrl: '',
       showAgreementModal: false,
-      showPrivacyModal: false
+      showPrivacyModal: false,
+      userAgreementContent: '',
+      privacyPolicyContent: '',
+      userAgreementUpdateTime: '',
+      privacyPolicyUpdateTime: '',
+      user2LoginEnabled: false
     }
   },
   onLoad(options) {
     if (options.redirect) {
       this.redirectUrl = decodeURIComponent(options.redirect)
     }
+    this.loadAgreementContent()
+    this.loadUser2LoginConfig()
   },
   methods: {
+    async loadUser2LoginConfig() {
+      try {
+        const res = await configApi.getConfigByKey('user2_login_enabled')
+        if (res.code === 200 && (res.data === 'true' || res.data === true)) {
+          this.user2LoginEnabled = true
+        }
+      } catch (error) {
+        console.log('加载用户二登录配置失败')
+      }
+    },
+
+    async loadAgreementContent() {
+      try {
+        const [agreementRes, privacyRes, agreementTimeRes, privacyTimeRes] = await Promise.allSettled([
+          configApi.getConfigByKey('user_agreement'),
+          configApi.getConfigByKey('privacy_policy'),
+          configApi.getConfigByKey('user_agreement_update_time'),
+          configApi.getConfigByKey('privacy_policy_update_time')
+        ])
+        
+        if (agreementRes.status === 'fulfilled' && agreementRes.value?.code === 200 && agreementRes.value.data) {
+          this.userAgreementContent = agreementRes.value.data
+        }
+        if (privacyRes.status === 'fulfilled' && privacyRes.value?.code === 200 && privacyRes.value.data) {
+          this.privacyPolicyContent = privacyRes.value.data
+        }
+        if (agreementTimeRes.status === 'fulfilled' && agreementTimeRes.value?.code === 200 && agreementTimeRes.value.data) {
+          this.userAgreementUpdateTime = agreementTimeRes.value.data
+        }
+        if (privacyTimeRes.status === 'fulfilled' && privacyTimeRes.value?.code === 200 && privacyTimeRes.value.data) {
+          this.privacyPolicyUpdateTime = privacyTimeRes.value.data
+        }
+      } catch (error) {
+        console.log('加载协议内容失败，使用默认内容')
+      }
+    },
+
     toggleAgreement() {
       this.agreed = !this.agreed
     },
@@ -428,7 +491,7 @@ export default {
       uni.showModal({
         title: '提示',
         content: '游客模式下部分功能将受到限制，是否继续？',
-        confirmColor: '#f59e0b',
+        confirmColor: '#FF6B35',
         success: (res) => {
           if (res.confirm) {
             uni.switchTab({
@@ -437,6 +500,38 @@ export default {
           }
         }
       })
+    },
+
+    loginAsUser2() {
+      const mockUser2 = {
+        token: 'mock_user2_token_' + Date.now(),
+        userInfo: {
+          id: 2,
+          nickname: '用户二',
+          avatar: '',
+          gender: 1,
+          phone: '13800000002',
+          studentId: '20240002',
+          verified: true,
+          balance: 100.00,
+          reputation: 95
+        }
+      }
+      
+      setToken(mockUser2.token)
+      uni.setStorageSync('userInfo', mockUser2.userInfo)
+      uni.setStorageSync('isMockToken', true)
+      
+      uni.showToast({
+        title: '用户二登录成功',
+        icon: 'success'
+      })
+      
+      setTimeout(() => {
+        uni.switchTab({
+          url: '/pages/index/index'
+        })
+      }, 1500)
     }
   }
 }
@@ -446,16 +541,16 @@ export default {
 // ============================================
 // 设计系统变量
 // ============================================
-$primary-gradient: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
-$primary-gradient-hover: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-primary) 100%);
+$primary-gradient: linear-gradient(135deg, #FF6B35 0%, #FF8C5A 100%);
+$primary-gradient-hover: linear-gradient(135deg, #FF8C5A 0%, #FF6B35 100%);
 $wechat-green: #07C160;
 $wechat-green-hover: #06ad56;
-$bg-gradient: linear-gradient(180deg, #FFF9E6 0%, #FFFFFF 50%, #F8F9FA 100%);
+$bg-gradient: linear-gradient(180deg, #FFF8F0 0%, #FFFFFF 50%, #FFF5EB 100%);
 
-$shadow-sm: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
-$shadow-md: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
-$shadow-lg: 0 8rpx 32rpx rgba(0, 0, 0, 0.12);
-$shadow-primary: 0 8rpx 24rpx rgba(255, 195, 0, 0.35);
+$shadow-sm: 0 2rpx 8rpx rgba(74, 55, 40, 0.04);
+$shadow-md: 0 4rpx 16rpx rgba(74, 55, 40, 0.08);
+$shadow-lg: 0 8rpx 32rpx rgba(74, 55, 40, 0.12);
+$shadow-primary: 0 8rpx 24rpx rgba(255, 107, 53, 0.35);
 $shadow-wechat: 0 8rpx 24rpx rgba(7, 193, 96, 0.35);
 
 $radius-sm: 12rpx;
@@ -499,7 +594,7 @@ $radius-full: 9999rpx;
 .orb-1 {
   width: 600rpx;
   height: 600rpx;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+  background: linear-gradient(135deg, #FF6B35 0%, #FF8C5A 100%);
   top: -200rpx;
   right: -200rpx;
   animation: float 8s ease-in-out infinite;
@@ -508,7 +603,7 @@ $radius-full: 9999rpx;
 .orb-2 {
   width: 400rpx;
   height: 400rpx;
-  background: linear-gradient(135deg, #FFE082 0%, var(--color-primary) 100%);
+  background: linear-gradient(135deg, #FFB347 0%, #FF6B35 100%);
   top: 400rpx;
   left: -150rpx;
   animation: float 10s ease-in-out infinite 1s;
@@ -517,7 +612,7 @@ $radius-full: 9999rpx;
 .orb-3 {
   width: 300rpx;
   height: 300rpx;
-  background: linear-gradient(135deg, #FFF8E1 0%, #FFE082 100%);
+  background: linear-gradient(135deg, #FFF0E5 0%, #FFB347 100%);
   bottom: 200rpx;
   right: -100rpx;
   animation: float 12s ease-in-out infinite 2s;
@@ -530,8 +625,8 @@ $radius-full: 9999rpx;
   right: 0;
   bottom: 0;
   background-image: 
-    linear-gradient(rgba(255, 195, 0, 0.03) 1rpx, transparent 1rpx),
-    linear-gradient(90deg, rgba(255, 195, 0, 0.03) 1rpx, transparent 1rpx);
+    linear-gradient(rgba(255, 107, 53, 0.03) 1rpx, transparent 1rpx),
+    linear-gradient(90deg, rgba(255, 107, 53, 0.03) 1rpx, transparent 1rpx);
   background-size: 60rpx 60rpx;
 }
 
@@ -576,7 +671,7 @@ $radius-full: 9999rpx;
   transform: translate(-50%, -50%);
   width: 240rpx;
   height: 240rpx;
-  background: radial-gradient(circle, rgba(255, 195, 0, 0.3) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(255, 107, 53, 0.3) 0%, transparent 70%);
   border-radius: 50%;
   animation: pulse 3s ease-in-out infinite;
 }
@@ -602,7 +697,7 @@ $radius-full: 9999rpx;
     content: '';
     position: absolute;
     inset: -4rpx;
-    background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-primary-dark) 100%);
+    background: linear-gradient(135deg, #FF8C5A 0%, #E85A2A 100%);
     border-radius: $radius-xl;
     z-index: -1;
     opacity: 0.5;
@@ -967,18 +1062,18 @@ $radius-full: 9999rpx;
   display: flex;
   flex-direction: column;
   box-shadow: 0 20rpx 60rpx rgba(0, 0, 0, 0.3);
-  animation: slideUp 0.3s ease;
+  animation: modalSlideUp 0.3s ease;
   z-index: 2;
 }
 
-@keyframes slideUp {
+@keyframes modalSlideUp {
   from {
     opacity: 0;
-    transform: translateY(40rpx);
+    transform: translate(-50%, calc(-50% + 40rpx));
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate(-50%, -50%);
   }
 }
 
@@ -1003,10 +1098,10 @@ $radius-full: 9999rpx;
   justify-content: center;
   font-size: 36rpx;
   margin-right: 20rpx;
-  box-shadow: 0 4rpx 12rpx rgba(255, 195, 0, 0.3);
+  box-shadow: 0 4rpx 12rpx rgba(255, 107, 53, 0.3);
   
   &.privacy {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(16, 185, 129, 0.24) 100%);
+    background: linear-gradient(135deg, rgba(123, 196, 127, 0.12) 0%, rgba(123, 196, 127, 0.24) 100%);
   }
 }
 
@@ -1051,16 +1146,40 @@ $radius-full: 9999rpx;
   padding: 40rpx;
 }
 
+.dynamic-content {
+  font-size: 28rpx;
+  line-height: 1.8;
+  color: #333;
+  
+  :deep(h1), :deep(h2), :deep(h3) {
+    margin: 24rpx 0 16rpx;
+    font-weight: 600;
+  }
+  
+  :deep(p) {
+    margin-bottom: 16rpx;
+  }
+  
+  :deep(ul), :deep(ol) {
+    padding-left: 40rpx;
+    margin-bottom: 16rpx;
+  }
+  
+  :deep(li) {
+    margin-bottom: 8rpx;
+  }
+}
+
 // 内容介绍
 .content-intro {
   text-align: center;
   padding: 32rpx;
-  background: linear-gradient(135deg, rgba(255, 195, 0, 0.08) 0%, rgba(255, 243, 224, 0.5) 100%);
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.08) 0%, rgba(255, 248, 240, 0.5) 100%);
   border-radius: $radius-lg;
   margin-bottom: 40rpx;
   
   &.privacy-intro {
-    background: linear-gradient(135deg, rgba(7, 193, 96, 0.08) 0%, rgba(232, 245, 233, 0.5) 100%);
+    background: linear-gradient(135deg, rgba(123, 196, 127, 0.08) 0%, rgba(232, 245, 233, 0.5) 100%);
   }
 }
 
@@ -1125,7 +1244,7 @@ $radius-full: 9999rpx;
 .item-icon {
   width: 48rpx;
   height: 48rpx;
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(16, 185, 129, 0.24) 100%);
+  background: linear-gradient(135deg, rgba(123, 196, 127, 0.12) 0%, rgba(123, 196, 127, 0.24) 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -1195,12 +1314,12 @@ $radius-full: 9999rpx;
   
   &.confirm {
     background: $primary-gradient;
-    color: #1a1a1a;
-    box-shadow: 0 4rpx 16rpx rgba(255, 195, 0, 0.35);
+    color: #fff;
+    box-shadow: 0 4rpx 16rpx rgba(255, 107, 53, 0.35);
     
     &:active {
       transform: translateY(2rpx);
-      box-shadow: 0 2rpx 8rpx rgba(255, 195, 0, 0.25);
+      box-shadow: 0 2rpx 8rpx rgba(255, 107, 53, 0.25);
     }
   }
 }
