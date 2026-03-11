@@ -1,4 +1,6 @@
 import http from '@/utils/request.js'
+import socket from '@/utils/socket.js'
+import { clearSession } from '@/utils/auth.js'
 
 /**
  * 认证相关API
@@ -27,8 +29,8 @@ export default {
    * 清除本地存储的token和用户信息
    */
   logout() {
-    uni.removeStorageSync('token')
-    uni.removeStorageSync('userInfo')
+    socket.disconnect()
+    clearSession()
     uni.showToast({
       title: '已退出登录',
       icon: 'success'

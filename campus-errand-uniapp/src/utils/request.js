@@ -1,4 +1,5 @@
-import { getToken, removeToken } from './auth.js'
+import { clearSession, getToken } from './auth.js'
+import socket from './socket.js'
 
 // API基础配置
 const BASE_URL = 'http://localhost:8080/api'
@@ -209,8 +210,8 @@ const handleAuthError = (msg, isMockToken = false) => {
     return
   }
   
-  removeToken()
-  uni.removeStorageSync('userInfo')
+  socket.disconnect()
+  clearSession()
   
   uni.showToast({
     title: msg || '登录已过期，请重新登录',

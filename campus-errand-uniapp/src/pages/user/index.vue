@@ -133,7 +133,16 @@ export default {
       try {
         const res = await userApi.getUserInfo()
         if (res.code === 200) {
-          this.userInfo = res.data
+          const payload = res.data || {}
+          this.userInfo = payload.user || {
+            nickname: '',
+            avatar: '',
+            creditScore: 100
+          }
+          if (payload.wallet) {
+            this.wallet.balance = parseFloat(payload.wallet.balance || 0).toFixed(2)
+            this.wallet.frozenAmount = parseFloat(payload.wallet.frozenAmount || 0).toFixed(2)
+          }
         }
       } catch (e) {
         console.error('加载用户信息失败', e)
@@ -154,11 +163,13 @@ export default {
       }
     },
     goPublishedTasks() {
+      uni.setStorageSync('orderListRole', 1)
       uni.switchTab({
         url: '/pages/order/list'
       })
     },
     goAcceptedTasks() {
+      uni.setStorageSync('orderListRole', 2)
       uni.switchTab({
         url: '/pages/order/list'
       })

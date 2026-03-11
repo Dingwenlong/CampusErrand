@@ -495,6 +495,7 @@ export default {
             icon: 'success'
           })
           setTimeout(() => {
+            uni.$emit('taskPublished')
             uni.navigateBack()
           }, 1500)
         } else {

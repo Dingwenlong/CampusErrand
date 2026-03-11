@@ -23,7 +23,7 @@ export default {
 
   // 更新任务状态
   updateStatus(id, status) {
-    return request.post(`/task/${id}/status`, { status })
+    return request.post(`/task/${id}/status?status=${status}`)
   },
 
   // 取消任务

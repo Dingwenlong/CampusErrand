@@ -61,11 +61,16 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message> impl
     }
 
     @Override
-    public IPage<MessageVO> getUserMessages(Long userId, Long current, Long size) {
+    public IPage<MessageVO> getUserMessages(Long userId, Integer type, Long current, Long size) {
         Page<Message> page = new Page<>(current, size);
         LambdaQueryWrapper<Message> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Message::getUserId, userId)
-               .orderByDesc(Message::getCreateTime);
+        wrapper.eq(Message::getUserId, userId);
+
+        if (type != null) {
+            wrapper.eq(Message::getType, type);
+        }
+
+        wrapper.orderByDesc(Message::getCreateTime);
 
         IPage<Message> messagePage = page(page, wrapper);
 
@@ -99,6 +104,15 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message> impl
     @Override
     public int getUnreadCount(Long userId) {
         return baseMapper.countUnreadByUserId(userId);
+    }
+
+    @Override
+    public boolean deleteMessage(Long messageId, Long userId) {
+        Message message = getById(messageId);
+        if (message == null || !message.getUserId().equals(userId)) {
+            return false;
+        }
+        return removeById(messageId);
     }
 
     @Override

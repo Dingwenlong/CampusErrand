@@ -438,7 +438,12 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
         task.setCancelType(1); // 发单者取消
         task.setCancelReason(reason);
 
-        return updateById(task);
+        boolean updated = updateById(task);
+        if (updated && task.getRunnerId() != null) {
+            messageService.sendOrderCancelledNotification(task.getRunnerId(), task.getId(), task.getTitle(), false);
+        }
+
+        return updated;
     }
 
     /**
@@ -470,7 +475,12 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
         // 5. 记录取消次数（可选，用于信用评估）
         // TODO: 记录跑腿员取消次数
 
-        return updateById(task);
+        boolean updated = updateById(task);
+        if (updated) {
+            messageService.sendMessage(task.getUserId(), 2, "接单已取消", "接单者已取消任务，您的任务已重新回到待接单状态", task.getId());
+        }
+
+        return updated;
     }
 
     @Override
@@ -541,7 +551,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
     }
 
     @Override
-    public IPage<TaskVO> getMyTasks(Long userId, Integer role, Integer status, Long current, Long size) {
+    public IPage<TaskVO> getMyTasks(Long userId, Integer role, Integer status, String statusGroup, Long current, Long size) {
         Page<Task> page = new Page<>(current, size);
         LambdaQueryWrapper<Task> wrapper = new LambdaQueryWrapper<>();
 
@@ -555,7 +565,9 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
         }
 
         // 状态筛选
-        if (status != null) {
+        if ("processing".equalsIgnoreCase(statusGroup)) {
+            wrapper.in(Task::getStatus, 1, 2, 3, 4);
+        } else if (status != null) {
             wrapper.eq(Task::getStatus, status);
         }
 
@@ -582,10 +594,10 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
     public int processExpiredTasks() {
         LocalDateTime now = LocalDateTime.now();
         
-        // 查询超时任务：截止时间 < 当前时间 且 状态在 (1-已接单, 2-待取件, 3-配送中)
+        // 查询超时未接单任务：截止时间 < 当前时间 且 状态为待接单
         LambdaQueryWrapper<Task> wrapper = new LambdaQueryWrapper<>();
         wrapper.lt(Task::getDeadlineTime, now)
-               .in(Task::getStatus, 1, 2, 3)
+               .eq(Task::getStatus, 0)
                .isNull(Task::getRunnerId);
         
         List<Task> expiredTasks = list(wrapper);

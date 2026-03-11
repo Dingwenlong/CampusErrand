@@ -25,10 +25,11 @@ public class MessageController {
     @Operation(summary = "获取消息列表")
     @GetMapping("/list")
     public Result<IPage<MessageVO>> list(
+            @RequestParam(required = false) Integer type,
             @RequestParam(defaultValue = "1") Long current,
             @RequestParam(defaultValue = "10") Long size) {
         Long userId = UserContext.getUserId();
-        IPage<MessageVO> page = messageService.getUserMessages(userId, current, size);
+        IPage<MessageVO> page = messageService.getUserMessages(userId, type, current, size);
         return Result.success(page);
     }
 
@@ -57,5 +58,16 @@ public class MessageController {
         Long userId = UserContext.getUserId();
         int count = messageService.getUnreadCount(userId);
         return Result.success(count);
+    }
+
+    @Operation(summary = "删除消息")
+    @DeleteMapping("/{id}")
+    public Result<Boolean> delete(@PathVariable Long id) {
+        Long userId = UserContext.getUserId();
+        boolean success = messageService.deleteMessage(id, userId);
+        if (!success) {
+            return Result.error("删除失败");
+        }
+        return Result.success(true);
     }
 }

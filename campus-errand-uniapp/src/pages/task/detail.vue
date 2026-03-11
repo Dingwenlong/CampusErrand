@@ -211,6 +211,7 @@
 
 <script>
 import taskApi from '@/api/task.js'
+import { getUserId } from '@/utils/auth.js'
 
 export default {
   data() {
@@ -222,7 +223,7 @@ export default {
   },
   onLoad(options) {
     this.taskId = options.id
-    this.currentUserId = uni.getStorageSync('userId')
+    this.currentUserId = getUserId()
     this.loadTaskDetail()
   },
   methods: {
@@ -295,7 +296,14 @@ export default {
         success: async (res) => {
           if (res.confirm) {
             try {
-              const result = await taskApi.updateStatus(this.taskId, status)
+              let result
+              if (status === 4) {
+                result = await taskApi.deliver(this.taskId)
+              } else if (status === 5) {
+                result = await taskApi.receive(this.taskId)
+              } else {
+                result = await taskApi.updateStatus(this.taskId, status)
+              }
               if (result.code === 200) {
                 uni.showToast({
                   title: '操作成功',
@@ -305,7 +313,7 @@ export default {
               }
             } catch (e) {
               uni.showToast({
-                title: '操作失败',
+                title: e?.message || '操作失败',
                 icon: 'none'
               })
             }

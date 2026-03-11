@@ -7,7 +7,7 @@
           <text class="iconfont" :class="getStatusIcon(order.status)"></text>
         </view>
         <text class="status-text">{{ order.statusName }}</text>
-        <text class="status-desc">{{ getStatusDesc(order.status) }}</text>
+        <text class="status-desc">{{ order.statusDesc }}</text>
         <view class="status-progress" v-if="order.status < 4">
           <view class="progress-bar">
             <view class="progress-fill" :style="{ width: getProgressWidth(order.status) + '%' }"></view>
@@ -145,13 +145,17 @@
 
       <!-- 操作按钮 -->
       <view class="action-section">
-        <view v-if="order.status === 0" class="btn btn-lg btn-primary pressable" @click="cancelOrder">
+        <view v-if="order.canCancel" class="btn btn-lg btn-primary pressable" @click="cancelOrder">
           <text class="iconfont icon-close"></text>
-          <text>取消订单</text>
+          <text>{{ order.cancelLabel }}</text>
         </view>
-        <view v-if="order.status === 2" class="btn btn-lg btn-primary pressable" @click="confirmOrder">
+        <view v-if="order.canDeliver" class="btn btn-lg btn-primary pressable" @click="deliverOrder">
           <text class="iconfont icon-check"></text>
-          <text>确认完成</text>
+          <text>确认送达</text>
+        </view>
+        <view v-if="order.canConfirm" class="btn btn-lg btn-primary pressable" @click="confirmOrder">
+          <text class="iconfont icon-check"></text>
+          <text>确认收货</text>
         </view>
         <view class="btn btn-lg btn-ghost pressable" @click="contactService">
           <text class="iconfont icon-service"></text>
@@ -177,26 +181,29 @@
 
 <script>
 import orderApi from '@/api/order.js'
+import { getUserId } from '@/utils/auth.js'
 
 export default {
   data() {
     return {
       orderId: null,
       order: {},
-      loading: false
+      loading: false,
+      currentUserId: null
     }
   },
   onLoad(options) {
     this.orderId = options.id
+    this.currentUserId = getUserId()
     this.loadOrderDetail()
   },
   methods: {
     async loadOrderDetail() {
       this.loading = true
       try {
-        const res = await orderApi.getOrderDetail(this.orderId)
+        const res = await orderApi.getDetail(this.orderId)
         if (res.code === 200) {
-          this.order = res.data
+          this.order = this.normalizeOrder(res.data)
         }
       } catch (e) {
         console.error('加载订单详情失败', e)
@@ -208,6 +215,81 @@ export default {
         this.loading = false
       }
     },
+    normalizeOrder(task) {
+      const rawStatus = task.status
+      const isPublisher = task.userId === this.currentUserId
+      const isRunner = task.runnerId === this.currentUserId
+
+      return {
+        id: task.id,
+        rawStatus,
+        status: this.normalizeDisplayStatus(rawStatus),
+        statusName: task.statusName || this.getRawStatusName(rawStatus),
+        statusDesc: this.getRawStatusDesc(rawStatus),
+        taskTitle: task.title,
+        taskDesc: task.description,
+        taskType: task.taskType,
+        taskTypeName: task.taskTypeName,
+        orderNo: `TASK${String(task.id).padStart(8, '0')}`,
+        createTime: task.createTime,
+        amount: task.totalAmount,
+        deliveryInfo: {
+          address: task.deliveryAddress,
+          contactName: task.deliveryContact,
+          contactPhone: task.deliveryPhone
+        },
+        runnerInfo: task.runnerId ? {
+          name: task.runnerName,
+          phone: task.runnerPhone,
+          creditScore: 100
+        } : null,
+        canCancel: (isPublisher && [0, 1, 2].includes(rawStatus)) || (isRunner && [1, 2].includes(rawStatus)),
+        cancelLabel: isRunner ? '取消接单' : '取消订单',
+        canDeliver: isRunner && rawStatus === 3,
+        canConfirm: isPublisher && rawStatus === 4,
+        isPublisher,
+        isRunner
+      }
+    },
+    normalizeDisplayStatus(status) {
+      if (status === 6) {
+        return 4
+      }
+      if (status === 5) {
+        return 3
+      }
+      if (status === 4) {
+        return 2
+      }
+      if (status === 1 || status === 2 || status === 3) {
+        return 1
+      }
+      return 0
+    },
+    getRawStatusName(status) {
+      const statusMap = {
+        0: '待接单',
+        1: '已接单',
+        2: '待取件',
+        3: '配送中',
+        4: '待确认',
+        5: '已完成',
+        6: '已取消'
+      }
+      return statusMap[status] || '未知状态'
+    },
+    getRawStatusDesc(status) {
+      const descMap = {
+        0: '订单已创建，等待接单',
+        1: '跑腿员已接单，等待取件',
+        2: '跑腿员正在准备取件',
+        3: '物品正在配送中',
+        4: '跑腿员已送达，等待确认收货',
+        5: '订单已完成',
+        6: '订单已取消'
+      }
+      return descMap[status] || ''
+    },
     getStatusIcon(status) {
       const icons = {
         0: 'icon-pending',
@@ -217,16 +299,6 @@ export default {
         4: 'icon-cancelled'
       }
       return icons[status] || 'icon-order'
-    },
-    getStatusDesc(status) {
-      const descs = {
-        0: '订单已创建，等待接单',
-        1: '跑腿员已接单，正在处理',
-        2: '任务已完成，等待确认',
-        3: '订单已完成',
-        4: '订单已取消'
-      }
-      return descs[status] || ''
     },
     getProgressWidth(status) {
       const widths = {
@@ -278,7 +350,10 @@ export default {
     },
     async handleCancel() {
       try {
-        const res = await orderApi.cancelOrder(this.orderId)
+        const res = await orderApi.cancel(this.orderId, {
+          cancelType: this.order.isRunner ? 2 : 1,
+          reason: '用户主动取消'
+        })
         if (res.code === 200) {
           uni.showToast({
             title: '取消成功',
@@ -288,7 +363,35 @@ export default {
         }
       } catch (e) {
         uni.showToast({
-          title: '取消失败',
+          title: e?.message || '取消失败',
+          icon: 'none'
+        })
+      }
+    },
+    deliverOrder() {
+      uni.showModal({
+        title: '提示',
+        content: '确认该订单已送达？',
+        success: (res) => {
+          if (res.confirm) {
+            this.handleDeliver()
+          }
+        }
+      })
+    },
+    async handleDeliver() {
+      try {
+        const res = await orderApi.deliver(this.orderId)
+        if (res.code === 200) {
+          uni.showToast({
+            title: '确认成功',
+            icon: 'success'
+          })
+          this.loadOrderDetail()
+        }
+      } catch (e) {
+        uni.showToast({
+          title: e?.message || '确认失败',
           icon: 'none'
         })
       }
@@ -313,7 +416,7 @@ export default {
     },
     async handleConfirm() {
       try {
-        const res = await orderApi.confirmOrder(this.orderId)
+        const res = await orderApi.receive(this.orderId)
         if (res.code === 200) {
           uni.showToast({
             title: '确认成功',
@@ -323,7 +426,7 @@ export default {
         }
       } catch (e) {
         uni.showToast({
-          title: '确认失败',
+          title: e?.message || '确认失败',
           icon: 'none'
         })
       }

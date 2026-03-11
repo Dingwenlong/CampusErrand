@@ -1,4 +1,7 @@
 <script>
+import { isLoggedIn } from './utils/auth.js'
+import socket from './utils/socket.js'
+
 export default {
   globalData: {
     tabBarIndex: 0
@@ -7,12 +10,19 @@ export default {
     console.log('App Launch')
     this.detectPlatform()
     this.initSystemInfo()
+    if (isLoggedIn()) {
+      socket.connect()
+    }
   },
   onShow: function() {
     console.log('App Show')
+    if (isLoggedIn()) {
+      socket.connect()
+    }
   },
   onHide: function() {
     console.log('App Hide')
+    socket.disconnect()
   },
   methods: {
     detectPlatform() {
