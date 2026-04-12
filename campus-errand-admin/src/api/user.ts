@@ -2,11 +2,11 @@ import request from '@/utils/request'
 import type { User, UserDetail, PageResult } from '@/types'
 
 export const getUserList = (params: { current?: number; size?: number; keyword?: string }) => {
-  return request.get<any, { code: number; data: PageResult<User>; message: string }>('/admin/user/list', { params })
+  return request.get<PageResult<User>>('/admin/user/list', { params })
 }
 
 export const getUserDetail = (id: number) => {
-  return request.get<any, { code: number; data: UserDetail; message: string }>(`/admin/user/${id}`)
+  return request.get<UserDetail>(`/admin/user/${id}`)
 }
 
 export const updateUserStatus = (id: number, status: number) => {

@@ -53,7 +53,7 @@ public interface TaskService extends IService<Task> {
      * @param size 每页大小
      * @return 任务列表
      */
-    IPage<TaskVO> getMyTasks(Long userId, Integer role, Integer status, Long current, Long size);
+    IPage<TaskVO> getMyTasks(Long userId, Integer role, Integer status, String statusGroup, Long current, Long size);
 
     /**
      * 处理超时任务

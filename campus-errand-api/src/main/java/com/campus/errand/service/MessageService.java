@@ -25,7 +25,7 @@ public interface MessageService extends IService<Message> {
      * @param size 每页大小
      * @return 分页消息列表
      */
-    IPage<MessageVO> getUserMessages(Long userId, Long current, Long size);
+    IPage<MessageVO> getUserMessages(Long userId, Integer type, Long current, Long size);
 
     /**
      * 标记消息已读
@@ -48,6 +48,14 @@ public interface MessageService extends IService<Message> {
      * @return 未读数量
      */
     int getUnreadCount(Long userId);
+
+    /**
+     * 删除消息
+     * @param messageId 消息ID
+     * @param userId 用户ID
+     * @return 是否成功
+     */
+    boolean deleteMessage(Long messageId, Long userId);
 
     /**
      * 发送任务被接单通知

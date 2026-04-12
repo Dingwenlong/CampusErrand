@@ -191,16 +191,16 @@
           <a-divider>钱包信息</a-divider>
           <a-descriptions :column="isMobile ? 1 : 2" bordered>
             <a-descriptions-item label="账户余额">
-              <span class="amount">¥{{ formatAmount(currentUser.balance) }}</span>
+              <span class="amount">¥{{ formatAmount(currentUser.wallet?.balance) }}</span>
             </a-descriptions-item>
             <a-descriptions-item label="冻结金额">
-              <span class="amount frozen">¥{{ formatAmount(currentUser.frozenAmount) }}</span>
+              <span class="amount frozen">¥{{ formatAmount(currentUser.wallet?.frozenAmount) }}</span>
             </a-descriptions-item>
             <a-descriptions-item label="累计收入">
-              <span class="amount income">¥{{ formatAmount(currentUser.totalIncome) }}</span>
+              <span class="amount income">¥{{ formatAmount(currentUser.wallet?.totalIncome) }}</span>
             </a-descriptions-item>
             <a-descriptions-item label="累计支出">
-              <span class="amount expense">¥{{ formatAmount(currentUser.totalExpense) }}</span>
+              <span class="amount expense">¥{{ formatAmount(currentUser.wallet?.totalExpense) }}</span>
             </a-descriptions-item>
             <a-descriptions-item label="操作" :span="2">
               <a-button type="primary" size="small" @click="handleRecharge">

@@ -1,6 +1,7 @@
 package com.campus.errand.controller;
 
 import com.campus.errand.common.Result;
+import com.campus.errand.dto.UserProfileDTO;
 import com.campus.errand.entity.User;
 import com.campus.errand.entity.UserWallet;
 import com.campus.errand.service.UserService;
@@ -11,6 +12,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -50,5 +53,30 @@ public class UserController {
     public Result<User> getUserById(@PathVariable Long id) {
         User user = userService.getById(id);
         return Result.success(user);
+    }
+
+    @Operation(summary = "更新当前用户资料")
+    @PutMapping("/profile")
+    public Result<Boolean> updateProfile(@RequestBody UserProfileDTO profileDTO) {
+        Long userId = UserContext.getUserId();
+        User user = userService.getById(userId);
+        if (user == null) {
+            return Result.error("用户不存在");
+        }
+
+        if (profileDTO.getNickname() != null) {
+            user.setNickname(profileDTO.getNickname());
+        }
+        if (profileDTO.getPhone() != null) {
+            user.setPhone(profileDTO.getPhone());
+        }
+        if (profileDTO.getGender() != null) {
+            user.setGender(profileDTO.getGender());
+        }
+        if (profileDTO.getSchoolName() != null) {
+            user.setSchoolName(profileDTO.getSchoolName());
+        }
+
+        return Result.success(userService.updateById(user));
     }
 }

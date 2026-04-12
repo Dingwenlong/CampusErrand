@@ -191,15 +191,26 @@ export default {
     }
   },
   onLoad() {
+    this.applyPendingRole()
     this.refreshList()
   },
   onShow() {
+    this.applyPendingRole()
     uni.$emit('tabBarChange', 2)
     this.refreshList()
   },
   methods: {
+    applyPendingRole() {
+      const role = uni.getStorageSync('orderListRole')
+      if (role === 1 || role === 2 || role === '1' || role === '2') {
+        this.currentRole = Number(role)
+        uni.removeStorageSync('orderListRole')
+      }
+    },
+
     refreshList() {
       this.current = 1
+      this.orderList = []
       this.noMore = false
       this.loadOrderList()
     },
@@ -229,7 +240,9 @@ export default {
           size: this.size
         }
         
-        if (this.currentStatus !== null) {
+        if (this.currentStatus === 1) {
+          params.statusGroup = 'processing'
+        } else if (this.currentStatus !== null) {
           params.status = this.currentStatus
         }
         

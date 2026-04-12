@@ -247,7 +247,8 @@
 <script>
 import authApi from '@/api/auth.js'
 import configApi from '@/api/config.js'
-import { setToken } from '@/utils/auth.js'
+import socket from '@/utils/socket.js'
+import { setSession } from '@/utils/auth.js'
 
 export default {
   data() {
@@ -376,9 +377,15 @@ export default {
         console.log('后端响应:', res)
 
         if (res.code === 200) {
-          const { token, userInfo } = res.data
-          setToken(token)
-          uni.setStorageSync('userInfo', userInfo)
+          const { token, userId, nickname, avatar, isNewUser } = res.data
+          setSession({
+            token,
+            userId,
+            nickname,
+            avatar,
+            isNewUser
+          })
+          socket.connect()
 
           uni.showToast({
             title: '登录成功',
@@ -505,22 +512,19 @@ export default {
     loginAsUser2() {
       const mockUser2 = {
         token: 'mock_user2_token_' + Date.now(),
-        userInfo: {
-          id: 2,
-          nickname: '用户二',
-          avatar: '',
-          gender: 1,
-          phone: '13800000002',
-          studentId: '20240002',
-          verified: true,
-          balance: 100.00,
-          reputation: 95
-        }
+        userId: 2,
+        nickname: '用户二',
+        avatar: '',
+        gender: 1,
+        phone: '13800000002',
+        studentId: '20240002',
+        verified: true,
+        balance: 100.00,
+        reputation: 95
       }
       
-      setToken(mockUser2.token)
-      uni.setStorageSync('userInfo', mockUser2.userInfo)
-      uni.setStorageSync('isMockToken', true)
+      setSession(mockUser2, { isMockToken: true })
+      socket.connect()
       
       uni.showToast({
         title: '用户二登录成功',

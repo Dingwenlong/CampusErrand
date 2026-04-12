@@ -99,13 +99,14 @@ export default {
       try {
         const res = await userApi.getUserInfo()
         if (res.code === 200) {
-          this.userInfo = res.data
+          const user = res.data?.user || {}
+          this.userInfo = user
           this.form = {
-            nickname: res.data.nickname || '',
-            phone: res.data.phone || '',
-            gender: res.data.gender || 0,
-            school: res.data.school || '',
-            signature: res.data.signature || ''
+            nickname: user.nickname || '',
+            phone: user.phone || '',
+            gender: user.gender || 0,
+            school: user.schoolName || '',
+            signature: ''
           }
         }
       } catch (e) {
@@ -156,7 +157,12 @@ export default {
 
       try {
         uni.showLoading({ title: '保存中...' })
-        const res = await userApi.updateProfile(this.form)
+        const res = await userApi.updateProfile({
+          nickname: this.form.nickname,
+          phone: this.form.phone,
+          gender: this.form.gender,
+          schoolName: this.form.school
+        })
         uni.hideLoading()
         if (res.code === 200) {
           uni.showToast({

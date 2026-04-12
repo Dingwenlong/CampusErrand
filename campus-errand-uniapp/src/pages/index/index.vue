@@ -134,6 +134,7 @@
 
 <script>
 import { http } from '@/utils/request.js'
+import taskApi from '@/api/task.js'
 import CustomTabbar from '@/components/custom-tabbar/index.vue'
 
 const taskTypeMap = {
@@ -311,13 +312,24 @@ export default {
         title: '确认接单',
         content: `确定要接这个${task.typeName}任务吗？`,
         confirmColor: '#f59e0b',
-        success: (res) => {
+        success: async (res) => {
           if (res.confirm) {
-            uni.showToast({
-              title: '接单成功',
-              icon: 'success',
-              duration: 1500
-            })
+            try {
+              const result = await taskApi.accept(task.id)
+              if (result.code === 200) {
+                uni.showToast({
+                  title: '接单成功',
+                  icon: 'success',
+                  duration: 1500
+                })
+                this.fetchRecommendTasks()
+              }
+            } catch (error) {
+              uni.showToast({
+                title: error?.message || '接单失败',
+                icon: 'none'
+              })
+            }
           }
         }
       })
