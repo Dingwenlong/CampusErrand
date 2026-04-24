@@ -68,16 +68,8 @@
           <view class="btn-shine"></view>
         </button>
 
-        <!-- 用户二登录入口 -->
-        <view class="guest-section" v-if="user2LoginEnabled">
-          <button class="guest-btn" @click="loginAsUser2">
-            <text class="guest-text">用户二登录</text>
-            <view class="arrow-icon">→</view>
-          </button>
-        </view>
-
         <!-- 游客入口 -->
-        <view class="guest-section" v-else>
+        <view class="guest-section">
           <button class="guest-btn" @click="enterAsGuest">
             <text class="guest-text">暂不登录，先看看</text>
             <view class="arrow-icon">→</view>
@@ -261,8 +253,7 @@ export default {
       userAgreementContent: '',
       privacyPolicyContent: '',
       userAgreementUpdateTime: '',
-      privacyPolicyUpdateTime: '',
-      user2LoginEnabled: false
+      privacyPolicyUpdateTime: ''
     }
   },
   onLoad(options) {
@@ -270,20 +261,8 @@ export default {
       this.redirectUrl = decodeURIComponent(options.redirect)
     }
     this.loadAgreementContent()
-    this.loadUser2LoginConfig()
   },
   methods: {
-    async loadUser2LoginConfig() {
-      try {
-        const res = await configApi.getConfigByKey('user2_login_enabled')
-        if (res.code === 200 && (res.data === 'true' || res.data === true)) {
-          this.user2LoginEnabled = true
-        }
-      } catch (error) {
-        console.log('加载用户二登录配置失败')
-      }
-    },
-
     async loadAgreementContent() {
       try {
         const [agreementRes, privacyRes, agreementTimeRes, privacyTimeRes] = await Promise.allSettled([
@@ -340,8 +319,6 @@ export default {
     },
 
     async handleLogin() {
-      console.log('=== 登录按钮被点击 ===')
-      
       if (!this.agreed) {
         uni.showToast({
           title: '请先同意用户协议和隐私政策',
@@ -353,15 +330,9 @@ export default {
       this.loading = true
 
       try {
-        // 步骤1：获取用户信息（必须在点击后立即调用）
-        console.log('步骤1：开始获取用户信息...')
         const userProfile = await this.getUserProfile()
-        console.log('获取用户信息成功:', userProfile)
 
-        // 步骤2：获取微信登录 code
-        console.log('步骤2：开始获取微信登录 code...')
         const loginRes = await this.wxLogin()
-        console.log('获取 code 成功:', loginRes.code)
 
         const loginData = {
           code: loginRes.code,
@@ -370,11 +341,7 @@ export default {
           gender: userProfile.gender
         }
 
-        // 步骤3：调用后端登录接口
-        console.log('步骤3：调用后端登录接口...')
-        console.log('请求数据:', loginData)
         const res = await authApi.wxLogin(loginData)
-        console.log('后端响应:', res)
 
         if (res.code === 200) {
           const { token, userId, nickname, avatar, isNewUser } = res.data
@@ -399,7 +366,6 @@ export default {
           throw new Error(res.message || '登录失败')
         }
       } catch (error) {
-        console.error('登录失败:', error)
         uni.showToast({
           title: error.message || '登录失败，请重试',
           icon: 'none',
@@ -507,35 +473,6 @@ export default {
           }
         }
       })
-    },
-
-    loginAsUser2() {
-      const mockUser2 = {
-        token: 'mock_user2_token_' + Date.now(),
-        userId: 2,
-        nickname: '用户二',
-        avatar: '',
-        gender: 1,
-        phone: '13800000002',
-        studentId: '20240002',
-        verified: true,
-        balance: 100.00,
-        reputation: 95
-      }
-      
-      setSession(mockUser2, { isMockToken: true })
-      socket.connect()
-      
-      uni.showToast({
-        title: '用户二登录成功',
-        icon: 'success'
-      })
-      
-      setTimeout(() => {
-        uni.switchTab({
-          url: '/pages/index/index'
-        })
-      }, 1500)
     }
   }
 }

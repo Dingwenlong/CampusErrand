@@ -4,10 +4,15 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.campus.errand.entity.Task;
+import com.campus.errand.entity.Transaction;
+import com.campus.errand.entity.UserWallet;
 import com.campus.errand.entity.User;
 import com.campus.errand.mapper.TaskMapper;
 import com.campus.errand.mapper.UserMapper;
 import com.campus.errand.service.AdminTaskService;
+import com.campus.errand.service.MessageService;
+import com.campus.errand.service.TransactionService;
+import com.campus.errand.service.UserWalletService;
 import com.campus.errand.vo.TaskVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,11 +30,20 @@ public class AdminTaskServiceImpl implements AdminTaskService {
 
     private final TaskMapper taskMapper;
     private final UserMapper userMapper;
+    private final UserWalletService userWalletService;
+    private final TransactionService transactionService;
+    private final MessageService messageService;
 
     @Autowired
-    public AdminTaskServiceImpl(TaskMapper taskMapper, UserMapper userMapper) {
+    public AdminTaskServiceImpl(TaskMapper taskMapper, UserMapper userMapper,
+                                UserWalletService userWalletService,
+                                TransactionService transactionService,
+                                MessageService messageService) {
         this.taskMapper = taskMapper;
         this.userMapper = userMapper;
+        this.userWalletService = userWalletService;
+        this.transactionService = transactionService;
+        this.messageService = messageService;
     }
 
     @Override
@@ -99,7 +113,52 @@ public class AdminTaskServiceImpl implements AdminTaskService {
         task.setCancelType(3); // 3-管理员取消
         task.setCancelReason(reason);
 
-        return taskMapper.updateById(task) > 0;
+        if (!userWalletService.unfreezeAmount(task.getUserId(), task.getTotalAmount())) {
+            return false;
+        }
+
+        com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<Transaction> paymentWrapper =
+                new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<>();
+        paymentWrapper.eq(Transaction::getRelatedId, task.getId())
+                .eq(Transaction::getUserId, task.getUserId())
+                .eq(Transaction::getTransactionType, 3);
+        Transaction paymentTx = transactionService.getOne(paymentWrapper, false);
+        if (paymentTx != null) {
+            paymentTx.setStatus(2);
+            paymentTx.setRemark((paymentTx.getRemark() == null ? "" : paymentTx.getRemark()) + " - 管理员取消退款");
+            transactionService.updateById(paymentTx);
+        }
+
+        com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<Transaction> refundWrapper =
+                new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<>();
+        refundWrapper.eq(Transaction::getRelatedId, task.getId())
+                .eq(Transaction::getUserId, task.getUserId())
+                .eq(Transaction::getTransactionType, 5);
+        if (transactionService.count(refundWrapper) == 0) {
+            UserWallet wallet = userWalletService.getByUserId(task.getUserId());
+            Transaction refundTx = new Transaction();
+            refundTx.setTransactionNo(transactionService.generateTransactionNo());
+            refundTx.setUserId(task.getUserId());
+            refundTx.setDirection(1);
+            refundTx.setTransactionType(5);
+            refundTx.setAmount(task.getTotalAmount());
+            refundTx.setBalance(wallet == null ? java.math.BigDecimal.ZERO : wallet.getBalance());
+            refundTx.setRelatedId(task.getId());
+            refundTx.setRelatedType("TASK");
+            refundTx.setStatus(1);
+            refundTx.setRemark("管理员取消任务退款：" + task.getTitle());
+            refundTx.setCreateTime(LocalDateTime.now());
+            transactionService.save(refundTx);
+        }
+
+        boolean updated = taskMapper.updateById(task) > 0;
+        if (updated) {
+            messageService.sendOrderCancelledNotification(task.getUserId(), task.getId(), task.getTitle(), true);
+            if (task.getRunnerId() != null) {
+                messageService.sendOrderCancelledNotification(task.getRunnerId(), task.getId(), task.getTitle(), false);
+            }
+        }
+        return updated;
     }
 
     @Override

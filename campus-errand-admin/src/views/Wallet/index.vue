@@ -129,6 +129,16 @@
               <span style="color: #999; margin-left: 8px;">{{ record.userPhone }}</span>
             </div>
           </template>
+
+          <template v-if="column.key === 'action'">
+            <a-space v-if="record.transactionType === 2 && record.status === 0">
+              <a-popconfirm title="确认该提现已完成线下处理？" @confirm="handleApproveWithdraw(record.id)">
+                <a-button type="link" size="small">确认</a-button>
+              </a-popconfirm>
+              <a-button type="link" danger size="small" @click="handleRejectWithdraw(record.id)">驳回</a-button>
+            </a-space>
+            <span v-else style="color: #999;">-</span>
+          </template>
         </template>
       </a-table>
     </a-card>
@@ -187,7 +197,7 @@ import {
   CalendarOutlined,
   SearchOutlined
 } from '@ant-design/icons-vue'
-import { getTransactions, getWalletStats } from '@/api/wallet'
+import { approveWithdrawal, getTransactions, getWalletStats, rejectWithdrawal } from '@/api/wallet'
 import { useResponsive } from '@/composables/useResponsive'
 
 const { isMobile } = useResponsive()
@@ -223,7 +233,8 @@ const columns = [
   { title: '余额', dataIndex: 'balance', key: 'balance', width: 120, align: 'right' as const },
   { title: '状态', key: 'status', width: 100 },
   { title: '备注', dataIndex: 'remark', key: 'remark', ellipsis: true },
-  { title: '交易时间', dataIndex: 'createTime', key: 'createTime', width: 180 }
+  { title: '交易时间', dataIndex: 'createTime', key: 'createTime', width: 180 },
+  { title: '操作', key: 'action', width: 130, fixed: 'right' as const }
 ]
 
 // 加载统计数据
@@ -287,6 +298,25 @@ const handleTableChange = (pag: any) => {
 const handlePageChange = (page: number) => {
   pagination.current = page
   loadTransactions()
+}
+
+const handleApproveWithdraw = async (id: number) => {
+  const res = await approveWithdrawal(id)
+  if (res.code === 200) {
+    message.success('提现已确认')
+    loadStats()
+    loadTransactions()
+  }
+}
+
+const handleRejectWithdraw = (id: number) => {
+  rejectWithdrawal(id, '管理员驳回').then((res) => {
+    if (res.code === 200) {
+      message.success('提现已驳回并退回余额')
+      loadStats()
+      loadTransactions()
+    }
+  })
 }
 
 // 获取类型颜色

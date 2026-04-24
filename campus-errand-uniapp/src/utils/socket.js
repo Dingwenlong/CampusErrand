@@ -1,6 +1,13 @@
 import { getToken } from './auth.js'
 
-const BASE_URL = 'ws://localhost:8081'
+const BASE_URL = import.meta.env.VITE_WS_BASE_URL || 'ws://localhost:8081'
+const DEBUG = import.meta.env.DEV || import.meta.env.VITE_DEBUG === 'true'
+
+const debugLog = (...args) => {
+  if (DEBUG) {
+    console.log(...args)
+  }
+}
 
 class WebSocketClient {
   constructor() {
@@ -17,22 +24,22 @@ class WebSocketClient {
   connect() {
     const token = getToken()
     if (!token) {
-      console.log('未登录，无法连接WebSocket')
+      debugLog('未登录，无法连接WebSocket')
       return
     }
 
     if (this.socket && this.isConnected) {
-      console.log('WebSocket已连接')
+      debugLog('WebSocket已连接')
       return
     }
 
     const url = `${BASE_URL}/ws/message?token=${token}`
-    console.log('连接WebSocket:', url)
+    debugLog('连接WebSocket:', url)
 
     this.socket = uni.connectSocket({
       url: url,
       success: () => {
-        console.log('WebSocket连接请求已发送')
+        debugLog('WebSocket连接请求已发送')
       },
       fail: (err) => {
         console.error('WebSocket连接失败:', err)
@@ -41,7 +48,7 @@ class WebSocketClient {
     })
 
     this.socket.onOpen(() => {
-      console.log('WebSocket连接成功')
+      debugLog('WebSocket连接成功')
       this.isConnected = true
       this.reconnectAttempts = 0
       this.startHeartbeat()
@@ -49,17 +56,17 @@ class WebSocketClient {
     })
 
     this.socket.onMessage((res) => {
-      console.log('收到WebSocket消息:', res.data)
+      debugLog('收到WebSocket消息:', res.data)
       try {
         const data = JSON.parse(res.data)
         this.handleMessage(data)
       } catch (e) {
-        console.log('收到非JSON消息:', res.data)
+        debugLog('收到非JSON消息:', res.data)
       }
     })
 
     this.socket.onClose(() => {
-      console.log('WebSocket连接关闭')
+      debugLog('WebSocket连接关闭')
       this.isConnected = false
       this.stopHeartbeat()
       this.reconnect()
@@ -74,7 +81,7 @@ class WebSocketClient {
 
   // 断开连接
   disconnect() {
-    console.log('断开WebSocket连接')
+    debugLog('断开WebSocket连接')
     this.stopHeartbeat()
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer)
@@ -91,13 +98,13 @@ class WebSocketClient {
   // 重连
   reconnect() {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      console.log('重连次数已达上限')
+      debugLog('重连次数已达上限')
       return
     }
 
     this.reconnectAttempts++
     const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000)
-    console.log(`${delay}ms后尝试第${this.reconnectAttempts}次重连`)
+    debugLog(`${delay}ms后尝试第${this.reconnectAttempts}次重连`)
 
     this.reconnectTimer = setTimeout(() => {
       this.connect()
@@ -123,7 +130,7 @@ class WebSocketClient {
   // 发送消息
   send(data) {
     if (!this.isConnected) {
-      console.log('WebSocket未连接，无法发送消息')
+      debugLog('WebSocket未连接，无法发送消息')
       return false
     }
 
@@ -131,7 +138,7 @@ class WebSocketClient {
     this.socket.send({
       data: message,
       success: () => {
-        console.log('消息发送成功:', message)
+        debugLog('消息发送成功:', message)
       },
       fail: (err) => {
         console.error('消息发送失败:', err)
@@ -144,13 +151,13 @@ class WebSocketClient {
   handleMessage(data) {
     // 处理心跳响应
     if (data === 'pong') {
-      console.log('收到心跳响应')
+      debugLog('收到心跳响应')
       return
     }
 
     // 处理连接成功消息
     if (data.type === 'connected') {
-      console.log('连接成功:', data.message)
+      debugLog('连接成功:', data.message)
       return
     }
 

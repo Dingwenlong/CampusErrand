@@ -197,7 +197,7 @@ public class EvaluationServiceImpl extends ServiceImpl<EvaluationMapper, Evaluat
 
         List<Evaluation> list = list(wrapper);
         if (list.isEmpty()) {
-            return 5.0; // 默认5分
+            return 0.0;
         }
 
         double sum = list.stream().mapToInt(Evaluation::getRating).sum();

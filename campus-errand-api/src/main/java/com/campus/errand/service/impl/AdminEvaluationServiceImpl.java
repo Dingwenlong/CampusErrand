@@ -95,7 +95,7 @@ public class AdminEvaluationServiceImpl implements AdminEvaluationService {
                     .orElse(0.0);
             result.put("averageRating", BigDecimal.valueOf(avgRating).setScale(1, RoundingMode.HALF_UP));
         } else {
-            result.put("averageRating", 5.0);
+            result.put("averageRating", BigDecimal.ZERO.setScale(1, RoundingMode.HALF_UP));
         }
 
         // 各评分数量

@@ -27,4 +27,8 @@ public interface AdminWalletService {
      * @return 是否成功
      */
     boolean adminRecharge(Long userId, BigDecimal amount, String remark);
+
+    boolean approveWithdrawal(Long transactionId);
+
+    boolean rejectWithdrawal(Long transactionId, String reason);
 }

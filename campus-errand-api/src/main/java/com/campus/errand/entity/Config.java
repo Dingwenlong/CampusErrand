@@ -2,6 +2,7 @@ package com.campus.errand.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.time.LocalDateTime;
@@ -18,6 +19,7 @@ public class Config {
 
     private String description;
 
+    @TableField(exist = false)
     private String category;
 
     private LocalDateTime createTime;

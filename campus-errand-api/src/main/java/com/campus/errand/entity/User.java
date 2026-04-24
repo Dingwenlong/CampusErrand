@@ -18,6 +18,13 @@ public class User extends BaseEntity {
     private Integer isVerified;
     private String realName;
     private String idCard;
+    private Integer verifyStatus;
+    private String verifyRejectReason;
+    private String idCardFrontImage;
+    private String idCardBackImage;
+    private java.time.LocalDateTime verifySubmitTime;
+    private java.time.LocalDateTime verifyTime;
+    private Long verifyAdminId;
     private String studentId;
     private String schoolName;
     private Integer creditScore;
@@ -111,6 +118,62 @@ public class User extends BaseEntity {
 
     public void setIdCard(String idCard) {
         this.idCard = idCard;
+    }
+
+    public Integer getVerifyStatus() {
+        return verifyStatus;
+    }
+
+    public void setVerifyStatus(Integer verifyStatus) {
+        this.verifyStatus = verifyStatus;
+    }
+
+    public String getVerifyRejectReason() {
+        return verifyRejectReason;
+    }
+
+    public void setVerifyRejectReason(String verifyRejectReason) {
+        this.verifyRejectReason = verifyRejectReason;
+    }
+
+    public String getIdCardFrontImage() {
+        return idCardFrontImage;
+    }
+
+    public void setIdCardFrontImage(String idCardFrontImage) {
+        this.idCardFrontImage = idCardFrontImage;
+    }
+
+    public String getIdCardBackImage() {
+        return idCardBackImage;
+    }
+
+    public void setIdCardBackImage(String idCardBackImage) {
+        this.idCardBackImage = idCardBackImage;
+    }
+
+    public java.time.LocalDateTime getVerifySubmitTime() {
+        return verifySubmitTime;
+    }
+
+    public void setVerifySubmitTime(java.time.LocalDateTime verifySubmitTime) {
+        this.verifySubmitTime = verifySubmitTime;
+    }
+
+    public java.time.LocalDateTime getVerifyTime() {
+        return verifyTime;
+    }
+
+    public void setVerifyTime(java.time.LocalDateTime verifyTime) {
+        this.verifyTime = verifyTime;
+    }
+
+    public Long getVerifyAdminId() {
+        return verifyAdminId;
+    }
+
+    public void setVerifyAdminId(Long verifyAdminId) {
+        this.verifyAdminId = verifyAdminId;
     }
 
     public String getStudentId() {

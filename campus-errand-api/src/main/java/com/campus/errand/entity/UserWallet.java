@@ -15,6 +15,7 @@ public class UserWallet extends BaseEntity {
     private BigDecimal totalIncome;
     private BigDecimal totalExpense;
     private String payPassword;
+    private Integer version;
 
     public Long getUserId() {
         return userId;
@@ -62,5 +63,13 @@ public class UserWallet extends BaseEntity {
 
     public void setPayPassword(String payPassword) {
         this.payPassword = payPassword;
+    }
+
+    public Integer getVersion() {
+        return version;
+    }
+
+    public void setVersion(Integer version) {
+        this.version = version;
     }
 }

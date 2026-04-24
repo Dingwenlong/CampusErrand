@@ -28,6 +28,12 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '用户管理', icon: 'UserOutlined' }
       },
       {
+        path: 'verification',
+        name: 'Verification',
+        component: () => import('@/views/Verification/index.vue'),
+        meta: { title: '实名审核', icon: 'SafetyCertificateOutlined' }
+      },
+      {
         path: 'task',
         name: 'Task',
         component: () => import('@/views/Task/index.vue'),

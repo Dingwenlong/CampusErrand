@@ -37,6 +37,12 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Password hashing for administrator accounts -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-crypto</artifactId>
+        </dependency>
+
         <!-- MySQL -->
         <dependency>
             <groupId>com.mysql</groupId>

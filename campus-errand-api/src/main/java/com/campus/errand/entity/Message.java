@@ -2,6 +2,7 @@ package com.campus.errand.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.time.LocalDateTime;
@@ -12,6 +13,7 @@ public class Message {
     @TableId(type = IdType.AUTO)
     private Long id;
     private Long userId;
+    @TableField("message_type")
     private Integer type;
     private String title;
     private String content;

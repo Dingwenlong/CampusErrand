@@ -29,6 +29,10 @@
         <UserOutlined />
         <span>用户管理</span>
       </a-menu-item>
+      <a-menu-item key="/verification">
+        <SafetyCertificateOutlined />
+        <span>实名审核</span>
+      </a-menu-item>
       <a-menu-item key="/task">
         <FileTextOutlined />
         <span>任务管理</span>
@@ -76,6 +80,10 @@
         <UserOutlined />
         <span>用户管理</span>
       </a-menu-item>
+      <a-menu-item key="/verification">
+        <SafetyCertificateOutlined />
+        <span>实名审核</span>
+      </a-menu-item>
       <a-menu-item key="/task">
         <FileTextOutlined />
         <span>任务管理</span>
@@ -106,6 +114,7 @@ import { useRoute, useRouter } from 'vue-router'
 import {
   DashboardOutlined,
   UserOutlined,
+  SafetyCertificateOutlined,
   FileTextOutlined,
   WalletOutlined,
   StarOutlined,

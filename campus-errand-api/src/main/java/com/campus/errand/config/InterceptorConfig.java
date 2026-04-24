@@ -23,6 +23,9 @@ public class InterceptorConfig implements WebMvcConfigurer {
                 .excludePathPatterns(
                         "/auth/**",
                         "/admin/login",
+                        "/config/**",
+                        "/banner/list",
+                        "/task/list",
                         "/doc.html",
                         "/webjars/**",
                         "/swagger-resources/**",

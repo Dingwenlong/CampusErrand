@@ -1,6 +1,5 @@
 package com.campus.errand.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.campus.errand.entity.Config;
 import com.campus.errand.mapper.ConfigMapper;
@@ -48,9 +47,10 @@ public class ConfigServiceImpl extends ServiceImpl<ConfigMapper, Config> impleme
 
     @Override
     public List<Config> getConfigsByCategory(String category) {
-        LambdaQueryWrapper<Config> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Config::getCategory, category);
-        return list(wrapper);
+        return list().stream()
+                .filter(config -> category.equals(getConfigCategory(config.getConfigKey())))
+                .peek(config -> config.setCategory(getConfigCategory(config.getConfigKey())))
+                .toList();
     }
 
     /**

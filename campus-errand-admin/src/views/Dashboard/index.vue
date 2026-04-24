@@ -37,16 +37,6 @@
       </a-col>
     </a-row>
 
-    <!-- 虚拟数据提示 -->
-    <a-alert
-      v-if="showMockBadge"
-      message="当前显示为演示数据"
-      description="系统暂无真实数据，图表展示的是虚拟演示数据。可在 mockData.ts 中修改配置。"
-      type="info"
-      show-icon
-      closable
-      class="mock-alert"
-    />
     <a-row :gutter="[16, 16]" class="charts">
       <a-col :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
         <a-card title="📈 任务状态分布" :loading="chartLoading" class="chart-card">
@@ -76,13 +66,11 @@ import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import {
   UserOutlined,
   FileTextOutlined,
-  DollarOutlined,
-  InfoCircleOutlined
+  DollarOutlined
 } from '@ant-design/icons-vue'
 import * as echarts from 'echarts'
 import type { EChartsType } from 'echarts'
 import { getDashboardData, getTaskStatusStats, getAmountTrend, getUserGrowth } from '@/api/dashboard'
-import { mockDataConfig, mockStats } from './mockData'
 
 interface DashboardStats {
   userCount: number
@@ -96,7 +84,6 @@ const stats = ref<DashboardStats>({
   totalAmount: 0
 })
 const chartLoading = ref(false)
-const showMockBadge = ref(false)
 const taskStatusChartRef = ref<HTMLElement | null>(null)
 const amountTrendChartRef = ref<HTMLElement | null>(null)
 const userGrowthChartRef = ref<HTMLElement | null>(null)
@@ -119,35 +106,19 @@ const formatAmount = (value: number | string | undefined) => Number(value || 0).
 const loadData = async () => {
   try {
     const res = await getDashboardData()
-    console.log('Dashboard API response:', res)
     
     if (res.code === 200 && res.data) {
       const userCount = Number(res.data.userCount || 0)
       const taskCount = Number(res.data.taskCount || 0)
       const totalAmount = Number(res.data.totalAmount || 0)
-      
-      console.log('Data values:', userCount, taskCount, totalAmount)
-      
-      if (userCount > 0 || taskCount > 0 || totalAmount > 0) {
-        stats.value = {
-          userCount,
-          taskCount,
-          totalAmount
-        }
-      } else if (mockDataConfig.enabled) {
-        stats.value = { ...mockStats }
-        showMockBadge.value = true
+      stats.value = {
+        userCount,
+        taskCount,
+        totalAmount
       }
-    } else if (mockDataConfig.enabled) {
-      stats.value = { ...mockStats }
-      showMockBadge.value = true
     }
   } catch (error) {
     console.error('加载仪表盘数据失败', error)
-    if (mockDataConfig.enabled) {
-      stats.value = { ...mockStats }
-      showMockBadge.value = true
-    }
   }
 }
 
@@ -156,8 +127,6 @@ const initTaskStatusChart = async (data: any[]) => {
     console.error('任务状态图表容器未找到')
     return
   }
-  
-  console.log('初始化任务状态图表，容器:', taskStatusChartRef.value)
   
   taskStatusChartInstance.value?.dispose()
   taskStatusChartInstance.value = echarts.init(taskStatusChartRef.value)
@@ -205,7 +174,6 @@ const initTaskStatusChart = async (data: any[]) => {
     }]
   })
   
-  console.log('任务状态图表初始化完成')
 }
 
 const initAmountTrendChart = async (dates: string[], amounts: number[]) => {
@@ -213,8 +181,6 @@ const initAmountTrendChart = async (dates: string[], amounts: number[]) => {
     console.error('交易趋势图表容器未找到')
     return
   }
-  
-  console.log('初始化交易趋势图表，容器:', amountTrendChartRef.value)
   
   amountTrendChartInstance.value?.dispose()
   amountTrendChartInstance.value = echarts.init(amountTrendChartRef.value)
@@ -264,7 +230,6 @@ const initAmountTrendChart = async (dates: string[], amounts: number[]) => {
     }]
   })
   
-  console.log('交易趋势图表初始化完成')
 }
 
 const initUserGrowthChart = async (dates: string[], newUsers: number[], totalUsers: number[]) => {
@@ -272,8 +237,6 @@ const initUserGrowthChart = async (dates: string[], newUsers: number[], totalUse
     console.error('用户增长图表容器未找到')
     return
   }
-  
-  console.log('初始化用户增长图表，容器:', userGrowthChartRef.value)
   
   userGrowthChartInstance.value?.dispose()
   userGrowthChartInstance.value = echarts.init(userGrowthChartRef.value)
@@ -337,80 +300,54 @@ const initUserGrowthChart = async (dates: string[], newUsers: number[], totalUse
     ]
   })
   
-  console.log('用户增长图表初始化完成')
 }
 
 const initCharts = async () => {
   chartLoading.value = true
-  let usedMockData = false
+  let statusData: any[] = []
+  let trendDates: string[] = []
+  let trendAmounts: number[] = []
+  let growthDates: string[] = []
+  let growthNewUsers: number[] = []
+  let growthTotalUsers: number[] = []
   
   try {
-    await nextTick()
-    await new Promise(resolve => setTimeout(resolve, 200))
-    
-    console.log('开始初始化图表，refs:', {
-      taskStatusChartRef: taskStatusChartRef.value,
-      amountTrendChartRef: amountTrendChartRef.value,
-      userGrowthChartRef: userGrowthChartRef.value
-    })
-    
     const statusRes = await getTaskStatusStats()
-    let statusData: any[] = []
     if (statusRes.code === 200 && statusRes.data?.data?.length > 0) {
       statusData = statusRes.data.data
-    } else if (mockDataConfig.enabled) {
-      statusData = mockDataConfig.taskStatus.data
-      usedMockData = true
-    }
-    console.log('任务状态数据:', statusData)
-    
-    if (statusData.length > 0) {
-      await initTaskStatusChart(statusData)
     }
 
     const trendRes = await getAmountTrend()
-    let trendDates: string[] = []
-    let trendAmounts: number[] = []
     if (trendRes.code === 200 && trendRes.data?.dates?.length > 0) {
       trendDates = trendRes.data.dates
       trendAmounts = trendRes.data.amounts
-    } else if (mockDataConfig.enabled) {
-      trendDates = mockDataConfig.amountTrend.dates
-      trendAmounts = mockDataConfig.amountTrend.amounts
-      usedMockData = true
-    }
-    console.log('交易趋势数据:', { trendDates, trendAmounts })
-    
-    if (trendDates.length > 0) {
-      await initAmountTrendChart(trendDates, trendAmounts)
     }
 
     const growthRes = await getUserGrowth()
-    let growthDates: string[] = []
-    let growthNewUsers: number[] = []
-    let growthTotalUsers: number[] = []
     if (growthRes.code === 200 && growthRes.data?.dates?.length > 0) {
       growthDates = growthRes.data.dates
       growthNewUsers = growthRes.data.newUsers
       growthTotalUsers = growthRes.data.totalUsers
-    } else if (mockDataConfig.enabled) {
-      growthDates = mockDataConfig.userGrowth.dates
-      growthNewUsers = mockDataConfig.userGrowth.newUsers
-      growthTotalUsers = mockDataConfig.userGrowth.totalUsers
-      usedMockData = true
-    }
-    console.log('用户增长数据:', { growthDates, growthNewUsers, growthTotalUsers })
-    
-    if (growthDates.length > 0) {
-      await initUserGrowthChart(growthDates, growthNewUsers, growthTotalUsers)
     }
   } catch (error) {
     console.error('加载图表数据失败', error)
   } finally {
-    if (usedMockData) {
-      showMockBadge.value = true
-    }
     chartLoading.value = false
+  }
+
+  await nextTick()
+  await new Promise(resolve => setTimeout(resolve, 200))
+
+  if (statusData.length > 0) {
+    await initTaskStatusChart(statusData)
+  }
+
+  if (trendDates.length > 0) {
+    await initAmountTrendChart(trendDates, trendAmounts)
+  }
+
+  if (growthDates.length > 0) {
+    await initUserGrowthChart(growthDates, growthNewUsers, growthTotalUsers)
   }
 }
 
@@ -430,7 +367,6 @@ const disposeCharts = () => {
 }
 
 onMounted(async () => {
-  console.log('Dashboard 组件挂载')
   await nextTick()
   await loadData()
   await nextTick()
@@ -447,10 +383,6 @@ onUnmounted(() => {
 <style scoped>
 .dashboard {
   padding: 0;
-}
-
-.mock-alert {
-  margin-bottom: 16px;
 }
 
 .stat-cards {

@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -21,6 +22,9 @@ public class LoginInterceptor implements HandlerInterceptor {
 
     private final JwtUtil jwtUtil;
 
+    @Value("${app.auth.allow-mock-user2:false}")
+    private boolean allowMockUser2;
+
     @Autowired
     public LoginInterceptor(JwtUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
@@ -28,6 +32,15 @@ public class LoginInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            return true;
+        }
+
+        String requestUri = request.getRequestURI();
+        if ("GET".equalsIgnoreCase(request.getMethod()) && requestUri.matches(".*/task/\\d+$")) {
+            return true;
+        }
+
         String token = request.getHeader("Authorization");
 
         if (token == null || !token.startsWith("Bearer ")) {
@@ -37,8 +50,8 @@ public class LoginInterceptor implements HandlerInterceptor {
 
         token = token.substring(7);
 
-        // 处理 mock token（用户二登录）
-        if (token.startsWith("mock_user2_token_")) {
+        // 开发环境显式开启后才允许用户二模拟登录，生产环境默认关闭。
+        if (allowMockUser2 && token.startsWith("mock_user2_token_")) {
             log.info("Mock token detected, user2 login");
             UserContext.setUserId(2L);
             UserContext.setOpenid("mock_user2_openid");
@@ -48,9 +61,15 @@ public class LoginInterceptor implements HandlerInterceptor {
         try {
             Long userId = jwtUtil.getUserId(token);
             String openid = jwtUtil.getOpenid(token);
+            String role = jwtUtil.getRole(token);
 
             if (userId == null) {
                 writeErrorResponse(response, ResultCode.TOKEN_INVALID);
+                return false;
+            }
+
+            if (requestUri.contains("/admin/") && !"admin".equals(role)) {
+                writeErrorResponse(response, ResultCode.FORBIDDEN);
                 return false;
             }
 

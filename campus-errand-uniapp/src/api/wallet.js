@@ -57,5 +57,13 @@ export default {
       return Promise.reject(new Error('支付密码不能为空'))
     }
     return http.post('/wallet/verify-pay-password', { payPassword: password })
+  },
+
+  recharge(data) {
+    return http.post('/wallet/recharge', data)
+  },
+
+  withdraw(data) {
+    return http.post('/wallet/withdraw', data)
   }
 }

@@ -1,9 +1,13 @@
 package com.campus.errand.controller;
 
 import com.campus.errand.common.Result;
+import com.campus.errand.dto.AdminChangePasswordDTO;
 import com.campus.errand.dto.AdminLoginDTO;
+import com.campus.errand.entity.AdminAccount;
+import com.campus.errand.service.AdminAccountService;
 import com.campus.errand.service.AdminService;
 import com.campus.errand.util.JwtUtil;
+import com.campus.errand.util.UserContext;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -19,34 +23,32 @@ import java.util.Map;
 public class AdminController {
 
     private final AdminService adminService;
+    private final AdminAccountService adminAccountService;
     private final JwtUtil jwtUtil;
 
-    // 默认管理员账号密码（实际应该存储在数据库中并加密）
-    private static final String DEFAULT_ADMIN_USERNAME = "admin";
-    private static final String DEFAULT_ADMIN_PASSWORD = "admin123";
-
     @Autowired
-    public AdminController(AdminService adminService, JwtUtil jwtUtil) {
+    public AdminController(AdminService adminService, AdminAccountService adminAccountService, JwtUtil jwtUtil) {
         this.adminService = adminService;
+        this.adminAccountService = adminAccountService;
         this.jwtUtil = jwtUtil;
     }
 
     @Operation(summary = "管理员登录")
     @PostMapping("/login")
     public Result<Map<String, Object>> login(@Valid @RequestBody AdminLoginDTO loginDTO) {
-        // 验证用户名密码
-        if (!DEFAULT_ADMIN_USERNAME.equals(loginDTO.getUsername()) ||
-            !DEFAULT_ADMIN_PASSWORD.equals(loginDTO.getPassword())) {
+        AdminAccount account = adminAccountService.authenticate(loginDTO.getUsername(), loginDTO.getPassword());
+        if (account == null) {
             return Result.error("用户名或密码错误");
         }
 
-        // 生成JWT Token
-        String token = jwtUtil.generateToken(0L, "admin");
+        String token = jwtUtil.generateToken(account.getId(), account.getUsername(), "admin");
 
         Map<String, Object> result = new HashMap<>();
         result.put("token", token);
-        result.put("username", DEFAULT_ADMIN_USERNAME);
-        result.put("role", "admin");
+        result.put("username", account.getUsername());
+        result.put("nickname", account.getNickname());
+        result.put("role", account.getRole());
+        result.put("forcePasswordChange", account.getForcePasswordChange());
 
         return Result.success(result);
     }
@@ -54,11 +56,26 @@ public class AdminController {
     @Operation(summary = "获取管理员信息")
     @GetMapping("/info")
     public Result<Map<String, Object>> getAdminInfo() {
+        AdminAccount account = adminAccountService.getById(UserContext.getUserId());
+        if (account == null) {
+            return Result.error("管理员不存在");
+        }
         Map<String, Object> result = new HashMap<>();
-        result.put("username", DEFAULT_ADMIN_USERNAME);
-        result.put("role", "admin");
-        result.put("nickname", "管理员");
+        result.put("username", account.getUsername());
+        result.put("role", account.getRole());
+        result.put("nickname", account.getNickname());
+        result.put("forcePasswordChange", account.getForcePasswordChange());
         return Result.success(result);
+    }
+
+    @Operation(summary = "修改管理员密码")
+    @PostMapping("/change-password")
+    public Result<Boolean> changePassword(@Valid @RequestBody AdminChangePasswordDTO dto) {
+        boolean success = adminAccountService.changePassword(UserContext.getUserId(), dto.getOldPassword(), dto.getNewPassword());
+        if (!success) {
+            return Result.error("原密码错误或管理员不存在");
+        }
+        return Result.success(true);
     }
 
     @Operation(summary = "获取仪表盘数据")

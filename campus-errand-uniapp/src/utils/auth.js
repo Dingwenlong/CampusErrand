@@ -3,7 +3,6 @@
 const TOKEN_KEY = 'token'
 const USER_INFO_KEY = 'userInfo'
 const USER_ID_KEY = 'userId'
-const MOCK_TOKEN_KEY = 'isMockToken'
 
 // 获取token
 export function getToken() {
@@ -36,7 +35,7 @@ export function getUserId() {
 }
 
 // 设置登录会话
-export function setSession(session = {}, options = {}) {
+export function setSession(session = {}) {
   const { token, userId, ...userInfo } = session
 
   if (token) {
@@ -53,8 +52,6 @@ export function setSession(session = {}, options = {}) {
       ...userInfo
     })
   }
-
-  uni.setStorageSync(MOCK_TOKEN_KEY, !!options.isMockToken)
 }
 
 // 清除登录会话
@@ -62,7 +59,6 @@ export function clearSession() {
   removeToken()
   uni.removeStorageSync(USER_INFO_KEY)
   uni.removeStorageSync(USER_ID_KEY)
-  uni.removeStorageSync(MOCK_TOKEN_KEY)
 }
 
 // 检查是否已登录

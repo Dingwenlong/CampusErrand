@@ -42,10 +42,14 @@ public class WalletController {
     public Result<Map<String, Object>> getWalletInfo() {
         Long userId = UserContext.getUserId();
         UserWallet wallet = userWalletService.getByUserId(userId);
+        if (wallet == null) {
+            return Result.error("钱包不存在");
+        }
 
         Map<String, Object> result = new HashMap<>();
         result.put("balance", wallet.getBalance());
         result.put("frozenAmount", wallet.getFrozenAmount());
+        result.put("availableBalance", wallet.getBalance().subtract(wallet.getFrozenAmount()));
         result.put("totalIncome", wallet.getTotalIncome());
         result.put("totalExpense", wallet.getTotalExpense());
         result.put("hasPayPassword", wallet.getPayPassword() != null && !wallet.getPayPassword().isEmpty() ? 1 : 0);

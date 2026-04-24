@@ -251,14 +251,33 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
         Long runnerId = task.getRunnerId();
         BigDecimal totalAmount = task.getTotalAmount();
 
+        if (runnerId == null) {
+            throw new RuntimeException("任务未指定接单者，无法结算");
+        }
+
+        LambdaQueryWrapper<Transaction> settledWrapper = new LambdaQueryWrapper<>();
+        settledWrapper.eq(Transaction::getRelatedId, task.getId())
+                .eq(Transaction::getUserId, runnerId)
+                .eq(Transaction::getTransactionType, 4)
+                .eq(Transaction::getStatus, 1);
+        if (transactionService.count(settledWrapper) > 0) {
+            return;
+        }
+
         // 1. 解冻发单者金额
-        userWalletService.unfreezeAmount(publisherId, totalAmount);
+        if (!userWalletService.unfreezeAmount(publisherId, totalAmount)) {
+            throw new RuntimeException("解冻金额失败");
+        }
 
         // 2. 扣除发单者余额
-        userWalletService.deductBalance(publisherId, totalAmount);
+        if (!userWalletService.deductBalance(publisherId, totalAmount)) {
+            throw new RuntimeException("扣除余额失败");
+        }
 
         // 3. 增加跑腿员余额（全额到账，平台暂不抽成）
-        userWalletService.addBalance(runnerId, totalAmount);
+        if (!userWalletService.addBalance(runnerId, totalAmount)) {
+            throw new RuntimeException("跑腿员入账失败");
+        }
 
         // 4. 更新发单者交易流水为成功
         LambdaQueryWrapper<Transaction> wrapper = new LambdaQueryWrapper<>();
@@ -528,6 +547,10 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
             throw new RuntimeException("无权操作该任务");
         }
 
+        if (task.getStatus() == 5) {
+            return true;
+        }
+
         // 2. 验证状态（必须是待确认）
         if (task.getStatus() != 4) {
             throw new RuntimeException("当前状态不能确认收货");
@@ -615,8 +638,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
                 task.setCancelTime(now);
                 updateById(task);
                 
-                // 记录交易流水（退款）
-                transactionService.refund(task.getUserId(), totalAmount, "任务超时退款");
+                createFrozenRefundRecord(task, totalAmount, "任务超时退款");
                 
                 // 发送消息通知
                 messageService.sendMessage(task.getUserId(), 2, "任务超时取消", "您的任务已超时取消，金额已退还", null);
@@ -649,8 +671,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
                 task.setCancelTime(now);
                 updateById(task);
                 
-                // 记录交易流水（退款）
-                transactionService.refund(task.getUserId(), totalAmount, "任务超时退款");
+                createFrozenRefundRecord(task, totalAmount, "任务超时退款");
                 
                 // 扣减跑腿员信用分
                 User runner = userMapper.selectById(task.getRunnerId());
@@ -673,5 +694,40 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
         }
         
         return count;
+    }
+
+    private void createFrozenRefundRecord(Task task, BigDecimal totalAmount, String remark) {
+        LambdaQueryWrapper<Transaction> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Transaction::getRelatedId, task.getId())
+               .eq(Transaction::getUserId, task.getUserId())
+               .eq(Transaction::getTransactionType, 3);
+        Transaction paymentTx = transactionService.getOne(wrapper, false);
+        if (paymentTx != null) {
+            paymentTx.setStatus(2);
+            transactionService.updateById(paymentTx);
+        }
+
+        LambdaQueryWrapper<Transaction> refundWrapper = new LambdaQueryWrapper<>();
+        refundWrapper.eq(Transaction::getRelatedId, task.getId())
+                .eq(Transaction::getUserId, task.getUserId())
+                .eq(Transaction::getTransactionType, 5);
+        if (transactionService.count(refundWrapper) > 0) {
+            return;
+        }
+
+        UserWallet wallet = userWalletService.getByUserId(task.getUserId());
+        Transaction refundTx = new Transaction();
+        refundTx.setTransactionNo(transactionService.generateTransactionNo());
+        refundTx.setUserId(task.getUserId());
+        refundTx.setDirection(1);
+        refundTx.setTransactionType(5);
+        refundTx.setAmount(totalAmount);
+        refundTx.setBalance(wallet == null ? BigDecimal.ZERO : wallet.getBalance());
+        refundTx.setRelatedId(task.getId());
+        refundTx.setRelatedType("TASK");
+        refundTx.setStatus(1);
+        refundTx.setRemark(remark);
+        refundTx.setCreateTime(LocalDateTime.now());
+        transactionService.save(refundTx);
     }
 }

@@ -141,15 +141,13 @@ export default {
       return parseFloat(amount).toFixed(2)
     },
     goRecharge() {
-      uni.showToast({
-        title: '充值功能开发中',
-        icon: 'none'
+      uni.navigateTo({
+        url: '/pages/wallet/recharge'
       })
     },
     goWithdraw() {
-      uni.showToast({
-        title: '提现功能开发中',
-        icon: 'none'
+      uni.navigateTo({
+        url: '/pages/wallet/withdraw'
       })
     },
     goTransactions() {

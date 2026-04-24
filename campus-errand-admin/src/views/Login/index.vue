@@ -139,22 +139,11 @@
               </a-button>
             </a-form-item>
 
-            <a-form-item>
-              <a-button
-                type="default"
-                size="large"
-                block
-                class="quick-login-btn"
-                @click="handleQuickLogin"
-              >
-                <span class="btn-text">一键登录</span>
-              </a-button>
-            </a-form-item>
           </a-form>
 
           <div class="login-footer">
             <div class="footer-line"></div>
-            <p>默认账号: <span class="highlight-text">admin</span> / 密码: <span class="highlight-text">admin123</span></p>
+            <p>请使用已分配的管理员账号登录</p>
           </div>
         </div>
       </div>
@@ -228,13 +217,6 @@ const handleForgotPassword = () => {
   message.info('请联系系统管理员重置密码')
 }
 
-const handleQuickLogin = () => {
-  // 自动填充默认账号密码
-  formState.username = 'admin'
-  formState.password = 'admin123'
-  // 执行登录
-  handleLogin()
-}
 </script>
 
 <style scoped>
@@ -758,29 +740,6 @@ const handleQuickLogin = () => {
 .login-btn:hover .btn-arrow {
   background: rgba(0, 0, 0, 0.15);
   transform: translateX(4px);
-}
-
-/* 一键登录按钮样式 */
-.quick-login-btn {
-  height: 52px;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: 600;
-  background: #f3f4f6;
-  border: 1px solid #e5e7eb;
-  color: #374151;
-  transition: all 0.3s ease;
-  margin-top: 12px;
-}
-
-.quick-login-btn:hover {
-  background: #e5e7eb;
-  border-color: #d1d5db;
-  transform: translateY(-2px);
-}
-
-.quick-login-btn:active {
-  transform: translateY(0);
 }
 
 /* 登录页脚 */

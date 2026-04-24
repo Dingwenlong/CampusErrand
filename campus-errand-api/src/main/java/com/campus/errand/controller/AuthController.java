@@ -6,6 +6,7 @@ import com.campus.errand.entity.User;
 import com.campus.errand.entity.UserWallet;
 import com.campus.errand.service.UserService;
 import com.campus.errand.service.UserWalletService;
+import com.campus.errand.service.WeChatAuthService;
 import com.campus.errand.util.JwtUtil;
 import com.campus.errand.vo.LoginVO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,12 +31,15 @@ public class AuthController {
 
     private final UserService userService;
     private final UserWalletService userWalletService;
+    private final WeChatAuthService weChatAuthService;
     private final JwtUtil jwtUtil;
 
     @Autowired
-    public AuthController(UserService userService, UserWalletService userWalletService, JwtUtil jwtUtil) {
+    public AuthController(UserService userService, UserWalletService userWalletService,
+                          WeChatAuthService weChatAuthService, JwtUtil jwtUtil) {
         this.userService = userService;
         this.userWalletService = userWalletService;
+        this.weChatAuthService = weChatAuthService;
         this.jwtUtil = jwtUtil;
     }
 
@@ -49,8 +53,8 @@ public class AuthController {
                 loginDTO.getAvatar(),
                 loginDTO.getGender());
 
-        // 模拟获取openid（实际应调用微信接口）
-        String openid = "mock_openid_" + loginDTO.getCode();
+        WeChatAuthService.WeChatSession session = weChatAuthService.code2Session(loginDTO.getCode());
+        String openid = session.getOpenid();
         logger.info("生成的openid: {}", openid);
 
         // 查询用户是否存在
@@ -61,10 +65,13 @@ public class AuthController {
             // 新用户注册
             user = new User();
             user.setOpenid(openid);
+            user.setUnionid(session.getUnionid());
             user.setNickname(loginDTO.getNickname());
             user.setAvatar(loginDTO.getAvatar());
             user.setGender(loginDTO.getGender());
             user.setStatus(1);
+            user.setUserType(0);
+            user.setIsVerified(0);
             user.setCreditScore(100);
             userService.save(user);
 
@@ -88,6 +95,9 @@ public class AuthController {
             }
             if (loginDTO.getGender() != null) {
                 user.setGender(loginDTO.getGender());
+            }
+            if (session.getUnionid() != null) {
+                user.setUnionid(session.getUnionid());
             }
             userService.updateById(user);
         }

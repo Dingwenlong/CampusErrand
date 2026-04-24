@@ -3,16 +3,20 @@ package com.campus.errand.controller;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.campus.errand.common.Result;
+import com.campus.errand.dto.AdminVerifyRejectDTO;
 import com.campus.errand.entity.User;
 import com.campus.errand.entity.UserWallet;
 import com.campus.errand.service.UserService;
 import com.campus.errand.service.UserWalletService;
+import com.campus.errand.util.UserContext;
 import com.campus.errand.vo.UserDetailVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Tag(name = "后台用户管理", description = "后台用户管理相关接口")
@@ -130,5 +134,60 @@ public class AdminUserController {
         user.setCreditScore(creditScore);
         userService.updateById(user);
         return Result.success();
+    }
+
+    @Operation(summary = "获取实名认证审核列表")
+    @GetMapping("/verify/list")
+    public Result<Page<User>> getVerifyList(
+            @RequestParam(required = false) Integer status,
+            @RequestParam(defaultValue = "1") Integer current,
+            @RequestParam(defaultValue = "10") Integer size,
+            @RequestParam(required = false) String keyword) {
+        Page<User> page = new Page<>(current, size);
+        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
+        if (status != null) {
+            wrapper.eq(User::getVerifyStatus, status);
+        } else {
+            wrapper.in(User::getVerifyStatus, 1, 2, 3);
+        }
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            wrapper.and(w -> w.like(User::getNickname, keyword.trim())
+                    .or()
+                    .like(User::getRealName, keyword.trim())
+                    .or()
+                    .like(User::getPhone, keyword.trim()));
+        }
+        wrapper.orderByDesc(User::getVerifySubmitTime);
+        return Result.success(userService.page(page, wrapper));
+    }
+
+    @Operation(summary = "通过实名认证")
+    @PostMapping("/verify/{id}/approve")
+    public Result<Boolean> approveVerify(@PathVariable Long id) {
+        User user = userService.getById(id);
+        if (user == null) {
+            return Result.error("用户不存在");
+        }
+        user.setVerifyStatus(2);
+        user.setIsVerified(1);
+        user.setVerifyRejectReason(null);
+        user.setVerifyTime(LocalDateTime.now());
+        user.setVerifyAdminId(UserContext.getUserId());
+        return Result.success(userService.updateById(user));
+    }
+
+    @Operation(summary = "驳回实名认证")
+    @PostMapping("/verify/{id}/reject")
+    public Result<Boolean> rejectVerify(@PathVariable Long id, @Valid @RequestBody AdminVerifyRejectDTO dto) {
+        User user = userService.getById(id);
+        if (user == null) {
+            return Result.error("用户不存在");
+        }
+        user.setVerifyStatus(3);
+        user.setIsVerified(0);
+        user.setVerifyRejectReason(dto.getReason());
+        user.setVerifyTime(LocalDateTime.now());
+        user.setVerifyAdminId(UserContext.getUserId());
+        return Result.success(userService.updateById(user));
     }
 }

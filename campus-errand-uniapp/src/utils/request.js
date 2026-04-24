@@ -2,7 +2,8 @@ import { clearSession, getToken } from './auth.js'
 import socket from './socket.js'
 
 // API基础配置
-const BASE_URL = 'http://localhost:8081/api'
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081/api'
+const DEBUG = import.meta.env.DEV || import.meta.env.VITE_DEBUG === 'true'
 const TIMEOUT = 30000 // 30秒超时
 const MAX_RETRY = 3 // 最大重试次数
 const RETRY_DELAY = 1000 // 重试延迟(毫秒)
@@ -53,12 +54,9 @@ const requestInterceptor = (options) => {
   options.timeout = options.timeout || TIMEOUT
   
   // 请求日志（开发环境）
-  if (process.env.NODE_ENV === 'development') {
+  if (DEBUG) {
     console.log(`[Request] ${options.method || 'GET'} ${options.url}`, options.data)
   }
-  
-  // 打印完整请求配置用于调试
-  console.log('[Request Config] url:', options.url, 'method:', options.method, 'data:', options.data)
   
   return options
 }
@@ -66,12 +64,9 @@ const requestInterceptor = (options) => {
 // 响应拦截器
 const responseInterceptor = (response) => {
   // 响应日志（开发环境）
-  if (process.env.NODE_ENV === 'development') {
+  if (DEBUG) {
     console.log(`[Response]`, response.data)
   }
-  
-  // 打印完整响应用于调试
-  console.log('[Response Config] statusCode:', response.statusCode, 'data:', response.data)
   
   return response
 }
@@ -143,13 +138,11 @@ const request = (options, retryCount = 0) => {
             resolve(data)
           } else if (data.code === 401 || data.code === 401001) {
             // Token过期或未登录
-            const isMockToken = uni.getStorageSync('isMockToken') || false
-            handleAuthError(undefined, isMockToken)
+            handleAuthError()
             reject({ ...data, type: 'auth' })
           } else if (data.code === 401002) {
             // Token无效
-            const isMockToken = uni.getStorageSync('isMockToken') || false
-            handleAuthError('登录状态无效，请重新登录', isMockToken)
+            handleAuthError('登录状态无效，请重新登录')
             reject({ ...data, type: 'auth' })
           } else {
             // 其他业务错误
@@ -162,13 +155,14 @@ const request = (options, retryCount = 0) => {
             reject({ ...data, type: 'business' })
           }
         } else if (response.statusCode === 401) {
-          const isMockToken = uni.getStorageSync('isMockToken') || false
-          handleAuthError(undefined, isMockToken)
+          handleAuthError()
           reject({ statusCode: 401, type: 'auth' })
         } else if (response.statusCode >= 500) {
           // 服务器错误，尝试重试
           if (retryCount < MAX_RETRY && config.retry !== false) {
-            console.warn(`请求失败(${response.statusCode})，${RETRY_DELAY}ms后重试(${retryCount + 1}/${MAX_RETRY})`)
+            if (DEBUG) {
+              console.warn(`请求失败(${response.statusCode})，${RETRY_DELAY}ms后重试(${retryCount + 1}/${MAX_RETRY})`)
+            }
             delay(RETRY_DELAY).then(() => {
               request(options, retryCount + 1).then(resolve).catch(reject)
             })
@@ -186,7 +180,9 @@ const request = (options, retryCount = 0) => {
         
         // 网络错误重试
         if (retryCount < MAX_RETRY && config.retry !== false) {
-          console.warn(`网络错误，${RETRY_DELAY}ms后重试(${retryCount + 1}/${MAX_RETRY})`)
+          if (DEBUG) {
+            console.warn(`网络错误，${RETRY_DELAY}ms后重试(${retryCount + 1}/${MAX_RETRY})`)
+          }
           delay(RETRY_DELAY).then(() => {
             request(options, retryCount + 1).then(resolve).catch(reject)
           })
@@ -205,11 +201,7 @@ const request = (options, retryCount = 0) => {
 }
 
 // 处理认证错误
-const handleAuthError = (msg, isMockToken = false) => {
-  if (isMockToken) {
-    return
-  }
-  
+const handleAuthError = (msg) => {
   socket.disconnect()
   clearSession()
   

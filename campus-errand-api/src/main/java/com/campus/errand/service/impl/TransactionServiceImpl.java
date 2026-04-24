@@ -127,9 +127,10 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
         // 获取更新后的余额
         wallet = userWalletService.getByUserId(userId);
 
-        // 创建交易记录
-        createTransaction(userId, 2, 2, amount, wallet.getBalance(),
-                null, "WITHDRAW", "虚拟提现");
+        Transaction transaction = createTransaction(userId, 2, 2, amount, wallet.getBalance(),
+                null, "WITHDRAW", "提现申请，待管理员确认");
+        transaction.setStatus(0);
+        updateById(transaction);
 
         return true;
     }
@@ -159,16 +160,12 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
             return false;
         }
 
-        // 然后扣除余额（从冻结中扣除）
+        // 解冻后扣除余额，避免可用余额条件与冻结金额重复计算。
+        userWalletService.unfreezeAmount(userId, amount);
         boolean deductSuccess = userWalletService.deductBalance(userId, amount);
         if (!deductSuccess) {
-            // 回滚冻结
-            userWalletService.unfreezeAmount(userId, amount);
             return false;
         }
-
-        // 解冻（因为已经扣除了）
-        userWalletService.unfreezeAmount(userId, amount);
 
         // 获取更新后的余额
         wallet = userWalletService.getByUserId(userId);

@@ -1,7 +1,6 @@
 package com.campus.errand.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.campus.errand.entity.UserWallet;
 import com.campus.errand.mapper.UserWalletMapper;
@@ -64,12 +63,7 @@ public class UserWalletServiceImpl extends ServiceImpl<UserWalletMapper, UserWal
             return false;
         }
 
-        // 更新冻结金额
-        LambdaUpdateWrapper<UserWallet> wrapper = new LambdaUpdateWrapper<>();
-        wrapper.eq(UserWallet::getId, wallet.getId())
-                .set(UserWallet::getFrozenAmount, wallet.getFrozenAmount().add(amount));
-
-        return update(wrapper);
+        return baseMapper.freezeAmount(userId, amount) > 0;
     }
 
     @Override
@@ -85,12 +79,7 @@ public class UserWalletServiceImpl extends ServiceImpl<UserWalletMapper, UserWal
             return false;
         }
 
-        // 更新冻结金额
-        LambdaUpdateWrapper<UserWallet> wrapper = new LambdaUpdateWrapper<>();
-        wrapper.eq(UserWallet::getId, wallet.getId())
-                .set(UserWallet::getFrozenAmount, wallet.getFrozenAmount().subtract(amount));
-
-        return update(wrapper);
+        return baseMapper.unfreezeAmount(userId, amount) > 0;
     }
 
     @Override
@@ -101,18 +90,12 @@ public class UserWalletServiceImpl extends ServiceImpl<UserWalletMapper, UserWal
             return false;
         }
 
-        // 检查余额是否充足
-        if (wallet.getBalance().compareTo(amount) < 0) {
+        BigDecimal availableBalance = wallet.getBalance().subtract(wallet.getFrozenAmount());
+        if (availableBalance.compareTo(amount) < 0) {
             return false;
         }
 
-        // 更新余额和累计支出
-        LambdaUpdateWrapper<UserWallet> wrapper = new LambdaUpdateWrapper<>();
-        wrapper.eq(UserWallet::getId, wallet.getId())
-                .set(UserWallet::getBalance, wallet.getBalance().subtract(amount))
-                .set(UserWallet::getTotalExpense, wallet.getTotalExpense().add(amount));
-
-        return update(wrapper);
+        return baseMapper.deductAvailableBalance(userId, amount) > 0;
     }
 
     @Override
@@ -123,13 +106,7 @@ public class UserWalletServiceImpl extends ServiceImpl<UserWalletMapper, UserWal
             return false;
         }
 
-        // 更新余额和累计收入
-        LambdaUpdateWrapper<UserWallet> wrapper = new LambdaUpdateWrapper<>();
-        wrapper.eq(UserWallet::getId, wallet.getId())
-                .set(UserWallet::getBalance, wallet.getBalance().add(amount))
-                .set(UserWallet::getTotalIncome, wallet.getTotalIncome().add(amount));
-
-        return update(wrapper);
+        return baseMapper.addBalance(userId, amount) > 0;
     }
 
     @Override

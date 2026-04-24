@@ -48,6 +48,18 @@
       "style": {
         "navigationBarTitleText": "消息中心"
       }
+    },
+    {
+      "path": "pages/wallet/recharge",
+      "style": {
+        "navigationBarTitleText": "余额充值"
+      }
+    },
+    {
+      "path": "pages/wallet/withdraw",
+      "style": {
+        "navigationBarTitleText": "提现申请"
+      }
     }
   ],
   "subPackages": [

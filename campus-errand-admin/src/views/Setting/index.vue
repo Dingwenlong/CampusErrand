@@ -150,12 +150,6 @@
                       un-checked-children="关闭" />
                   </a-form-item>
                 </a-col>
-                <a-col :xs="24" :sm="12" :md="8" :lg="6" :xl="6">
-                  <a-form-item label="用户二登录开关">
-                    <a-switch v-model:checked="otherForm.user2LoginEnabled" checked-children="开启"
-                      un-checked-children="关闭" />
-                  </a-form-item>
-                </a-col>
               </a-row>
               <a-form-item label="维护提示信息" v-if="otherForm.maintenanceMode">
                 <a-textarea v-model:value="otherForm.maintenanceMessage" :rows="3" placeholder="请输入维护提示信息"
@@ -326,8 +320,7 @@ const otherForm = reactive({
   taskPublishEnabled: true,
   verifyEnabled: false,
   maintenanceMode: false,
-  maintenanceMessage: '',
-  user2LoginEnabled: false
+  maintenanceMessage: ''
 })
 
 // 协议配置表单
@@ -458,7 +451,6 @@ const loadOtherConfigs = async () => {
         if (key === 'verify_enabled') otherForm.verifyEnabled = value === 'true'
         if (key === 'maintenance_mode') otherForm.maintenanceMode = value === 'true'
         if (key === 'maintenance_message') otherForm.maintenanceMessage = value || ''
-        if (key === 'user2_login_enabled') otherForm.user2LoginEnabled = value === 'true'
       })
       originalData.other = { ...otherForm }
     }
@@ -596,8 +588,7 @@ const saveOtherConfig = async () => {
       task_publish_enabled: otherForm.taskPublishEnabled.toString(),
       verify_enabled: otherForm.verifyEnabled.toString(),
       maintenance_mode: otherForm.maintenanceMode.toString(),
-      maintenance_message: otherForm.maintenanceMessage,
-      user2_login_enabled: otherForm.user2LoginEnabled.toString()
+      maintenance_message: otherForm.maintenanceMessage
     }
 
     const res = await saveConfigs(configMap)

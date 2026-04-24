@@ -9,11 +9,36 @@ spring:
   application:
     name: campus-errand-api
   profiles:
-    active: dev
+    active: ${SPRING_PROFILES_ACTIVE:dev}
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
     default-property-inclusion: non_null
+  servlet:
+    multipart:
+      max-file-size: ${APP_UPLOAD_MAX_FILE_SIZE:5MB}
+      max-request-size: ${APP_UPLOAD_MAX_REQUEST_SIZE:6MB}
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:campus_errand_secret_key_2024}
+    expiration-ms: ${JWT_EXPIRATION_MS:604800000}
+    issuer: ${JWT_ISSUER:campus-errand-system}
+  auth:
+    allow-mock-user2: ${ALLOW_MOCK_USER2:false}
+    wechat-mock-enabled: ${WECHAT_MOCK_ENABLED:false}
+  wechat:
+    app-id: ${WECHAT_APP_ID:}
+    app-secret: ${WECHAT_APP_SECRET:}
+  upload:
+    dir: ${UPLOAD_DIR:./uploads}
+    url-prefix: ${UPLOAD_URL_PREFIX:/uploads}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173}
+  admin:
+    init-username: ${ADMIN_INIT_USERNAME:admin}
+    init-password: ${ADMIN_INIT_PASSWORD:}
+    init-nickname: ${ADMIN_INIT_NICKNAME:系统管理员}
 
 ---
 spring:
@@ -49,6 +74,11 @@ spring:
         max-idle: 8
         min-idle: 0
 
+app:
+  auth:
+    allow-mock-user2: ${ALLOW_MOCK_USER2:false}
+    wechat-mock-enabled: ${WECHAT_MOCK_ENABLED:false}
+
 mybatis-plus:
   mapper-locations: classpath:/mapper/**/*.xml
   type-aliases-package: com.campus.errand.entity
@@ -69,3 +99,38 @@ logging:
     org.springframework.web: info
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{50} - %msg%n"
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    druid:
+      initial-size: 5
+      min-idle: 5
+      max-active: 30
+      max-wait: 60000
+      validation-query: SELECT 1
+      test-while-idle: true
+  redis:
+    host: ${REDIS_HOST:redis}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:}
+    database: ${REDIS_DATABASE:0}
+    timeout: 3000ms
+
+app:
+  auth:
+    allow-mock-user2: false
+    wechat-mock-enabled: false
+
+logging:
+  level:
+    com.campus.errand: info
+    org.springframework.web: warn

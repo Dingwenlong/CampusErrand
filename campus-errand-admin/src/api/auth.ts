@@ -7,3 +7,7 @@ export const login = (data: { username: string; password: string }) => {
 export const getAdminInfo = () => {
   return request.get('/admin/info')
 }
+
+export const changePassword = (data: { oldPassword: string; newPassword: string }) => {
+  return request.post('/admin/change-password', data)
+}

@@ -210,6 +210,59 @@ public class AdminWalletServiceImpl implements AdminWalletService {
         return true;
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean approveWithdrawal(Long transactionId) {
+        Transaction transaction = transactionMapper.selectById(transactionId);
+        if (transaction == null || transaction.getTransactionType() != 2 || transaction.getStatus() != 0) {
+            return false;
+        }
+        transaction.setStatus(1);
+        transaction.setRemark((transaction.getRemark() == null ? "" : transaction.getRemark()) + " - 已确认");
+        transaction.setUpdateTime(LocalDateTime.now());
+        return transactionMapper.updateById(transaction) > 0;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean rejectWithdrawal(Long transactionId, String reason) {
+        Transaction transaction = transactionMapper.selectById(transactionId);
+        if (transaction == null || transaction.getTransactionType() != 2 || transaction.getStatus() != 0) {
+            return false;
+        }
+        UserWallet wallet = userWalletMapper.selectOne(
+                new LambdaQueryWrapper<UserWallet>().eq(UserWallet::getUserId, transaction.getUserId())
+        );
+        if (wallet == null) {
+            return false;
+        }
+        wallet.setBalance(wallet.getBalance().add(transaction.getAmount()));
+        wallet.setTotalIncome(wallet.getTotalIncome().add(transaction.getAmount()));
+        userWalletMapper.updateById(wallet);
+
+        transaction.setStatus(2);
+        transaction.setRemark((transaction.getRemark() == null ? "" : transaction.getRemark()) +
+                " - 已驳回" + (reason == null || reason.isBlank() ? "" : "：" + reason));
+        transaction.setUpdateTime(LocalDateTime.now());
+        transactionMapper.updateById(transaction);
+
+        Transaction refund = new Transaction();
+        refund.setTransactionNo("WDRJ" + UUID.randomUUID().toString().replace("-", "").substring(0, 16));
+        refund.setUserId(transaction.getUserId());
+        refund.setTransactionType(5);
+        refund.setDirection(1);
+        refund.setAmount(transaction.getAmount());
+        refund.setBalance(wallet.getBalance());
+        refund.setRelatedId(transaction.getId());
+        refund.setRelatedType("WITHDRAW");
+        refund.setStatus(1);
+        refund.setRemark("提现驳回退回余额");
+        refund.setCreateTime(LocalDateTime.now());
+        refund.setUpdateTime(LocalDateTime.now());
+        transactionMapper.insert(refund);
+        return true;
+    }
+
     private TransactionVO convertToVO(Transaction transaction) {
         TransactionVO vo = new TransactionVO();
         BeanUtils.copyProperties(transaction, vo);

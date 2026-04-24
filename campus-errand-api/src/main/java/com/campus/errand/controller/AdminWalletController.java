@@ -59,4 +59,24 @@ public class AdminWalletController {
         }
         return Result.success(true);
     }
+
+    @Operation(summary = "确认提现")
+    @PostMapping("/withdraw/{id}/approve")
+    public Result<Boolean> approveWithdrawal(@PathVariable Long id) {
+        boolean success = adminWalletService.approveWithdrawal(id);
+        if (!success) {
+            return Result.error("确认提现失败");
+        }
+        return Result.success(true);
+    }
+
+    @Operation(summary = "驳回提现")
+    @PostMapping("/withdraw/{id}/reject")
+    public Result<Boolean> rejectWithdrawal(@PathVariable Long id, @RequestParam(required = false) String reason) {
+        boolean success = adminWalletService.rejectWithdrawal(id, reason);
+        if (!success) {
+            return Result.error("驳回提现失败");
+        }
+        return Result.success(true);
+    }
 }

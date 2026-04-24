@@ -1,6 +1,7 @@
 package com.campus.errand.config;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -11,11 +12,14 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class CorsConfig implements WebMvcConfigurer {
 
+    @Value("${app.cors.allowed-origins:http://localhost:3000,http://localhost:5173}")
+    private String allowedOrigins;
+
     @Override
     public void addCorsMappings(CorsRegistry registry) {
+        String[] origins = allowedOrigins.split("\\s*,\\s*");
         registry.addMapping("/**")
-                // 允许所有来源
-                .allowedOriginPatterns("*")
+                .allowedOriginPatterns(origins)
                 // 允许携带凭证
                 .allowCredentials(true)
                 // 允许所有请求方法
