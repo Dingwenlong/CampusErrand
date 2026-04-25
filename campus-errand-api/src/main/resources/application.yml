@@ -26,10 +26,10 @@ app:
     issuer: ${JWT_ISSUER:campus-errand-system}
   auth:
     allow-mock-user2: ${ALLOW_MOCK_USER2:false}
-    wechat-mock-enabled: ${WECHAT_MOCK_ENABLED:false}
+    wechat-mock-enabled: ${WECHAT_MOCK_ENABLED:true}
   wechat:
-    app-id: ${WECHAT_APP_ID:}
-    app-secret: ${WECHAT_APP_SECRET:}
+    app-id: ${WECHAT_APP_ID:wx1bdf45f8766c2423}
+    app-secret: ${WECHAT_APP_SECRET:8cc3077d7c1052666b42c87d8f36c56b}
   upload:
     dir: ${UPLOAD_DIR:./uploads}
     url-prefix: ${UPLOAD_URL_PREFIX:/uploads}
@@ -37,7 +37,7 @@ app:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173}
   admin:
     init-username: ${ADMIN_INIT_USERNAME:admin}
-    init-password: ${ADMIN_INIT_PASSWORD:}
+    init-password: ${ADMIN_INIT_PASSWORD:admin123}
     init-nickname: ${ADMIN_INIT_NICKNAME:系统管理员}
 
 ---
@@ -77,7 +77,10 @@ spring:
 app:
   auth:
     allow-mock-user2: ${ALLOW_MOCK_USER2:false}
-    wechat-mock-enabled: ${WECHAT_MOCK_ENABLED:false}
+    wechat-mock-enabled: ${WECHAT_MOCK_ENABLED:true}
+  wechat:
+    app-id: ${WECHAT_APP_ID:wx1bdf45f8766c2423}
+    app-secret: ${WECHAT_APP_SECRET:8cc3077d7c1052666b42c87d8f36c56b}
 
 mybatis-plus:
   mapper-locations: classpath:/mapper/**/*.xml

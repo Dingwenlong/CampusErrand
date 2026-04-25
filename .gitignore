@@ -19,6 +19,7 @@ logs/
 *.zip
 *.tar.gz
 *.rar
+*.7z
 
 # Maven
 target/

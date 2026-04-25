@@ -141,8 +141,8 @@ export default {
 
         if (res.code === 200) {
           const data = res.data
-          const list = data.list || []
-
+          const list = data.records || []
+          
           if (list.length < this.size) {
             this.noMore = true
           }
@@ -152,6 +152,14 @@ export default {
           } else {
             this.transactions = [...this.transactions, ...list]
           }
+
+          // 补充显示所需的字段
+          this.transactions = this.transactions.map(item => ({
+            ...item,
+            transactionTypeName: this.getTransactionTypeName(item.transactionType),
+            statusName: this.getStatusName(item.status),
+            createTime: this.formatTime(item.createTime)
+          }))
           
           this.calculateSummary()
         }
@@ -199,6 +207,34 @@ export default {
         5: 'icon-transfer'
       }
       return iconMap[type] || 'icon-transaction'
+    },
+    getTransactionTypeName(type) {
+      const typeMap = {
+        1: '充值',
+        2: '提现',
+        3: '任务支付',
+        4: '任务收入',
+        5: '退款'
+      }
+      return typeMap[type] || '其他'
+    },
+    getStatusName(status) {
+      const statusMap = {
+        0: '待处理',
+        1: '成功',
+        2: '失败'
+      }
+      return statusMap[status] || '未知'
+    },
+    formatTime(time) {
+      if (!time) return ''
+      const date = new Date(time)
+      const year = date.getFullYear()
+      const month = String(date.getMonth() + 1).padStart(2, '0')
+      const day = String(date.getDate()).padStart(2, '0')
+      const hour = String(date.getHours()).padStart(2, '0')
+      const minute = String(date.getMinutes()).padStart(2, '0')
+      return `${year}-${month}-${day} ${hour}:${minute}`
     },
     viewDetail(item) {
       // 查看交易详情

@@ -1,7 +1,11 @@
 package com.campus.errand.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
+@Data
+@EqualsAndHashCode(callSuper = true)
 @TableName("tb_evaluation")
 public class Evaluation extends BaseEntity {
 

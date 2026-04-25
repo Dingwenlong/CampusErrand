@@ -28,8 +28,8 @@ instance.interceptors.response.use(
   (response: AxiosResponse) => {
     const res = response.data
     if (res.code !== 200) {
-      message.error(res.message || '请求失败')
-      if (res.code === 401) {
+      // Token 相关错误：401、401001、401002 都需要跳转登录
+      if (res.code === 401 || res.code === 401001 || res.code === 401002) {
         localStorage.removeItem('admin_token')
         router.push('/login')
       }
@@ -38,7 +38,6 @@ instance.interceptors.response.use(
     return res as any
   },
   (error) => {
-    message.error(error.message || '网络错误')
     return Promise.reject(error)
   }
 )

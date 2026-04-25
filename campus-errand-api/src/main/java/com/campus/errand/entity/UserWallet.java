@@ -1,9 +1,13 @@
 package com.campus.errand.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.math.BigDecimal;
 
+@Data
+@EqualsAndHashCode(callSuper = true)
 @TableName("tb_user_wallet")
 public class UserWallet extends BaseEntity {
 
